@@ -2,7 +2,7 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { useTheme } from 'next-themes';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActiveThemeProvider } from '../active-theme';
 
 export default function Providers({
@@ -14,13 +14,15 @@ export default function Providers({
 }) {
   // we need the resolvedTheme value to set the baseTheme for clerk based on the dark or light theme
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
         <ClerkProvider
           appearance={{
-            baseTheme: resolvedTheme === 'dark' ? dark : undefined
+            baseTheme: mounted && resolvedTheme === 'dark' ? dark : undefined
           }}
         >
           {children}

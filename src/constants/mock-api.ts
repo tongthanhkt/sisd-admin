@@ -4,21 +4,133 @@
 
 import { faker } from '@faker-js/faker';
 import { matchSorter } from 'match-sorter'; // For filtering
+import { mortalProductsData } from './data';
 
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 // Define the shape of Product data
-export type Product = {
-  photo_url: string;
+export interface Product {
+  id: string;
   name: string;
+  image?: string;
   description: string;
-  created_at: string;
-  price: number;
-  id: number;
   category: string;
-  updated_at: string;
-};
+  href?: string; // Optional property for the href
+  created_at: any;
+
+  photo_url: any;
+  updated_at: any;
+}
+const products: Product[] = [
+  {
+    id: 'dpc-100',
+    name: 'Vữa thô DPC-100',
+    image: '/images/products/dpc-100.svg',
+    description: 'Chất tăng bám dính',
+    category: 'vua-trang-tri',
+    href: 'mortal-DPC100',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'dpx-200',
+    name: 'Vữa mịn DPX-200',
+    image: '/images/products/dpx-200.svg',
+    description: 'Chất tăng bám dính',
+    category: 'vua-trang-tri',
+    href: 'mortal-DPX200',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'mj-100',
+    name: 'Vữa siêu mịn MJ-100',
+    image: '/images/products/mj-100.svg',
+    description: 'Chất tăng bám dính',
+    category: 'vua-trang-tri',
+    href: 'mortal-MJ100',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'dr-m402',
+    name: 'Vữa màu hai thành phần DR-M402',
+    image: '/images/products/dr-m402.svg',
+    description: 'Chất tăng bám dính',
+    category: 'vua-trang-tri',
+    href: 'http://localhost:3000',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'ta-s100',
+    name: 'Keo dán gạch TA-S100',
+    image: '/images/products/ta-s100.svg',
+    description: 'Loại siêu dính thông dụng',
+    category: 'keo-dan-gach',
+    href: 'products/ta-s100',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'ta-s101',
+    name: 'Keo dán gạch tiết kiệm TA-S101',
+    image: '/images/products/ta-s101.svg',
+    description: 'Loại siêu dính thông dụng',
+    category: 'keo-dan-gach',
+    href: 'products/ta-s101',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'ta-s106',
+    name: 'Keo dán gạch TA-S106',
+    image: '/images/products/ta-s106.svg',
+    description: 'Loại gạch nặng',
+    category: 'keo-dan-gach',
+    href: 'products/ta-s106',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'tf-g100',
+    name: 'Keo chà ron thẩm mỹ TF-G100 Hengcai',
+    image: '/images/products/tf-g100.svg',
+    description: 'Loại siêu dính thông dụng',
+    category: 'keo-dan-gach',
+    href: 'products/tf-g100',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  },
+  {
+    id: 'wm-102',
+    name: 'Chất phủ chống thấm WM-102',
+    image: '/images/products/wm-102.svg',
+    description: 'Loại polyme màu',
+    category: 'vat-tu-chong-tham',
+    created_at: 'http://localhost:3000',
+
+    photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
+    updated_at: 'http://localhost:3000'
+  }
+];
 
 // Mock product data store
 export const fakeProducts = {
@@ -27,7 +139,7 @@ export const fakeProducts = {
   // Initialize with sample data
   initialize() {
     const sampleProducts: Product[] = [];
-    function generateRandomProductData(id: number): Product {
+    function generateRandomProductData(id: string): Product {
       const categories = [
         'Electronics',
         'Furniture',
@@ -47,7 +159,7 @@ export const fakeProducts = {
           .between({ from: '2022-01-01', to: '2023-12-31' })
           .toISOString(),
         price: parseFloat(faker.commerce.price({ min: 5, max: 500, dec: 2 })),
-        photo_url: `https://api.slingacademy.com/public/sample-products/${id}.png`,
+        photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
         category: faker.helpers.arrayElement(categories),
         updated_at: faker.date.recent().toISOString()
       };
@@ -58,7 +170,7 @@ export const fakeProducts = {
       sampleProducts.push(generateRandomProductData(i));
     }
 
-    this.records = sampleProducts;
+    this.records = products;
   },
 
   // Get all products with optional category filtering and search
@@ -128,16 +240,16 @@ export const fakeProducts = {
   },
 
   // Get a specific product by its ID
-  async getProductById(id: number) {
+  async getProductById(id: string) {
     await delay(1000); // Simulate a delay
 
     // Find the product by its ID
-    const product = this.records.find((product) => product.id === id);
+    const product = mortalProductsData.find((product) => product.id === id);
 
     if (!product) {
       return {
         success: false,
-        message: `Product with ID ${id} not found`
+        message: `Product with ID 1 not found`
       };
     }
 
@@ -147,7 +259,7 @@ export const fakeProducts = {
     return {
       success: true,
       time: currentTime,
-      message: `Product with ID ${id} found`,
+      message: `Product with ID 1 found`,
       product
     };
   }

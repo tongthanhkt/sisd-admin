@@ -1,25 +1,26 @@
 'use client';
 import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
-import { Product } from '@/constants/data';
+import { IMortalProduct } from '@/models/MortalProduct';
 import { Column, ColumnDef } from '@tanstack/react-table';
 import { CheckCircle2, Text, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import { CellAction } from './cell-action';
 import { CATEGORY_OPTIONS } from './options';
 
-export const columns: ColumnDef<Product>[] = [
+export const columns: ColumnDef<IMortalProduct>[] = [
   {
-    accessorKey: 'photo_url',
-    header: 'IMAGE',
+    id: 'image',
+    accessorKey: 'image',
+    header: 'Image',
     cell: ({ row }) => {
       return (
-        <div className='relative aspect-square'>
+        <div className='relative aspect-square w-20'>
           <Image
-            src={row.getValue('photo_url')}
-            alt={row.getValue('name')}
+            src={row.original.image}
+            alt={row.original.name}
             fill
-            className='rounded-lg'
+            className='rounded-lg object-cover'
           />
         </div>
       );
@@ -28,10 +29,10 @@ export const columns: ColumnDef<Product>[] = [
   {
     id: 'name',
     accessorKey: 'name',
-    header: ({ column }: { column: Column<Product, unknown> }) => (
+    header: ({ column }: { column: Column<IMortalProduct, unknown> }) => (
       <DataTableColumnHeader column={column} title='Name' />
     ),
-    cell: ({ cell }) => <div>{cell.getValue<Product['name']>()}</div>,
+    cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
     meta: {
       label: 'Name',
       placeholder: 'Search products...',
@@ -41,19 +42,31 @@ export const columns: ColumnDef<Product>[] = [
     enableColumnFilter: true
   },
   {
+    id: 'code',
+    accessorKey: 'code',
+    header: ({ column }: { column: Column<IMortalProduct, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Code' />
+    ),
+    cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
+    meta: {
+      label: 'Code',
+      placeholder: 'Search by code...',
+      variant: 'text',
+      icon: Text
+    },
+    enableColumnFilter: true
+  },
+  {
     id: 'category',
     accessorKey: 'category',
-    header: ({ column }: { column: Column<Product, unknown> }) => (
+    header: ({ column }: { column: Column<IMortalProduct, unknown> }) => (
       <DataTableColumnHeader column={column} title='Category' />
     ),
     cell: ({ cell }) => {
-      const status = cell.getValue<Product['category']>();
-      const Icon = status === 'active' ? CheckCircle2 : XCircle;
-
+      const category = cell.getValue<string>();
       return (
         <Badge variant='outline' className='capitalize'>
-          <Icon />
-          {status}
+          {category}
         </Badge>
       );
     },
@@ -65,14 +78,15 @@ export const columns: ColumnDef<Product>[] = [
     }
   },
   {
-    accessorKey: 'price',
-    header: 'PRICE'
+    id: 'shortDescription',
+    accessorKey: 'shortDescription',
+    header: ({ column }: { column: Column<IMortalProduct, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Short Description' />
+    ),
+    cell: ({ cell }) => (
+      <div className='max-w-[200px] truncate'>{cell.getValue<string>()}</div>
+    )
   },
-  {
-    accessorKey: 'description',
-    header: 'DESCRIPTION'
-  },
-
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

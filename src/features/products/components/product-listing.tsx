@@ -1,34 +1,49 @@
-import { Product } from '@/constants/data';
-import { fakeProducts } from '@/constants/mock-api';
-import { searchParamsCache } from '@/lib/searchparams';
+import { IMortalProduct } from '@/models/MortalProduct';
 import { ProductTable } from './product-tables';
 import { columns } from './product-tables/columns';
 
-type ProductListingPage = {};
-
-export default async function ProductListingPage({}: ProductListingPage) {
-  // Showcasing the use of search params cache in nested RSCs
-  const page = searchParamsCache.get('page');
-  const search = searchParamsCache.get('name');
-  const pageLimit = searchParamsCache.get('perPage');
-  const categories = searchParamsCache.get('category');
-
-  const filters = {
-    page,
-    limit: pageLimit,
-    ...(search && { search }),
-    ...(categories && { categories: categories })
+type ProductListingPageProps = {
+  searchParams: {
+    [key: string]: string | string[] | undefined;
   };
+};
 
-  const data = await fakeProducts.getProducts(filters);
+export default async function ProductListingPage({
+  searchParams
+}: ProductListingPageProps) {
+  const page = Number(searchParams?.page || '1');
+  const pageLimit = Number(searchParams?.perPage || '10');
+  const search = searchParams?.name as string;
+  const categories = searchParams?.category as string;
+
+  const queryParams = new URLSearchParams();
+  queryParams.set('page', String(page));
+  queryParams.set('perPage', String(pageLimit));
+  if (search) queryParams.set('search', search);
+  if (categories) queryParams.set('category', categories);
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/products?${queryParams}`,
+    {
+      cache: 'no-store'
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch products');
+  }
+
+  const data = await response.json();
   const totalProducts = data.total_products;
-  const products: Product[] = data.products;
+  const products: IMortalProduct[] = data.products;
 
   return (
     <ProductTable
       data={products}
       totalItems={totalProducts}
       columns={columns}
+      page={page}
+      perPage={pageLimit}
     />
   );
 }

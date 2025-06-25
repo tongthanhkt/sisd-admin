@@ -8,21 +8,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Product } from '@/constants/data';
+import { IMortalProduct } from '@/models/MortalProduct';
 import { IconEdit, IconDotsVertical, IconTrash } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data: Product;
+  data: IMortalProduct;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const onConfirm = async () => {};
+  const onConfirm = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/products/${data.id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    } finally {
+      setLoading(false);
+      setOpen(false);
+    }
+  };
 
   return (
     <>

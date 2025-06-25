@@ -7,10 +7,11 @@ export const metadata = {
   title: 'Dashboard : Product View'
 };
 
-type PageProps = { params: Promise<{ productId: string }> };
+type PageProps = {
+  params: { productId: string };
+};
 
-export default async function Page(props: PageProps) {
-  const params = await props.params;
+export default function Page({ params }: PageProps) {
   return (
     <PageContainer scrollable>
       <div className='flex-1 space-y-4'>

@@ -51,7 +51,9 @@ interface UseDataTableProps<TData>
       | 'manualSorting'
     >,
     Required<Pick<TableOptions<TData>, 'pageCount'>> {
-  initialState?: Omit<Partial<TableState>, 'sorting'> & {
+  pagination?: PaginationState;
+  onPaginationChange?: (updater: Updater<PaginationState>) => void;
+  initialState?: Omit<Partial<TableState>, 'sorting' | 'pagination'> & {
     sorting?: ExtendedColumnSort<TData>[];
   };
   history?: 'push' | 'replace';
@@ -67,7 +69,10 @@ interface UseDataTableProps<TData>
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const {
     columns,
+    data,
     pageCount = -1,
+    pagination,
+    onPaginationChange,
     initialState,
     history = 'replace',
     debounceMs = DEBOUNCE_MS,
@@ -115,30 +120,15 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   );
   const [perPage, setPerPage] = useQueryState(
     PER_PAGE_KEY,
-    parseAsInteger
-      .withOptions(queryStateOptions)
-      .withDefault(initialState?.pagination?.pageSize ?? 10)
+    parseAsInteger.withOptions(queryStateOptions).withDefault(10)
   );
 
-  const pagination: PaginationState = React.useMemo(() => {
-    return {
-      pageIndex: page - 1, // zero-based index -> one-based index
+  const defaultPagination = React.useMemo(
+    () => ({
+      pageIndex: page - 1,
       pageSize: perPage
-    };
-  }, [page, perPage]);
-
-  const onPaginationChange = React.useCallback(
-    (updaterOrValue: Updater<PaginationState>) => {
-      if (typeof updaterOrValue === 'function') {
-        const newPagination = updaterOrValue(pagination);
-        void setPage(newPagination.pageIndex + 1);
-        void setPerPage(newPagination.pageSize);
-      } else {
-        void setPage(updaterOrValue.pageIndex + 1);
-        void setPerPage(updaterOrValue.pageSize);
-      }
-    },
-    [pagination, setPage, setPerPage]
+    }),
+    [page, perPage]
   );
 
   const columnIds = React.useMemo(() => {
@@ -151,7 +141,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     SORT_KEY,
     getSortingStateParser<TData>(columnIds)
       .withOptions(queryStateOptions)
-      .withDefault(initialState?.sorting ?? [])
+      .withDefault([])
   );
 
   const onSortingChange = React.useCallback(
@@ -168,7 +158,6 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const filterableColumns = React.useMemo(() => {
     if (enableAdvancedFilter) return [];
-
     return columns.filter((column) => column.enableColumnFilter);
   }, [columns, enableAdvancedFilter]);
 
@@ -206,15 +195,9 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     return Object.entries(filterValues).reduce<ColumnFiltersState>(
       (filters, [key, value]) => {
         if (value !== null) {
-          const processedValue = Array.isArray(value)
-            ? value
-            : typeof value === 'string' && /[^a-zA-Z0-9]/.test(value)
-              ? value.split(/[^a-zA-Z0-9]+/).filter(Boolean)
-              : [value];
-
           filters.push({
             id: key,
-            value: processedValue
+            value: value
           });
         }
         return filters;
@@ -226,7 +209,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const [columnFilters, setColumnFilters] =
     React.useState<ColumnFiltersState>(initialColumnFilters);
 
-  const onColumnFiltersChange = React.useCallback(
+  const handleColumnFiltersChange = React.useCallback(
     (updaterOrValue: Updater<ColumnFiltersState>) => {
       if (enableAdvancedFilter) return;
 
@@ -260,37 +243,36 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const table = useReactTable({
     ...tableProps,
+    data,
     columns,
-    initialState,
     pageCount,
     state: {
-      pagination,
-      sorting,
-      columnVisibility,
+      pagination: pagination || defaultPagination,
       rowSelection,
+      columnVisibility,
+      sorting,
       columnFilters
     },
-    defaultColumn: {
-      ...tableProps.defaultColumn,
-      enableColumnFilter: false
-    },
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
     onPaginationChange,
-    onSortingChange,
-    onColumnFiltersChange,
+    onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
+    onSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true
+    getFacetedMinMaxValues: getFacetedMinMaxValues()
   });
 
-  return { table, shallow, debounceMs, throttleMs };
+  return {
+    table,
+    filterableColumns
+  };
 }
