@@ -181,77 +181,82 @@ export function UploadImage(props: FileUploaderProps) {
   };
 
   return (
-    <div className='relative flex flex-col gap-6 overflow-hidden'>
-      <Dropzone
-        onDrop={onDrop}
-        accept={accept}
-        maxSize={maxSize}
-        maxFiles={maxFiles}
-        multiple={maxFiles > 1 || multiple}
-      >
-        {({ getRootProps, getInputProps, isDragActive }) => (
-          <div
-            {...getRootProps()}
-            className={cn(
-              'group border-muted-foreground/25 hover:bg-muted/25 relative grid h-52 w-full cursor-pointer place-items-center rounded-lg border-2 border-dashed px-5 py-2.5 text-center transition',
-              'ring-offset-background focus-visible:ring-ring focus-visible:outline-hiddenc focus-visible:ring-2 focus-visible:ring-offset-2',
-              isDragActive && 'border-muted-foreground/50',
-              className
-            )}
-            style={{ overflow: 'hidden' }}
-            onClick={handleEditClick}
-          >
-            {/* Hidden input for re-upload */}
-            <input
-              {...getInputProps({ refKey: 'ref' })}
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-            />
-            {files && files.length > 0 && isFileWithPreview(files[0]) ? (
-              <div className='relative flex h-full w-full items-center justify-center'>
-                <Image
-                  src={files[0].preview}
-                  alt={files[0].name}
-                  fill
-                  className='z-0 rounded-md object-contain'
-                  style={{ maxHeight: '100%', maxWidth: '100%' }}
-                />
-                <button
-                  type='button'
-                  onClick={handleEditClick}
-                  className='absolute inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'
-                  tabIndex={-1}
-                >
-                  <span className='flex items-center gap-2 rounded bg-white/50 p-2 text-sm font-medium hover:bg-white/80'>
-                    <Pencil className='size-4' />
-                  </span>
-                </button>
-              </div>
-            ) : (
-              <div className='flex flex-col items-center justify-center gap-4 sm:px-5'>
-                <div className='rounded-full border border-dashed p-3'>
-                  <IconUpload
-                    className='text-muted-foreground size-7'
-                    aria-hidden='true'
+    <div>
+      <div className='mb-2 flex items-center justify-between'>
+        <span className='font-medium'>Thumbnail</span>
+      </div>
+      <div className='relative flex flex-col gap-6 overflow-hidden'>
+        <Dropzone
+          onDrop={onDrop}
+          accept={accept}
+          maxSize={maxSize}
+          maxFiles={maxFiles}
+          multiple={maxFiles > 1 || multiple}
+        >
+          {({ getRootProps, getInputProps, isDragActive }) => (
+            <div
+              {...getRootProps()}
+              className={cn(
+                'group border-muted-foreground/25 hover:bg-muted/25 relative grid h-52 w-full cursor-pointer place-items-center rounded-lg border-2 border-dashed px-5 py-2.5 text-center transition',
+                'ring-offset-background focus-visible:ring-ring focus-visible:outline-hiddenc focus-visible:ring-2 focus-visible:ring-offset-2',
+                isDragActive && 'border-muted-foreground/50',
+                className
+              )}
+              style={{ overflow: 'hidden' }}
+              onClick={handleEditClick}
+            >
+              {/* Hidden input for re-upload */}
+              <input
+                {...getInputProps({ refKey: 'ref' })}
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+              />
+              {files && files.length > 0 && isFileWithPreview(files[0]) ? (
+                <div className='relative flex h-full w-full items-center justify-center'>
+                  <Image
+                    src={files[0].preview}
+                    alt={files[0].name}
+                    fill
+                    className='z-0 rounded-md object-contain'
+                    style={{ maxHeight: '100%', maxWidth: '100%' }}
                   />
+                  <button
+                    type='button'
+                    onClick={handleEditClick}
+                    className='absolute inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'
+                    tabIndex={-1}
+                  >
+                    <span className='flex items-center gap-2 rounded bg-white/50 p-2 text-sm font-medium hover:bg-white/80'>
+                      <Pencil className='size-4' />
+                    </span>
+                  </button>
                 </div>
-                <div className='space-y-px'>
-                  <p className='text-muted-foreground font-medium'>
-                    Drag {'n'} drop files here, or click to select files
-                  </p>
-                  <p className='text-muted-foreground/70 text-sm'>
-                    You can upload
-                    {maxFiles > 1
-                      ? ` ${maxFiles === Infinity ? 'multiple' : maxFiles}
+              ) : (
+                <div className='flex flex-col items-center justify-center gap-4 sm:px-5'>
+                  <div className='rounded-full border border-dashed p-3'>
+                    <IconUpload
+                      className='text-muted-foreground size-7'
+                      aria-hidden='true'
+                    />
+                  </div>
+                  <div className='space-y-px'>
+                    <p className='text-muted-foreground font-medium'>
+                      Drag {'n'} drop files here, or click to select files
+                    </p>
+                    <p className='text-muted-foreground/70 text-sm'>
+                      You can upload
+                      {maxFiles > 1
+                        ? ` ${maxFiles === Infinity ? 'multiple' : maxFiles}
                       files (up to ${formatBytes(maxSize)} each)`
-                      : ` a file with ${formatBytes(maxSize)}`}
-                  </p>
+                        : ` a file with ${formatBytes(maxSize)}`}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </Dropzone>
+              )}
+            </div>
+          )}
+        </Dropzone>
+      </div>
     </div>
   );
 }

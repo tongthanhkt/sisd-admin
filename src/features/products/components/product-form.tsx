@@ -31,6 +31,7 @@ import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
+import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -262,58 +263,6 @@ export default function ProductForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <FormField
               control={form.control}
-              name='image'
-              render={({ field }) => (
-                <UploadImage
-                  value={uploadedFiles}
-                  className='w-1/3'
-                  onValueChange={async (files) => {
-                    if (files && mounted) {
-                      try {
-                        setIsUploading(true);
-                        // Update uploaded files
-                        setUploadedFiles(files);
-
-                        // // Upload each file and get URLs
-                        // const filesArray =
-                        //   typeof files === 'function' ? files([]) : files;
-                        // const uploadPromises = filesArray.map(async (file) => {
-                        //   const result = await uploadFile(file);
-                        //   return {
-                        //     id: `new-${result.url}`,
-                        //     url: result.url
-                        //   };
-                        // });
-
-                        // const newPreviewUrls =
-                        //   await Promise.all(uploadPromises);
-
-                        // // Update form value with new URL
-                        // if (newPreviewUrls.length > 0) {
-                        //   field.onChange(newPreviewUrls[0].url);
-                        // }
-                        field.onChange(files);
-                        // // Log the updated image for debugging
-                        // console.log(
-                        //   'Updated main image:',
-                        //   newPreviewUrls[0]?.url
-                        // );
-                      } catch (error) {
-                        console.error('Error uploading file:', error);
-                      } finally {
-                        setIsUploading(false);
-                      }
-                    }
-                  }}
-                  maxFiles={1}
-                  maxSize={4 * 1024 * 1024}
-                  multiple={false}
-                />
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name='name'
               render={({ field }) => (
                 <FormItem>
@@ -325,6 +274,58 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
+
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='image'
+                render={({ field }) => (
+                  <UploadImage
+                    value={uploadedFiles}
+                    className='h-60'
+                    onValueChange={async (files) => {
+                      if (files && mounted) {
+                        try {
+                          setIsUploading(true);
+                          // Update uploaded files
+                          setUploadedFiles(files);
+                          // // Upload each file and get URLs
+                          // const filesArray =
+                          //   typeof files === 'function' ? files([]) : files;
+                          // const uploadPromises = filesArray.map(async (file) => {
+                          //   const result = await uploadFile(file);
+                          //   return {
+                          //     id: `new-${result.url}`,
+                          //     url: result.url
+                          //   };
+                          // });
+                          // const newPreviewUrls =
+                          //   await Promise.all(uploadPromises);
+                          // // Update form value with new URL
+                          // if (newPreviewUrls.length > 0) {
+                          //   field.onChange(newPreviewUrls[0].url);
+                          // }
+                          field.onChange(files);
+                          // // Log the updated image for debugging
+                          // console.log(
+                          //   'Updated main image:',
+                          //   newPreviewUrls[0]?.url
+                          // );
+                        } catch (error) {
+                          console.error('Error uploading file:', error);
+                        } finally {
+                          setIsUploading(false);
+                        }
+                      }
+                    }}
+                    maxFiles={1}
+                    maxSize={4 * 1024 * 1024}
+                    multiple={false}
+                  />
+                )}
+              />
+              <UploadMultipleIImage />
+            </div>
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
