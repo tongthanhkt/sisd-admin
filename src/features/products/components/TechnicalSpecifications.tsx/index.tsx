@@ -1,19 +1,11 @@
 // External libraries
+import { closestCenter, DndContext } from '@dnd-kit/core';
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  PointerSensor,
-  useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { ControllerRenderProps, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 
 // Aliased/internal imports
 import { SortableSpecItem } from '@/components';
@@ -26,6 +18,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useSortableList } from '@/hooks/use-sortable-list';
 import { ProductFormValues } from '../product-form';
 
 // Add a type for specification with id
@@ -38,8 +31,8 @@ interface SpecWithId {
 
 export const TechnicalSpecifications = () => {
   const methods = useFormContext<ProductFormValues>();
-  const { control } = methods;
-  const sensors = useSensors(useSensor(PointerSensor));
+  const { control, watch, setValue } = methods;
+  const values = watch();
 
   // Helper to ensure every spec has a unique id
   function ensureSpecIds(specs: SpecWithId[]) {
@@ -53,58 +46,57 @@ export const TechnicalSpecifications = () => {
     }));
   }
 
-  const handleDragEnd = (
-    event: DragEndEvent,
-    field: ControllerRenderProps<ProductFormValues, 'technicalSpecifications'>
-  ) => {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-      const specs = (field.value?.specifications || []) as SpecWithId[];
-      const oldIndex = specs.findIndex((item) => item.id === active.id);
-      const newIndex = specs.findIndex((item) => item.id === over?.id);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newSpecs = arrayMove(specs, oldIndex, newIndex);
-        field.onChange({
-          ...field.value,
+  // Get current specifications array
+  const currentSpecs = ensureSpecIds(
+    (values.technicalSpecifications?.specifications as SpecWithId[]) || []
+  );
+
+  const { sensors, handleDragEnd, addItem, updateItem, removeItem } =
+    useSortableList<SpecWithId>({
+      items: currentSpecs,
+      onItemsChange: (newSpecs) => {
+        setValue('technicalSpecifications', {
+          ...values.technicalSpecifications,
           specifications: newSpecs
         });
       }
-    }
-  };
+    });
 
   return (
     <FormField
       control={control}
       name='technicalSpecifications'
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Technical Specifications</FormLabel>
-          <FormControl>
-            <div className='space-y-4'>
-              <Input
-                placeholder='Standard'
-                value={field.value.standard}
-                onChange={(e) => {
-                  field.onChange({
-                    ...field.value,
-                    standard: e.target.value
-                  });
-                }}
-              />
-              <div className='flex flex-col gap-4'>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={(event) => handleDragEnd(event, field)}
-                >
-                  <SortableContext
-                    items={(
-                      (field.value?.specifications as SpecWithId[]) || []
-                    ).map((spec) => spec.id)}
-                    strategy={verticalListSortingStrategy}
+      render={({ field }) => {
+        const specs = ensureSpecIds(
+          (field.value?.specifications as SpecWithId[]) || []
+        );
+
+        return (
+          <FormItem>
+            <FormLabel>Technical Specifications</FormLabel>
+            <FormControl>
+              <div className='space-y-4'>
+                <Input
+                  placeholder='Standard'
+                  value={field.value.standard}
+                  onChange={(e) => {
+                    field.onChange({
+                      ...field.value,
+                      standard: e.target.value
+                    });
+                  }}
+                />
+                <div className='flex flex-col gap-4'>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
                   >
-                    {((field.value?.specifications as SpecWithId[]) || []).map(
-                      (spec, index) => (
+                    <SortableContext
+                      items={specs.map((spec) => spec.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {specs.map((spec, index) => (
                         <SortableSpecItem key={spec.id} id={spec.id}>
                           {(listeners) => (
                             <div className='grid grid-cols-2 gap-4'>
@@ -112,16 +104,8 @@ export const TechnicalSpecifications = () => {
                                 placeholder='Category'
                                 value={spec.category}
                                 onChange={(e) => {
-                                  const newSpecs = [
-                                    ...(field.value?.specifications || [])
-                                  ];
-                                  newSpecs[index] = {
-                                    ...spec,
+                                  updateItem(index, {
                                     category: e.target.value
-                                  };
-                                  field.onChange({
-                                    ...field.value,
-                                    specifications: newSpecs
                                   });
                                 }}
                               />
@@ -130,17 +114,8 @@ export const TechnicalSpecifications = () => {
                                   placeholder='Performance'
                                   value={spec.performance}
                                   onChange={(e) => {
-                                    const newSpecs = [
-                                      ...((field.value
-                                        ?.specifications as SpecWithId[]) || [])
-                                    ];
-                                    newSpecs[index] = {
-                                      ...spec,
+                                    updateItem(index, {
                                       performance: e.target.value
-                                    };
-                                    field.onChange({
-                                      ...field.value,
-                                      specifications: newSpecs
                                     });
                                   }}
                                 />
@@ -148,14 +123,7 @@ export const TechnicalSpecifications = () => {
                                   type='button'
                                   variant='ghost'
                                   onClick={() => {
-                                    const newSpecs = (
-                                      (field.value
-                                        ?.specifications as SpecWithId[]) || []
-                                    ).filter((_, i) => i !== index);
-                                    field.onChange({
-                                      ...field.value,
-                                      specifications: newSpecs
-                                    });
+                                    removeItem(index);
                                   }}
                                 >
                                   <Trash2Icon className='size-5 text-red-500' />
@@ -171,46 +139,30 @@ export const TechnicalSpecifications = () => {
                             </div>
                           )}
                         </SortableSpecItem>
-                      )
-                    )}
-                  </SortableContext>
-                </DndContext>
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={() => {
-                    field.onChange({
-                      ...field.value,
-                      specifications: [
-                        ...ensureSpecIds(
-                          (field.value?.specifications as SpecWithId[]) || []
-                        ),
-                        {
-                          id:
-                            typeof crypto !== 'undefined' && crypto.randomUUID
-                              ? crypto.randomUUID()
-                              : `${Date.now()}-${Math.random()}`,
-                          stt:
-                            (
-                              (field.value?.specifications as SpecWithId[]) ||
-                              []
-                            ).length + 1,
-                          category: '',
-                          performance: ''
-                        }
-                      ]
-                    });
-                  }}
-                  className='ml-auto w-fit'
-                >
-                  <PlusIcon className='size-5' /> Add Specification
-                </Button>
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => {
+                      addItem({
+                        stt: specs.length + 1,
+                        category: '',
+                        performance: ''
+                      });
+                    }}
+                    className='ml-auto w-fit'
+                  >
+                    <PlusIcon className='size-5' /> Add Specification
+                  </Button>
+                </div>
               </div>
-            </div>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 };

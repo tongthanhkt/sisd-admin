@@ -1,3 +1,5 @@
+import { SortableSpecItem } from '@/components';
+import { Button } from '@/components/ui/button';
 import {
   FormControl,
   FormField,
@@ -6,24 +8,16 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import React from 'react';
-import { ProductFormValues } from '../product-form';
-import { useFormContext } from 'react-hook-form';
-import { GripVerticalIcon, Trash2Icon, PlusIcon } from 'lucide-react';
+import { useSortableList } from '@/hooks/use-sortable-list';
+import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
-  useSensors,
-  useSensor,
-  PointerSensor,
-  DndContext,
-  closestCenter
-} from '@dnd-kit/core';
-import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { SortableSpecItem } from '@/components';
+import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
+import { ProductFormValues } from '../product-form';
 
 // Define a type for advantage item with id
 interface AdvantageItem {
@@ -32,7 +26,6 @@ interface AdvantageItem {
 }
 
 export const AdvantagedProducts = () => {
-  const sensors = useSensors(useSensor(PointerSensor));
   const methods = useFormContext<ProductFormValues>();
   const { control, watch, setValue } = methods;
   const values = watch();
@@ -76,18 +69,14 @@ export const AdvantagedProducts = () => {
     return fieldValue as AdvantageItem[];
   };
 
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-    if (active.id !== over.id) {
-      const arr = getAdvantageArray(values.advantages);
-      const oldIndex = arr.findIndex((item) => item.id === active.id);
-      const newIndex = arr.findIndex((item) => item.id === over.id);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newArr = arrayMove(arr, oldIndex, newIndex);
-        setValue('advantages', newArr);
-      }
-    }
-  };
+  // Get current advantages array
+  const currentAdvantages = getAdvantageArray(values.advantages);
+
+  const { sensors, handleDragEnd, addItem, updateItem, removeItem } =
+    useSortableList<AdvantageItem>({
+      items: currentAdvantages,
+      onItemsChange: (newItems) => setValue('advantages', newItems)
+    });
 
   return (
     <FormField
@@ -95,6 +84,7 @@ export const AdvantagedProducts = () => {
       name='advantages'
       render={({ field }) => {
         const advArr = getAdvantageArray(field.value);
+
         return (
           <FormItem>
             <FormLabel>Advantages</FormLabel>
@@ -117,22 +107,14 @@ export const AdvantagedProducts = () => {
                               placeholder={`Advantage ${index + 1}`}
                               value={item.value}
                               onChange={(e) => {
-                                const newArr = [...advArr];
-                                newArr[index] = {
-                                  ...item,
-                                  value: e.target.value
-                                };
-                                field.onChange(newArr);
+                                updateItem(index, { value: e.target.value });
                               }}
                             />
                             <Button
                               type='button'
                               variant='ghost'
                               onClick={() => {
-                                const newArr = advArr.filter(
-                                  (_, i) => i !== index
-                                );
-                                field.onChange(newArr);
+                                removeItem(index);
                               }}
                             >
                               <Trash2Icon className='size-5 text-red-500' />
@@ -153,16 +135,7 @@ export const AdvantagedProducts = () => {
                       variant='outline'
                       className='ml-auto w-fit'
                       onClick={() => {
-                        field.onChange([
-                          ...advArr,
-                          {
-                            id:
-                              typeof crypto !== 'undefined' && crypto.randomUUID
-                                ? crypto.randomUUID()
-                                : `${Date.now()}-${Math.random()}`,
-                            value: ''
-                          }
-                        ]);
+                        addItem({ value: '' });
                       }}
                     >
                       <PlusIcon className='size-5' /> Add Advantage

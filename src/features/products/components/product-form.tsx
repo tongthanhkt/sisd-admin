@@ -33,6 +33,7 @@ import { toast } from 'react-hot-toast';
 import { productCategories } from '@/constants/products';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 import { AdvantagedProducts } from './AdvantagedProducts';
+import { TransportAndStorage } from './TransportAndStorage';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -75,7 +76,14 @@ const formSchema = z.object({
       )
       .optional()
   }),
-  transportationAndStorage: z.array(z.string()).optional(),
+  transportationAndStorage: z
+    .array(
+      z.object({
+        id: z.string(),
+        value: z.string()
+      })
+    )
+    .optional(),
   safetyRegulations: z.object({
     standard: z.string().optional(),
     specifications: z
@@ -156,11 +164,7 @@ export default function ProductForm({
         standard: '',
         specifications: []
       },
-      transportationAndStorage: Array.isArray(
-        initialData?.transportationAndStorage
-      )
-        ? initialData.transportationAndStorage
-        : [],
+      transportationAndStorage: initialData?.transportationAndStorage || [],
       safetyRegulations: initialData?.safetyRegulations || {
         standard: '',
         specifications: []
@@ -388,53 +392,7 @@ export default function ProductForm({
 
             <TechnicalSpecifications />
 
-            <FormField
-              control={form.control}
-              name='transportationAndStorage'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Transportation and Storage</FormLabel>
-                  <FormControl>
-                    <div className='space-y-2'>
-                      {(field.value || []).map((_, index) => (
-                        <div key={index} className='flex gap-2'>
-                          <Input
-                            placeholder={`Rule ${index + 1}`}
-                            value={(field.value || [])[index]}
-                            onChange={(e) => {
-                              const newValue = [...(field.value || [])];
-                              newValue[index] = e.target.value;
-                              field.onChange(newValue);
-                            }}
-                          />
-                          <Button
-                            type='button'
-                            variant='destructive'
-                            onClick={() => {
-                              const newValue = (field.value || []).filter(
-                                (_, i) => i !== index
-                              );
-                              field.onChange(newValue);
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type='button'
-                        onClick={() => {
-                          field.onChange([...(field.value || []), '']);
-                        }}
-                      >
-                        Add Rule
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <TransportAndStorage />
 
             <FormField
               control={form.control}

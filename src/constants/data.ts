@@ -25,7 +25,10 @@ export interface Product {
       performance: string;
     }[];
   };
-  transportationAndStorage: string[];
+  transportationAndStorage: {
+    id: string;
+    value: string;
+  }[];
   safetyRegulations: {
     warning: string;
     notes: string;
