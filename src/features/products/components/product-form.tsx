@@ -1,6 +1,6 @@
 'use client';
 
-import { FileUploader } from '@/components/file-uploader';
+import { UploadImage } from '@/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -21,15 +21,17 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Product } from '@/constants/data';
+import { productCategories } from '@/constants/products';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import Image from 'next/image';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { IconX } from '@tabler/icons-react';
+import Image from 'next/image';
 import React, { useState } from 'react';
-import { uploadFile } from '@/lib/upload';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import * as z from 'zod';
+import { SortableListField } from './SortableListField';
+import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
+import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -41,6 +43,7 @@ const ACCEPTED_IMAGE_TYPES = [
 
 const formSchema = z.object({
   code: z.string().optional(),
+  href: z.string().optional(),
   name: z.string().optional(),
   category: z.string().optional(),
   shortDescription: z.string().optional(),
@@ -51,7 +54,14 @@ const formSchema = z.object({
     thumbnails: z.array(z.string()).optional()
   }),
   packaging: z.string().optional(),
-  advantages: z.array(z.string()).optional(),
+  advantages: z
+    .array(
+      z.object({
+        id: z.string(),
+        value: z.string()
+      })
+    )
+    .optional(),
   technicalSpecifications: z.object({
     standard: z.string().optional(),
     specifications: z
@@ -64,7 +74,14 @@ const formSchema = z.object({
       )
       .optional()
   }),
-  transportationAndStorage: z.array(z.string()).optional(),
+  transportationAndStorage: z
+    .array(
+      z.object({
+        id: z.string(),
+        value: z.string()
+      })
+    )
+    .optional(),
   safetyRegulations: z.object({
     standard: z.string().optional(),
     specifications: z
@@ -80,7 +97,8 @@ const formSchema = z.object({
   })
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type ProductFormValues = z.infer<typeof formSchema>;
+export type FieldName = keyof ProductFormValues;
 
 interface FileCardProps {
   imageUrl: string;
@@ -126,12 +144,12 @@ export default function ProductForm({
     []
   );
 
-  const form = useForm<FormValues>({
+  const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: initialData?.code || '',
       name: initialData?.name || '',
-      category: initialData?.category || '',
+      category: initialData?.category || 'MORTAL',
       shortDescription: initialData?.shortDescription || '',
       description: initialData?.description || '',
       image: initialData?.image || '',
@@ -145,11 +163,7 @@ export default function ProductForm({
         standard: '',
         specifications: []
       },
-      transportationAndStorage: Array.isArray(
-        initialData?.transportationAndStorage
-      )
-        ? initialData.transportationAndStorage
-        : [],
+      transportationAndStorage: initialData?.transportationAndStorage || [],
       safetyRegulations: initialData?.safetyRegulations || {
         standard: '',
         specifications: []
@@ -157,7 +171,7 @@ export default function ProductForm({
     }
   });
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: ProductFormValues) => {
     console.log('Submitting form', values);
     try {
       setIsLoading(true);
@@ -249,238 +263,71 @@ export default function ProductForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <FormField
               control={form.control}
-              name='image'
+              name='name'
               render={({ field }) => (
-                <FormItem className='w-full'>
-                  <FormLabel>Main Image</FormLabel>
+                <FormItem>
+                  <FormLabel>Product Name</FormLabel>
                   <FormControl>
-                    <FileUploader
-                      value={uploadedFiles}
-                      onValueChange={async (files) => {
-                        if (files && mounted) {
-                          try {
-                            setIsUploading(true);
-                            // Update uploaded files
-                            setUploadedFiles(files);
-
-                            // Upload each file and get URLs
-                            const filesArray =
-                              typeof files === 'function' ? files([]) : files;
-                            const uploadPromises = filesArray.map(
-                              async (file) => {
-                                const result = await uploadFile(file);
-                                return {
-                                  id: `new-${result.url}`,
-                                  url: result.url
-                                };
-                              }
-                            );
-
-                            const newPreviewUrls =
-                              await Promise.all(uploadPromises);
-
-                            // Update form value with new URL
-                            if (newPreviewUrls.length > 0) {
-                              field.onChange(newPreviewUrls[0].url);
-                            }
-
-                            // Log the updated image for debugging
-                            console.log(
-                              'Updated main image:',
-                              newPreviewUrls[0]?.url
-                            );
-                          } catch (error) {
-                            console.error('Error uploading file:', error);
-                          } finally {
-                            setIsUploading(false);
-                          }
-                        }
-                      }}
-                      maxFiles={1}
-                      maxSize={4 * 1024 * 1024}
-                      multiple={false}
-                    />
+                    <Input placeholder='Enter product name' {...field} />
                   </FormControl>
-                  {mounted && field.value && field.value !== '' && (
-                    <div className='mt-4'>
-                      <p className='text-muted-foreground mb-2 text-sm'>
-                        Preview:
-                      </p>
-                      <ScrollArea className='h-fit w-full'>
-                        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4'>
-                          <div className='relative aspect-square'>
-                            <Image
-                              src={field.value}
-                              alt='Main image preview'
-                              fill
-                              className='rounded-md object-cover'
-                            />
-                            <Button
-                              variant='ghost'
-                              size='icon'
-                              className='bg-background/80 hover:bg-background/90 absolute top-2 right-2 h-8 w-8'
-                              onClick={() => {
-                                if (mounted) {
-                                  field.onChange(null);
-                                  console.log('Cleared main image');
-                                }
-                              }}
-                            >
-                              <IconX className='h-4 w-4' />
-                            </Button>
-                          </div>
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='images.thumbnails'
-              render={({ field }) => (
-                <div className='space-y-6'>
-                  <FormItem className='w-full'>
-                    <FormLabel>Product Images</FormLabel>
-                    <FormControl>
-                      <FileUploader
-                        value={uploadedFiles}
-                        onValueChange={async (files) => {
-                          if (files && mounted) {
-                            try {
-                              setIsUploading(true);
-                              // Update uploaded files
-                              setUploadedFiles(files);
-
-                              // Upload each file and get URLs
-                              const filesArray =
-                                typeof files === 'function' ? files([]) : files;
-                              const uploadPromises = filesArray.map(
-                                async (file) => {
-                                  const result = await uploadFile(file);
-                                  return {
-                                    id: `new-${result.url}`,
-                                    url: result.url
-                                  };
-                                }
-                              );
-
-                              const newPreviewUrls =
-                                await Promise.all(uploadPromises);
-
-                              // Combine existing preview URLs with new ones
-                              const updatedUrls = [
-                                ...previewUrls,
-                                ...newPreviewUrls
-                              ];
-                              setPreviewUrls(updatedUrls);
-
-                              // Update form value with new URLs
-                              const currentThumbnails = field.value || [];
-                              const newThumbnails = [
-                                ...currentThumbnails,
-                                ...newPreviewUrls.map((item) => item.url)
-                              ];
-                              field.onChange(newThumbnails);
-
-                              // Log the updated thumbnails for debugging
-                              console.log('Updated thumbnails:', newThumbnails);
-                            } catch (error) {
-                              console.error('Error uploading files:', error);
-                            } finally {
-                              setIsUploading(false);
-                            }
-                          }
-                        }}
-                        maxFiles={4}
-                        maxSize={4 * 1024 * 1024}
-                        multiple
-                      />
-                    </FormControl>
-                    {mounted && previewUrls.length > 0 && (
-                      <div className='mt-4'>
-                        <p className='text-muted-foreground mb-2 text-sm'>
-                          Preview:
-                        </p>
-                        <ScrollArea className='h-fit w-full'>
-                          <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4'>
-                            {previewUrls.map(({ id, url }) => (
-                              <div key={id} className='relative aspect-square'>
-                                <Image
-                                  src={url}
-                                  alt='Preview'
-                                  fill
-                                  className='rounded-md object-cover'
-                                />
-                                <Button
-                                  variant='ghost'
-                                  size='icon'
-                                  className='bg-background/80 hover:bg-background/90 absolute top-2 right-2 h-8 w-8'
-                                  onClick={() => {
-                                    if (mounted) {
-                                      // Remove from preview URLs
-                                      const newPreviewUrls = previewUrls.filter(
-                                        (item) => item.id !== id
-                                      );
-                                      setPreviewUrls(newPreviewUrls);
-
-                                      // Remove from form value (thumbnails)
-                                      const currentThumbnails =
-                                        field.value || [];
-                                      const newThumbnails =
-                                        currentThumbnails.filter(
-                                          (thumbUrl) => thumbUrl !== url
-                                        );
-                                      field.onChange(newThumbnails);
-
-                                      // Log the updated arrays for debugging
-                                      console.log(
-                                        'Updated preview URLs:',
-                                        newPreviewUrls
-                                      );
-                                      console.log(
-                                        'Updated thumbnails:',
-                                        newThumbnails
-                                      );
-
-                                      // If it's a blob URL, revoke it
-                                      if (url.startsWith('blob:')) {
-                                        URL.revokeObjectURL(url);
-                                      }
-                                    }
-                                  }}
-                                >
-                                  <IconX className='h-4 w-4' />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                </div>
-              )}
-            />
-
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name='name'
+                name='image'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Product Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter product name' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  <UploadImage
+                    value={uploadedFiles}
+                    className='h-60'
+                    onValueChange={async (files) => {
+                      if (files && mounted) {
+                        try {
+                          setIsUploading(true);
+                          // Update uploaded files
+                          setUploadedFiles(files);
+                          // // Upload each file and get URLs
+                          // const filesArray =
+                          //   typeof files === 'function' ? files([]) : files;
+                          // const uploadPromises = filesArray.map(async (file) => {
+                          //   const result = await uploadFile(file);
+                          //   return {
+                          //     id: `new-${result.url}`,
+                          //     url: result.url
+                          //   };
+                          // });
+                          // const newPreviewUrls =
+                          //   await Promise.all(uploadPromises);
+                          // // Update form value with new URL
+                          // if (newPreviewUrls.length > 0) {
+                          //   field.onChange(newPreviewUrls[0].url);
+                          // }
+                          field.onChange(files);
+                          // // Log the updated image for debugging
+                          // console.log(
+                          //   'Updated main image:',
+                          //   newPreviewUrls[0]?.url
+                          // );
+                        } catch (error) {
+                          console.error('Error uploading file:', error);
+                        } finally {
+                          setIsUploading(false);
+                        }
+                      }
+                    }}
+                    maxFiles={1}
+                    maxSize={4 * 1024 * 1024}
+                    multiple={false}
+                  />
                 )}
               />
+              <UploadMultipleIImage />
+            </div>
+
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
                 name='code'
@@ -496,22 +343,41 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
+                name='href'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Href</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter href'
+                        className='resize-none'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
                 name='category'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className='w-full'>
                           <SelectValue placeholder='Select categories' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='MORTAL'>Mortal Products</SelectItem>
-                        <SelectItem value='TILE'>Tile Products</SelectItem>
-                        <SelectItem value='vat-tu-chong-tham'>
-                          Waterproofing Materials
-                        </SelectItem>
+                        {productCategories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -520,12 +386,15 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='shortDescription'
+                name='packaging'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Short Description</FormLabel>
+                    <FormLabel>Packaging</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter short description' {...field} />
+                      <Input
+                        placeholder='Enter packaging information'
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -533,257 +402,57 @@ export default function ProductForm({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder='Enter product description'
-                      className='resize-none'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='packaging'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Packaging</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder='Enter packaging information'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='advantages'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Advantages</FormLabel>
-                  <FormControl>
-                    <div className='space-y-2'>
-                      {(field.value || []).map((_, index) => (
-                        <div key={index} className='flex gap-2'>
-                          <Input
-                            placeholder={`Advantage ${index + 1}`}
-                            value={(field.value || [])[index]}
-                            onChange={(e) => {
-                              const newValue = [...(field.value || [])];
-                              newValue[index] = e.target.value;
-                              field.onChange(newValue);
-                            }}
-                          />
-                          <Button
-                            type='button'
-                            variant='destructive'
-                            onClick={() => {
-                              const newValue = (field.value || []).filter(
-                                (_, i) => i !== index
-                              );
-                              field.onChange(newValue);
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type='button'
-                        onClick={() => {
-                          field.onChange([...(field.value || []), '']);
-                        }}
-                      >
-                        Add Advantage
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='technicalSpecifications'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Technical Specifications</FormLabel>
-                  <FormControl>
-                    <div className='space-y-4'>
-                      <Input
-                        placeholder='Standard'
-                        value={field.value.standard}
-                        onChange={(e) => {
-                          field.onChange({
-                            ...field.value,
-                            standard: e.target.value
-                          });
-                        }}
+            <div className='grid grid-cols-1 gap-6'>
+              <FormField
+                control={form.control}
+                name='shortDescription'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Short Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Enter short description'
+                        className='resize-none'
+                        {...field}
                       />
-                      <div className='space-y-2'>
-                        {(field.value?.specifications || []).map(
-                          (spec, index) => (
-                            <div key={index} className='grid grid-cols-3 gap-2'>
-                              <Input
-                                type='number'
-                                placeholder='STT'
-                                value={spec.stt}
-                                onChange={(e) => {
-                                  const newSpecs = [
-                                    ...(field.value?.specifications || [])
-                                  ];
-                                  newSpecs[index] = {
-                                    ...spec,
-                                    stt: parseInt(e.target.value)
-                                  };
-                                  field.onChange({
-                                    ...field.value,
-                                    specifications: newSpecs
-                                  });
-                                }}
-                              />
-                              <Input
-                                placeholder='Category'
-                                value={spec.category}
-                                onChange={(e) => {
-                                  const newSpecs = [
-                                    ...(field.value?.specifications || [])
-                                  ];
-                                  newSpecs[index] = {
-                                    ...spec,
-                                    category: e.target.value
-                                  };
-                                  field.onChange({
-                                    ...field.value,
-                                    specifications: newSpecs
-                                  });
-                                }}
-                              />
-                              <div className='flex gap-2'>
-                                <Input
-                                  placeholder='Performance'
-                                  value={spec.performance}
-                                  onChange={(e) => {
-                                    const newSpecs = [
-                                      ...(field.value?.specifications || [])
-                                    ];
-                                    newSpecs[index] = {
-                                      ...spec,
-                                      performance: e.target.value
-                                    };
-                                    field.onChange({
-                                      ...field.value,
-                                      specifications: newSpecs
-                                    });
-                                  }}
-                                />
-                                <Button
-                                  type='button'
-                                  variant='destructive'
-                                  onClick={() => {
-                                    const newSpecs = (
-                                      field.value?.specifications || []
-                                    ).filter((_, i) => i !== index);
-                                    field.onChange({
-                                      ...field.value,
-                                      specifications: newSpecs
-                                    });
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            </div>
-                          )
-                        )}
-                        <Button
-                          type='button'
-                          onClick={() => {
-                            field.onChange({
-                              ...field.value,
-                              specifications: [
-                                ...(field.value?.specifications || []),
-                                {
-                                  stt:
-                                    (field.value?.specifications || []).length +
-                                    1,
-                                  category: '',
-                                  performance: ''
-                                }
-                              ]
-                            });
-                          }}
-                        >
-                          Add Specification
-                        </Button>
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Enter product description'
+                        className='resize-none'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <SortableListField
+              fieldName='advantages'
+              title='Advantages'
+              addButtonText='Add Advantage'
+              placeholder='Enter advantage'
             />
 
-            <FormField
-              control={form.control}
-              name='transportationAndStorage'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Transportation and Storage</FormLabel>
-                  <FormControl>
-                    <div className='space-y-2'>
-                      {(field.value || []).map((_, index) => (
-                        <div key={index} className='flex gap-2'>
-                          <Input
-                            placeholder={`Rule ${index + 1}`}
-                            value={(field.value || [])[index]}
-                            onChange={(e) => {
-                              const newValue = [...(field.value || [])];
-                              newValue[index] = e.target.value;
-                              field.onChange(newValue);
-                            }}
-                          />
-                          <Button
-                            type='button'
-                            variant='destructive'
-                            onClick={() => {
-                              const newValue = (field.value || []).filter(
-                                (_, i) => i !== index
-                              );
-                              field.onChange(newValue);
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type='button'
-                        onClick={() => {
-                          field.onChange([...(field.value || []), '']);
-                        }}
-                      >
-                        Add Rule
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <TechnicalSpecifications />
+
+            <SortableListField
+              fieldName='transportationAndStorage'
+              title='Transportation and Storage'
+              addButtonText='Add Rule'
+              placeholder='Enter rule'
             />
 
             <FormField

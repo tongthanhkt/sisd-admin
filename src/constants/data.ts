@@ -13,7 +13,10 @@ export interface Product {
     thumbnails: string[];
   };
   packaging: string;
-  advantages: string[];
+  advantages: {
+    id: string;
+    value: string;
+  }[];
   technicalSpecifications: {
     standard: string;
     specifications: {
@@ -22,7 +25,10 @@ export interface Product {
       performance: string;
     }[];
   };
-  transportationAndStorage: string[];
+  transportationAndStorage: {
+    id: string;
+    value: string;
+  }[];
   safetyRegulations: {
     warning: string;
     notes: string;
