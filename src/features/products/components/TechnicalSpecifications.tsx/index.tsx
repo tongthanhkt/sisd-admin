@@ -11,9 +11,9 @@ import {
   SortableContext,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
+import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 
 // Aliased/internal imports
 import { SortableSpecItem } from '@/components';
@@ -37,46 +37,49 @@ interface SpecWithId {
 }
 
 export const TechnicalSpecifications = () => {
-  const form = useFormContext<ProductFormValues>();
+  const methods = useFormContext<ProductFormValues>();
+  const { control, watch, setValue } = methods;
+  const values = watch();
   const sensors = useSensors(useSensor(PointerSensor));
 
   // Helper to ensure every spec has a unique id
   function ensureSpecIds(specs: any[]): SpecWithId[] {
     return (specs || []).map((spec) => ({
       ...spec,
-      id: spec.id || `${Date.now()}-${Math.random()}`
+      id:
+        spec.id ||
+        (typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`)
     }));
   }
 
   // Ensure ids on mount
   React.useEffect(() => {
-    const specs =
-      form.getValues('technicalSpecifications.specifications') || [];
+    const specs = watch('technicalSpecifications.specifications') || [];
     if (specs.some((spec: any) => !spec.id)) {
-      form.setValue(
-        'technicalSpecifications.specifications',
-        ensureSpecIds(specs)
-      );
+      setValue('technicalSpecifications.specifications', ensureSpecIds(specs));
     }
   }, []);
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     if (active.id !== over.id) {
-      // Always ensure ids before using as SpecWithId[]
-      const specs = ensureSpecIds(
-        form.getValues('technicalSpecifications.specifications') || []
-      );
+      // Use the current array, do NOT call ensureSpecIds here
+      const specs = (values.technicalSpecifications.specifications ||
+        []) as SpecWithId[];
       const oldIndex = specs.findIndex((item) => item.id === active.id);
       const newIndex = specs.findIndex((item) => item.id === over.id);
-      const newSpecs = arrayMove(specs, oldIndex, newIndex);
-      form.setValue('technicalSpecifications.specifications', newSpecs);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newSpecs = arrayMove(specs, oldIndex, newIndex);
+        setValue('technicalSpecifications.specifications', newSpecs);
+      }
     }
   };
 
   return (
     <FormField
-      control={form.control}
+      control={control}
       name='technicalSpecifications'
       render={({ field }) => (
         <FormItem>
@@ -100,11 +103,9 @@ export const TechnicalSpecifications = () => {
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={
-                      (
-                        field.value?.specifications as SpecWithId[] | undefined
-                      )?.map((spec) => spec.id) || []
-                    }
+                    items={(
+                      (field.value?.specifications as SpecWithId[]) || []
+                    ).map((spec) => spec.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     {((field.value?.specifications as SpecWithId[]) || []).map(
@@ -148,7 +149,6 @@ export const TechnicalSpecifications = () => {
                                     });
                                   }}
                                 />
-
                                 <Button
                                   type='button'
                                   variant='ghost'
@@ -191,7 +191,10 @@ export const TechnicalSpecifications = () => {
                           (field.value?.specifications as SpecWithId[]) || []
                         ),
                         {
-                          id: `${Date.now()}-${Math.random()}`,
+                          id:
+                            typeof crypto !== 'undefined' && crypto.randomUUID
+                              ? crypto.randomUUID()
+                              : `${Date.now()}-${Math.random()}`,
                           stt:
                             (
                               (field.value?.specifications as SpecWithId[]) ||
