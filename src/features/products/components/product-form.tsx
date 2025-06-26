@@ -1,6 +1,5 @@
 'use client';
 
-import { FileUploader } from '@/components/file-uploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -21,19 +20,16 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Product } from '@/constants/data';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import Image from 'next/image';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { IconX } from '@tabler/icons-react';
-import React, { useState } from 'react';
-import { uploadFile } from '@/lib/upload';
-import { toast } from 'react-hot-toast';
 import { productCategories } from '@/constants/products';
-import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { IconX } from '@tabler/icons-react';
+import Image from 'next/image';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import * as z from 'zod';
 import { AdvantagedProducts } from './AdvantagedProducts';
-import { TransportAndStorage } from './TransportAndStorage';
+import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -100,6 +96,7 @@ const formSchema = z.object({
 });
 
 export type ProductFormValues = z.infer<typeof formSchema>;
+export type FieldName = keyof ProductFormValues;
 
 interface FileCardProps {
   imageUrl: string;
@@ -388,11 +385,20 @@ export default function ProductForm({
               />
             </div>
 
-            <AdvantagedProducts />
+            <AdvantagedProducts
+              fieldName='advantages'
+              title='Advantages'
+              addButtonText='Add Advantage'
+            />
 
             <TechnicalSpecifications />
 
-            <TransportAndStorage />
+            <AdvantagedProducts
+              fieldName='transportationAndStorage'
+              title='Transportation and Storage'
+              addButtonText='Add Rule'
+              placeholder='Enter rule'
+            />
 
             <FormField
               control={form.control}

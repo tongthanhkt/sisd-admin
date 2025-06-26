@@ -17,7 +17,7 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { ProductFormValues } from '../product-form';
+import { FieldName, ProductFormValues } from '../product-form';
 
 // Define a type for advantage item with id
 interface AdvantageItem {
@@ -25,7 +25,19 @@ interface AdvantageItem {
   value: string;
 }
 
-export const AdvantagedProducts = () => {
+interface AdvantagedProductsProps {
+  fieldName: FieldName;
+  title: string;
+  addButtonText?: string;
+  placeholder?: string;
+}
+
+export const AdvantagedProducts = ({
+  fieldName,
+  title,
+  addButtonText = 'Add Advantage',
+  placeholder = 'Enter advantage'
+}: AdvantagedProductsProps) => {
   const methods = useFormContext<ProductFormValues>();
   const { control, watch, setValue } = methods;
   const values = watch();
@@ -52,15 +64,6 @@ export const AdvantagedProducts = () => {
     );
   }
 
-  // Ensure ids on mount
-  React.useEffect(() => {
-    const arr = values.advantages || [];
-    if (arr.some((item: any) => typeof item === 'string' || !item.id)) {
-      setValue('advantages', ensureAdvantageIds(arr));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const getAdvantageArray = (fieldValue: any): AdvantageItem[] => {
     if (!fieldValue) return [];
     if (Array.isArray(fieldValue) && typeof fieldValue[0] === 'string') {
@@ -70,24 +73,24 @@ export const AdvantagedProducts = () => {
   };
 
   // Get current advantages array
-  const currentAdvantages = getAdvantageArray(values.advantages);
+  const currentAdvantages = getAdvantageArray(values[fieldName]);
 
   const { sensors, handleDragEnd, addItem, updateItem, removeItem } =
     useSortableList<AdvantageItem>({
       items: currentAdvantages,
-      onItemsChange: (newItems) => setValue('advantages', newItems)
+      onItemsChange: (newItems) => setValue(fieldName, newItems)
     });
 
   return (
     <FormField
       control={control}
-      name='advantages'
+      name={fieldName}
       render={({ field }) => {
         const advArr = getAdvantageArray(field.value);
 
         return (
           <FormItem>
-            <FormLabel>Advantages</FormLabel>
+            <FormLabel>{title}</FormLabel>
             <FormControl>
               <DndContext
                 sensors={sensors}
@@ -104,7 +107,7 @@ export const AdvantagedProducts = () => {
                         {(listeners) => (
                           <div className='flex gap-2'>
                             <Input
-                              placeholder={`Advantage ${index + 1}`}
+                              placeholder={`${placeholder} ${index + 1}`}
                               value={item.value}
                               onChange={(e) => {
                                 updateItem(index, { value: e.target.value });
@@ -138,7 +141,7 @@ export const AdvantagedProducts = () => {
                         addItem({ value: '' });
                       }}
                     >
-                      <PlusIcon className='size-5' /> Add Advantage
+                      <PlusIcon className='size-5' /> {addButtonText}
                     </Button>
                   </div>
                 </SortableContext>
