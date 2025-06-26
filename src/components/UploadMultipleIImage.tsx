@@ -3,6 +3,7 @@ import Image from 'next/image';
 import * as React from 'react';
 import Dropzone, { type FileRejection } from 'react-dropzone';
 import { cn } from '@/lib/utils';
+import { FormLabel } from './ui/form';
 
 export const UploadMultipleIImage = () => {
   const [files, setFiles] = React.useState<File[]>([]);
@@ -31,10 +32,8 @@ export const UploadMultipleIImage = () => {
   };
 
   return (
-    <div>
-      <div className='mb-2 flex items-center justify-between'>
-        <span className='font-medium'>Others Images</span>
-      </div>
+    <div className='flex flex-col gap-2'>
+      <FormLabel>Others Images</FormLabel>
       <Dropzone
         onDrop={onDrop}
         accept={{ 'image/*': [] }}

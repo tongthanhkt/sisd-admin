@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useControllableState } from '@/hooks/use-controllable-state';
 import { cn, formatBytes } from '@/lib/utils';
 import { Pencil } from 'lucide-react';
+import { FormLabel } from './ui/form';
 
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
@@ -181,10 +182,8 @@ export function UploadImage(props: FileUploaderProps) {
   };
 
   return (
-    <div>
-      <div className='mb-2 flex items-center justify-between'>
-        <span className='font-medium'>Thumbnail</span>
-      </div>
+    <div className='flex flex-col gap-2'>
+      <FormLabel>Thumbnail</FormLabel>
       <div className='relative flex flex-col gap-6 overflow-hidden'>
         <Dropzone
           onDrop={onDrop}
