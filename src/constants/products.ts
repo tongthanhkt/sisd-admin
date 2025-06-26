@@ -9,7 +9,7 @@ export interface Product {
 
 export const productCategories = [
   { id: 'MORTAL', name: 'Vữa trang trí' },
-  { id: 'TILE', name: 'Keo dán gạch & keo chà ron' },
+  { id: 'TILE-CHARON', name: 'Keo dán gạch & keo chà ron' },
   { id: 'CT', name: 'Vật tư chống thấm' },
   { id: 'SPC', name: 'Sàn SPC' }
 ];
