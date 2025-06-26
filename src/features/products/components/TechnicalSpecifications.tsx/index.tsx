@@ -2,6 +2,7 @@
 import {
   closestCenter,
   DndContext,
+  DragEndEvent,
   PointerSensor,
   useSensor,
   useSensors
@@ -12,8 +13,7 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 // Aliased/internal imports
 import { SortableSpecItem } from '@/components';
@@ -38,12 +38,11 @@ interface SpecWithId {
 
 export const TechnicalSpecifications = () => {
   const methods = useFormContext<ProductFormValues>();
-  const { control, watch, setValue } = methods;
-  const values = watch();
+  const { control } = methods;
   const sensors = useSensors(useSensor(PointerSensor));
 
   // Helper to ensure every spec has a unique id
-  function ensureSpecIds(specs: any[]): SpecWithId[] {
+  function ensureSpecIds(specs: SpecWithId[]) {
     return (specs || []).map((spec) => ({
       ...spec,
       id:
@@ -54,25 +53,21 @@ export const TechnicalSpecifications = () => {
     }));
   }
 
-  // Ensure ids on mount
-  React.useEffect(() => {
-    const specs = watch('technicalSpecifications.specifications') || [];
-    if (specs.some((spec: any) => !spec.id)) {
-      setValue('technicalSpecifications.specifications', ensureSpecIds(specs));
-    }
-  }, []);
-
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (
+    event: DragEndEvent,
+    field: ControllerRenderProps<ProductFormValues, 'technicalSpecifications'>
+  ) => {
     const { active, over } = event;
-    if (active.id !== over.id) {
-      // Use the current array, do NOT call ensureSpecIds here
-      const specs = (values.technicalSpecifications.specifications ||
-        []) as SpecWithId[];
+    if (active.id !== over?.id) {
+      const specs = (field.value?.specifications || []) as SpecWithId[];
       const oldIndex = specs.findIndex((item) => item.id === active.id);
-      const newIndex = specs.findIndex((item) => item.id === over.id);
+      const newIndex = specs.findIndex((item) => item.id === over?.id);
       if (oldIndex !== -1 && newIndex !== -1) {
         const newSpecs = arrayMove(specs, oldIndex, newIndex);
-        setValue('technicalSpecifications.specifications', newSpecs);
+        field.onChange({
+          ...field.value,
+          specifications: newSpecs
+        });
       }
     }
   };
@@ -96,11 +91,11 @@ export const TechnicalSpecifications = () => {
                   });
                 }}
               />
-              <div className='flex flex-col gap-2'>
+              <div className='flex flex-col gap-4'>
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
+                  onDragEnd={(event) => handleDragEnd(event, field)}
                 >
                   <SortableContext
                     items={(
@@ -112,7 +107,7 @@ export const TechnicalSpecifications = () => {
                       (spec, index) => (
                         <SortableSpecItem key={spec.id} id={spec.id}>
                           {(listeners) => (
-                            <div className='grid grid-cols-2 gap-2'>
+                            <div className='grid grid-cols-2 gap-4'>
                               <Input
                                 placeholder='Category'
                                 value={spec.category}
@@ -206,7 +201,7 @@ export const TechnicalSpecifications = () => {
                       ]
                     });
                   }}
-                  className='mt-2 ml-auto w-fit'
+                  className='ml-auto w-fit'
                 >
                   <PlusIcon className='size-5' /> Add Specification
                 </Button>

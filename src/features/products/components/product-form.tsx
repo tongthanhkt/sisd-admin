@@ -32,6 +32,7 @@ import { uploadFile } from '@/lib/upload';
 import { toast } from 'react-hot-toast';
 import { productCategories } from '@/constants/products';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
+import { AdvantagedProducts } from './AdvantagedProducts';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -54,7 +55,14 @@ const formSchema = z.object({
     thumbnails: z.array(z.string()).optional()
   }),
   packaging: z.string().optional(),
-  advantages: z.array(z.string()).optional(),
+  advantages: z
+    .array(
+      z.object({
+        id: z.string(),
+        value: z.string()
+      })
+    )
+    .optional(),
   technicalSpecifications: z.object({
     standard: z.string().optional(),
     specifications: z
@@ -376,53 +384,7 @@ export default function ProductForm({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name='advantages'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Advantages</FormLabel>
-                  <FormControl>
-                    <div className='space-y-2'>
-                      {(field.value || []).map((_, index) => (
-                        <div key={index} className='flex gap-2'>
-                          <Input
-                            placeholder={`Advantage ${index + 1}`}
-                            value={(field.value || [])[index]}
-                            onChange={(e) => {
-                              const newValue = [...(field.value || [])];
-                              newValue[index] = e.target.value;
-                              field.onChange(newValue);
-                            }}
-                          />
-                          <Button
-                            type='button'
-                            variant='destructive'
-                            onClick={() => {
-                              const newValue = (field.value || []).filter(
-                                (_, i) => i !== index
-                              );
-                              field.onChange(newValue);
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type='button'
-                        onClick={() => {
-                          field.onChange([...(field.value || []), '']);
-                        }}
-                      >
-                        Add Advantage
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <AdvantagedProducts />
 
             <TechnicalSpecifications />
 

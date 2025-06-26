@@ -13,7 +13,10 @@ export interface Product {
     thumbnails: string[];
   };
   packaging: string;
-  advantages: string[];
+  advantages: {
+    id: string;
+    value: string;
+  }[];
   technicalSpecifications: {
     standard: string;
     specifications: {
