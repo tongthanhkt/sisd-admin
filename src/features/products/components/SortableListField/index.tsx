@@ -18,6 +18,7 @@ import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FieldName, ProductFormValues } from '../product-form';
+import NoData from '@/components/NoData';
 
 // Define a type for list item with id
 interface ListItem {
@@ -102,37 +103,41 @@ export const SortableListField = ({
                   strategy={verticalListSortingStrategy}
                 >
                   <div className='flex flex-col gap-4'>
-                    {itemsArr.map((item, index) => (
-                      <SortableSpecItem key={item.id} id={item.id}>
-                        {(listeners) => (
-                          <div className='flex gap-2'>
-                            <Input
-                              placeholder={`${placeholder} ${index + 1}`}
-                              value={item.value}
-                              onChange={(e) => {
-                                updateItem(index, { value: e.target.value });
-                              }}
-                            />
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              onClick={() => {
-                                removeItem(index);
-                              }}
-                            >
-                              <Trash2Icon className='size-5 text-red-500' />
-                            </Button>
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              {...listeners}
-                            >
-                              <GripVerticalIcon className='size-5' />
-                            </Button>
-                          </div>
-                        )}
-                      </SortableSpecItem>
-                    ))}
+                    {itemsArr.length === 0 ? (
+                      <NoData />
+                    ) : (
+                      itemsArr.map((item, index) => (
+                        <SortableSpecItem key={item.id} id={item.id}>
+                          {(listeners) => (
+                            <div className='flex gap-2'>
+                              <Input
+                                placeholder={`${placeholder} ${index + 1}`}
+                                value={item.value}
+                                onChange={(e) => {
+                                  updateItem(index, { value: e.target.value });
+                                }}
+                              />
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                onClick={() => {
+                                  removeItem(index);
+                                }}
+                              >
+                                <Trash2Icon className='size-5 text-red-500' />
+                              </Button>
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                {...listeners}
+                              >
+                                <GripVerticalIcon className='size-5' />
+                              </Button>
+                            </div>
+                          )}
+                        </SortableSpecItem>
+                      ))
+                    )}
                     <Button
                       type='button'
                       variant='outline'

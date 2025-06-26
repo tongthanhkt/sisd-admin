@@ -9,6 +9,7 @@ import { useFormContext } from 'react-hook-form';
 
 // Aliased/internal imports
 import { SortableSpecItem } from '@/components';
+import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
 import {
   FormControl,
@@ -96,50 +97,54 @@ export const TechnicalSpecifications = () => {
                       items={specs.map((spec) => spec.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      {specs.map((spec, index) => (
-                        <SortableSpecItem key={spec.id} id={spec.id}>
-                          {(listeners) => (
-                            <div className='grid grid-cols-2 gap-4'>
-                              <Input
-                                placeholder='Category'
-                                value={spec.category}
-                                onChange={(e) => {
-                                  updateItem(index, {
-                                    category: e.target.value
-                                  });
-                                }}
-                              />
-                              <div className='flex gap-2'>
+                      {specs.length === 0 ? (
+                        <NoData />
+                      ) : (
+                        specs.map((spec, index) => (
+                          <SortableSpecItem key={spec.id} id={spec.id}>
+                            {(listeners) => (
+                              <div className='grid grid-cols-2 gap-4'>
                                 <Input
-                                  placeholder='Performance'
-                                  value={spec.performance}
+                                  placeholder='Category'
+                                  value={spec.category}
                                   onChange={(e) => {
                                     updateItem(index, {
-                                      performance: e.target.value
+                                      category: e.target.value
                                     });
                                   }}
                                 />
-                                <Button
-                                  type='button'
-                                  variant='ghost'
-                                  onClick={() => {
-                                    removeItem(index);
-                                  }}
-                                >
-                                  <Trash2Icon className='size-5 text-red-500' />
-                                </Button>
-                                <Button
-                                  type='button'
-                                  variant='ghost'
-                                  {...listeners}
-                                >
-                                  <GripVerticalIcon className='size-5' />
-                                </Button>
+                                <div className='flex gap-2'>
+                                  <Input
+                                    placeholder='Performance'
+                                    value={spec.performance}
+                                    onChange={(e) => {
+                                      updateItem(index, {
+                                        performance: e.target.value
+                                      });
+                                    }}
+                                  />
+                                  <Button
+                                    type='button'
+                                    variant='ghost'
+                                    onClick={() => {
+                                      removeItem(index);
+                                    }}
+                                  >
+                                    <Trash2Icon className='size-5 text-red-500' />
+                                  </Button>
+                                  <Button
+                                    type='button'
+                                    variant='ghost'
+                                    {...listeners}
+                                  >
+                                    <GripVerticalIcon className='size-5' />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </SortableSpecItem>
-                      ))}
+                            )}
+                          </SortableSpecItem>
+                        ))
+                      )}
                     </SortableContext>
                   </DndContext>
                   <Button
