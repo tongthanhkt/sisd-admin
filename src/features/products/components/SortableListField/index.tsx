@@ -19,31 +19,31 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FieldName, ProductFormValues } from '../product-form';
 
-// Define a type for advantage item with id
-interface AdvantageItem {
+// Define a type for list item with id
+interface ListItem {
   id: string;
   value: string;
 }
 
-interface AdvantagedProductsProps {
+interface SortableListFieldProps {
   fieldName: FieldName;
   title: string;
   addButtonText?: string;
   placeholder?: string;
 }
 
-export const AdvantagedProducts = ({
+export const SortableListField = ({
   fieldName,
   title,
-  addButtonText = 'Add Advantage',
-  placeholder = 'Enter advantage'
-}: AdvantagedProductsProps) => {
+  addButtonText = 'Add Item',
+  placeholder = 'Enter item'
+}: SortableListFieldProps) => {
   const methods = useFormContext<ProductFormValues>();
   const { control, watch, setValue } = methods;
   const values = watch();
 
-  // Helper to ensure every advantage has a unique id
-  function ensureAdvantageIds(arr: any[]): AdvantageItem[] {
+  // Helper to ensure every item has a unique id
+  function ensureItemIds(arr: any[]): ListItem[] {
     return (arr || []).map((item) =>
       typeof item === 'string'
         ? {
@@ -64,20 +64,20 @@ export const AdvantagedProducts = ({
     );
   }
 
-  const getAdvantageArray = (fieldValue: any): AdvantageItem[] => {
+  const getItemArray = (fieldValue: any): ListItem[] => {
     if (!fieldValue) return [];
     if (Array.isArray(fieldValue) && typeof fieldValue[0] === 'string') {
-      return ensureAdvantageIds(fieldValue);
+      return ensureItemIds(fieldValue);
     }
-    return fieldValue as AdvantageItem[];
+    return fieldValue as ListItem[];
   };
 
-  // Get current advantages array
-  const currentAdvantages = getAdvantageArray(values[fieldName]);
+  // Get current items array
+  const currentItems = getItemArray(values[fieldName]);
 
   const { sensors, handleDragEnd, addItem, updateItem, removeItem } =
-    useSortableList<AdvantageItem>({
-      items: currentAdvantages,
+    useSortableList<ListItem>({
+      items: currentItems,
       onItemsChange: (newItems) => setValue(fieldName, newItems)
     });
 
@@ -86,7 +86,7 @@ export const AdvantagedProducts = ({
       control={control}
       name={fieldName}
       render={({ field }) => {
-        const advArr = getAdvantageArray(field.value);
+        const itemsArr = getItemArray(field.value);
 
         return (
           <FormItem>
@@ -98,11 +98,11 @@ export const AdvantagedProducts = ({
                 onDragEnd={handleDragEnd}
               >
                 <SortableContext
-                  items={advArr.map((item) => item.id)}
+                  items={itemsArr.map((item) => item.id)}
                   strategy={verticalListSortingStrategy}
                 >
                   <div className='flex flex-col gap-4'>
-                    {advArr.map((item, index) => (
+                    {itemsArr.map((item, index) => (
                       <SortableSpecItem key={item.id} id={item.id}>
                         {(listeners) => (
                           <div className='flex gap-2'>

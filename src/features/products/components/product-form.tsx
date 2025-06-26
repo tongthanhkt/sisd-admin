@@ -28,7 +28,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
-import { AdvantagedProducts } from './AdvantagedProducts';
+import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 
 const MAX_FILE_SIZE = 5000000;
@@ -385,15 +385,16 @@ export default function ProductForm({
               />
             </div>
 
-            <AdvantagedProducts
+            <SortableListField
               fieldName='advantages'
               title='Advantages'
               addButtonText='Add Advantage'
+              placeholder='Enter advantage'
             />
 
             <TechnicalSpecifications />
 
-            <AdvantagedProducts
+            <SortableListField
               fieldName='transportationAndStorage'
               title='Transportation and Storage'
               addButtonText='Add Rule'
