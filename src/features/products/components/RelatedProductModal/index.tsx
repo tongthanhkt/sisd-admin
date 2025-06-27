@@ -5,9 +5,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
 import { PRODUCT_CATEGORIES, PRODUCT_LABELS } from '@/constants/products';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Product {
   id: string;
@@ -20,28 +20,28 @@ interface RelatedProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (selectedProducts: string[]) => void;
+  selectedProductIds?: string[];
 }
 
 export function RelatedProductModal({
   isOpen,
   onClose,
-  onConfirm
+  onConfirm,
+  selectedProductIds = []
 }: RelatedProductModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] =
+    useState<string[]>(selectedProductIds);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const MAX_SELECTED = 3;
+  const remainingSelectable = MAX_SELECTED - selectedProductIds.length;
 
   useEffect(() => {
     async function fetchProducts() {
-      setLoading(true);
       const queryParams = new URLSearchParams();
       queryParams.set('page', String(currentPage));
       queryParams.set('perPage', String(itemsPerPage));
@@ -58,7 +58,6 @@ export function RelatedProductModal({
         setProducts(data.products);
         setTotalProducts(data.total_products);
       }
-      setLoading(false);
     }
     fetchProducts();
   }, [searchTerm, selectedCategory, currentPage, itemsPerPage]);
@@ -81,11 +80,15 @@ export function RelatedProductModal({
   );
 
   const handleProductToggle = (productId: string) => {
-    setSelectedProducts((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+    if (selectedProducts.includes(productId)) {
+      setSelectedProducts((prev) => prev.filter((id) => id !== productId));
+    } else {
+      if (selectedProducts.length < remainingSelectable) {
+        setSelectedProducts((prev) => [...prev, productId]);
+      } else {
+        alert(`You can only select up to ${MAX_SELECTED} products in total.`);
+      }
+    }
   };
 
   const handleSelectAll = () => {
@@ -173,6 +176,10 @@ export function RelatedProductModal({
                     <Checkbox
                       checked={selectedProducts.includes(product.id)}
                       onCheckedChange={() => handleProductToggle(product.id)}
+                      disabled={
+                        !selectedProducts.includes(product.id) &&
+                        selectedProducts.length >= remainingSelectable
+                      }
                     />
                   </td>
                   <td className='w-28 px-4 py-3'>
