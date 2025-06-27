@@ -140,6 +140,9 @@ export default function ProductForm({
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedMultipleFiles, setUploadedMultipleFiles] = useState<File[]>(
+    []
+  );
   const [previewUrls, setPreviewUrls] = useState<{ id: string; url: string }[]>(
     []
   );
@@ -324,7 +327,10 @@ export default function ProductForm({
                   />
                 )}
               />
-              <UploadMultipleIImage />
+              <UploadMultipleIImage
+                value={uploadedMultipleFiles}
+                onValueChange={setUploadedMultipleFiles}
+              />
             </div>
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
