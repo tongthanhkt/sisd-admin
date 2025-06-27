@@ -1,20 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PRODUCT_CATEGORIES, PRODUCT_LABELS } from '@/constants/products';
 import { IconX } from '@tabler/icons-react';
 import Image from 'next/image';
+import { useState } from 'react';
 import { RelatedProductModal } from '../RelatedProductModal';
 
 interface RelatedProduct {
   id: string;
   name: string;
-  sku: string;
-  price: number;
-  status: 'active' | 'out_of_stock';
   image: string;
+  category: string;
 }
 
 export function RelatedProducts() {
@@ -26,19 +24,15 @@ export function RelatedProducts() {
     const mockProducts: RelatedProduct[] = [
       {
         id: '1',
-        name: 'Sản phẩm E',
-        sku: 'SPE05',
-        price: 150000,
-        status: 'active',
-        image: '/product-1.png'
+        name: 'Vữa thô DPC-100',
+        image: '/product-1.png',
+        category: PRODUCT_CATEGORIES.MORTAL
       },
       {
         id: '3',
-        name: 'Sản phẩm G',
-        sku: 'SPG07',
-        price: 125000,
-        status: 'out_of_stock',
-        image: '/product-3.png'
+        name: 'Vữa mịn DPX-200',
+        image: '/product-3.png',
+        category: PRODUCT_CATEGORIES.MORTAL
       }
     ];
 
@@ -55,13 +49,6 @@ export function RelatedProducts() {
     setRelatedProducts((prev) =>
       prev.filter((product) => product.id !== productId)
     );
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
   };
 
   return (
@@ -109,26 +96,11 @@ export function RelatedProducts() {
                         {product.name}
                       </h4>
                       <p className='text-sm text-gray-600'>
-                        SKU: {product.sku}
-                      </p>
-                      <p className='text-sm font-medium text-gray-900'>
-                        {formatPrice(product.price)}
+                        Category: {PRODUCT_LABELS[product.category]}
                       </p>
                     </div>
                   </div>
                   <div className='flex items-center space-x-2'>
-                    <Badge
-                      variant={
-                        product.status === 'active' ? 'default' : 'secondary'
-                      }
-                      className={
-                        product.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }
-                    >
-                      {product.status === 'active' ? 'Hoạt động' : 'Hết hàng'}
-                    </Badge>
                     <Button
                       variant='ghost'
                       size='icon'
