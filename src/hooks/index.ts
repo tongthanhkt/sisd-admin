@@ -5,3 +5,4 @@ export { useUploadFile } from './use-upload-file';
 export { useControllableState } from './use-controllable-state';
 export { useBreadcrumbs } from './use-breadcrumbs';
 export { useCallbackRef } from './use-callback-ref';
+export { useModal } from './use-modal';
