@@ -63,6 +63,7 @@ export interface IBlog extends Document {
   isVertical?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  id: string;
 }
 
 const articleSectionImageSchema = new Schema({

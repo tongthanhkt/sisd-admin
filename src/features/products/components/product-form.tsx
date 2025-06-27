@@ -32,6 +32,9 @@ import * as z from 'zod';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RelatedProducts } from './RelatedProducts';
+import { RelatedBlogs } from './RelatedBlogs';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -94,7 +97,8 @@ const formSchema = z.object({
       .optional(),
     warning: z.string().optional(),
     notes: z.string().optional()
-  })
+  }),
+  isFeatured: z.boolean().optional()
 });
 
 export type ProductFormValues = z.infer<typeof formSchema>;
@@ -140,6 +144,9 @@ export default function ProductForm({
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedMultipleFiles, setUploadedMultipleFiles] = useState<File[]>(
+    []
+  );
   const [previewUrls, setPreviewUrls] = useState<{ id: string; url: string }[]>(
     []
   );
@@ -167,12 +174,12 @@ export default function ProductForm({
       safetyRegulations: initialData?.safetyRegulations || {
         standard: '',
         specifications: []
-      }
+      },
+      isFeatured: initialData?.isFeatured || false
     }
   });
 
   const onSubmit = async (values: ProductFormValues) => {
-    console.log('Submitting form', values);
     try {
       setIsLoading(true);
       const payload = {
@@ -205,16 +212,13 @@ export default function ProductForm({
       }
 
       if (!response.ok) {
-        console.log(response);
         throw new Error('Lưu sản phẩm thất bại!');
       }
       toast.success('Lưu sản phẩm thành công!');
       form.reset();
       setPreviewUrls([]);
       setUploadedFiles([]);
-      console.log('Submit success');
     } catch (error) {
-      console.error('Submit error', error);
       toast.error('Có lỗi xảy ra khi lưu sản phẩm!');
     } finally {
       setIsLoading(false);
@@ -261,19 +265,42 @@ export default function ProductForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Enter product name' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className='flex items-center gap-6'>
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem className='flex-1'>
+                    <FormLabel>Product Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter product name' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='isFeatured'
+                render={({ field }) => (
+                  <FormItem className='mt-5 flex flex-row items-start space-y-0 space-x-1 text-neutral-700'>
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        id='isFeatured'
+                      />
+                    </FormControl>
+                    <label
+                      htmlFor='isFeatured'
+                      className='space-y-1 text-sm leading-none'
+                    >
+                      Mark as Featured
+                    </label>
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <FormField
@@ -289,28 +316,8 @@ export default function ProductForm({
                           setIsUploading(true);
                           // Update uploaded files
                           setUploadedFiles(files);
-                          // // Upload each file and get URLs
-                          // const filesArray =
-                          //   typeof files === 'function' ? files([]) : files;
-                          // const uploadPromises = filesArray.map(async (file) => {
-                          //   const result = await uploadFile(file);
-                          //   return {
-                          //     id: `new-${result.url}`,
-                          //     url: result.url
-                          //   };
-                          // });
-                          // const newPreviewUrls =
-                          //   await Promise.all(uploadPromises);
-                          // // Update form value with new URL
-                          // if (newPreviewUrls.length > 0) {
-                          //   field.onChange(newPreviewUrls[0].url);
-                          // }
+
                           field.onChange(files);
-                          // // Log the updated image for debugging
-                          // console.log(
-                          //   'Updated main image:',
-                          //   newPreviewUrls[0]?.url
-                          // );
                         } catch (error) {
                           console.error('Error uploading file:', error);
                         } finally {
@@ -320,11 +327,14 @@ export default function ProductForm({
                     }}
                     maxFiles={1}
                     maxSize={4 * 1024 * 1024}
-                    multiple={false}
                   />
                 )}
               />
-              <UploadMultipleIImage />
+
+              <UploadMultipleIImage
+                value={uploadedMultipleFiles}
+                onValueChange={setUploadedMultipleFiles}
+              />
             </div>
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
@@ -489,6 +499,9 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
+
+            <RelatedProducts />
+            <RelatedBlogs />
 
             <Button>Save Product</Button>
           </form>

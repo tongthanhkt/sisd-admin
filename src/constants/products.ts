@@ -7,11 +7,31 @@ export interface Product {
   href?: string; // Optional property for the href
 }
 
+export const PRODUCT_CATEGORIES = {
+  MORTAL: 'MORTAL',
+  TILE_CHARON: 'TILE_CHARON',
+  CT: 'CT',
+  SPC: 'SPC'
+};
+
+export const PRODUCT_LABELS = {
+  [PRODUCT_CATEGORIES.MORTAL]: 'Vữa trang trí',
+  [PRODUCT_CATEGORIES.TILE_CHARON]: 'Keo dán gạch & keo chà ron',
+  [PRODUCT_CATEGORIES.CT]: 'Vật tư chống thấm',
+  [PRODUCT_CATEGORIES.SPC]: 'Sàn SPC'
+};
+
 export const productCategories = [
-  { id: 'MORTAL', name: 'Vữa trang trí' },
-  { id: 'TILE-CHARON', name: 'Keo dán gạch & keo chà ron' },
-  { id: 'CT', name: 'Vật tư chống thấm' },
-  { id: 'SPC', name: 'Sàn SPC' }
+  {
+    id: PRODUCT_CATEGORIES.MORTAL,
+    name: PRODUCT_LABELS[PRODUCT_CATEGORIES.MORTAL]
+  },
+  {
+    id: PRODUCT_CATEGORIES.TILE_CHARON,
+    name: PRODUCT_LABELS[PRODUCT_CATEGORIES.TILE_CHARON]
+  },
+  { id: PRODUCT_CATEGORIES.CT, name: PRODUCT_LABELS[PRODUCT_CATEGORIES.CT] },
+  { id: PRODUCT_CATEGORIES.SPC, name: PRODUCT_LABELS[PRODUCT_CATEGORIES.SPC] }
 ];
 
 export const products: Product[] = [

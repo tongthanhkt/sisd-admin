@@ -1,97 +1,23 @@
 'use client';
 
-import { IconX, IconUpload } from '@tabler/icons-react';
+import { IconUpload } from '@tabler/icons-react';
 import Image from 'next/image';
 import * as React from 'react';
-import Dropzone, {
-  type DropzoneProps,
-  type FileRejection
-} from 'react-dropzone';
-import { toast } from 'sonner';
+import Dropzone, { type DropzoneProps } from 'react-dropzone';
 
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useControllableState } from '@/hooks/use-controllable-state';
+import { useUploadFile } from '@/hooks/use-upload-file';
 import { cn, formatBytes } from '@/lib/utils';
 import { Pencil } from 'lucide-react';
 import { FormLabel } from './ui/form';
 
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Value of the uploader.
-   * @type File[]
-   * @default undefined
-   * @example value={files}
-   */
   value?: File[];
-
-  /**
-   * Function to be called when the value changes.
-   * @type React.Dispatch<React.SetStateAction<File[]>>
-   * @default undefined
-   * @example onValueChange={(files) => setFiles(files)}
-   */
   onValueChange?: React.Dispatch<React.SetStateAction<File[]>>;
-
-  /**
-   * Function to be called when files are uploaded.
-   * @type (files: File[]) => Promise<void>
-   * @default undefined
-   * @example onUpload={(files) => uploadFiles(files)}
-   */
   onUpload?: (files: File[]) => Promise<void>;
-
-  /**
-   * Progress of the uploaded files.
-   * @type Record<string, number> | undefined
-   * @default undefined
-   * @example progresses={{ "file1.png": 50 }}
-   */
-  progresses?: Record<string, number>;
-
-  /**
-   * Accepted file types for the uploader.
-   * @type { [key: string]: string[]}
-   * @default
-   * ```ts
-   * { "image/*": [] }
-   * ```
-   * @example accept={["image/png", "image/jpeg"]}
-   */
   accept?: DropzoneProps['accept'];
-
-  /**
-   * Maximum file size for the uploader.
-   * @type number | undefined
-   * @default 1024 * 1024 * 2 // 2MB
-   * @example maxSize={1024 * 1024 * 2} // 2MB
-   */
   maxSize?: DropzoneProps['maxSize'];
-
-  /**
-   * Maximum number of files for the uploader.
-   * @type number | undefined
-   * @default 1
-   * @example maxFiles={5}
-   */
   maxFiles?: DropzoneProps['maxFiles'];
-
-  /**
-   * Whether the uploader should accept multiple files.
-   * @type boolean
-   * @default false
-   * @example multiple
-   */
-  multiple?: boolean;
-
-  /**
-   * Whether the uploader is disabled.
-   * @type boolean
-   * @default false
-   * @example disabled
-   */
-  disabled?: boolean;
 }
 
 export function UploadImage(props: FileUploaderProps) {
@@ -99,14 +25,10 @@ export function UploadImage(props: FileUploaderProps) {
     value: valueProp,
     onValueChange,
     onUpload,
-    progresses,
     accept = { 'image/*': [] },
     maxSize = 1024 * 1024 * 2,
     maxFiles = 1,
-    multiple = false,
-    disabled = false,
-    className,
-    ...dropzoneProps
+    className
   } = props;
 
   const [files, setFiles] = useControllableState({
@@ -114,65 +36,14 @@ export function UploadImage(props: FileUploaderProps) {
     onChange: onValueChange
   });
 
-  const onDrop = React.useCallback(
-    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        })
-      );
-
-      const updatedFiles = newFiles.slice(0, 1);
-
-      setFiles(updatedFiles);
-
-      if (rejectedFiles.length > 0) {
-        rejectedFiles.forEach(({ file }) => {
-          toast.error(`File ${file.name} was rejected`);
-        });
-      }
-
-      if (
-        onUpload &&
-        updatedFiles.length > 0 &&
-        updatedFiles.length <= maxFiles
-      ) {
-        const target =
-          updatedFiles.length > 0 ? `${updatedFiles.length} files` : `file`;
-
-        toast.promise(onUpload(updatedFiles), {
-          loading: `Uploading ${target}...`,
-          success: () => {
-            setFiles([]);
-            return `${target} uploaded`;
-          },
-          error: `Failed to upload ${target}`
-        });
-      }
-    },
-
-    [files, maxFiles, multiple, onUpload, setFiles]
-  );
-
-  function onRemove(index: number) {
-    if (!files) return;
-    const newFiles = files.filter((_, i) => i !== index);
-    setFiles(newFiles);
-    onValueChange?.(newFiles);
-  }
-
-  // Revoke preview url when component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (!files) return;
-      files.forEach((file) => {
-        if (isFileWithPreview(file)) {
-          URL.revokeObjectURL(file.preview);
-        }
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { onDrop, handleRemove } = useUploadFile({
+    value: files,
+    onValueChange: setFiles as React.Dispatch<React.SetStateAction<File[]>>,
+    maxFiles,
+    maxSize,
+    onUpload,
+    mode: 'single'
+  });
 
   // Helper to trigger file input click
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -190,7 +61,7 @@ export function UploadImage(props: FileUploaderProps) {
           accept={accept}
           maxSize={maxSize}
           maxFiles={maxFiles}
-          multiple={maxFiles > 1 || multiple}
+          multiple={false}
         >
           {({ getRootProps, getInputProps, isDragActive }) => (
             <div

@@ -33,6 +33,7 @@ export interface Product {
     warning: string;
     notes: string;
   };
+  isFeatured: boolean;
 }
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
