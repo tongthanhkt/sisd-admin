@@ -11,7 +11,6 @@ export interface RelatedProduct {
 export function RelatedBlogs() {
   const [relatedBlogs, setRelatedBlogs] = useState<{ id: string }[]>([]);
   const [allBlogs, setAllBlogs] = useState<IBlog[]>([]);
-  console.log('🚀 ~ RelatedBlogs ~ allBlogs:', allBlogs);
 
   useEffect(() => {
     async function fetchBlogs() {

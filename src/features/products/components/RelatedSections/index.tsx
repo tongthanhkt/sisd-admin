@@ -22,20 +22,27 @@ export interface RelatedItem {
   category: string;
 }
 
-export interface RelatedSectionsProps {
-  items: RelatedItem[];
+export interface RelatedSectionsProps<T extends { id: string }> {
+  items: T[];
   value: string[];
   onChange: (ids: string[]) => void;
   label: string;
   addButtonText: string;
-  itemLabel: (item: RelatedItem) => string;
-  itemImage: (item: RelatedItem) => string;
-  itemCategory?: (item: RelatedItem) => string;
+  itemLabel: (item: T) => string;
+  itemImage: (item: T) => string;
+  itemCategory?: (item: T) => string;
   maxSelected?: number;
   modalComponent?: React.ComponentType<any>;
+  renderTableColumns?: () => React.ReactNode;
+  renderTableRow?: (
+    item: T,
+    selected: boolean,
+    onToggle: () => void,
+    disabled: boolean
+  ) => React.ReactNode;
 }
 
-export function RelatedSections({
+export function RelatedSections<T extends { id: string }>({
   items,
   value,
   onChange,
@@ -45,8 +52,10 @@ export function RelatedSections({
   itemImage,
   itemCategory,
   maxSelected = 3,
-  modalComponent: ModalComponent = RelatedProductModal
-}: RelatedSectionsProps) {
+  modalComponent: ModalComponent = RelatedProductModal,
+  renderTableColumns,
+  renderTableRow
+}: RelatedSectionsProps<T>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
   const { sensors, handleDragEnd } = useSortableList({
@@ -73,9 +82,9 @@ export function RelatedSections({
     onChange(newIds);
   };
 
-  const selectedObjects: RelatedItem[] = selectedIds
-    .map((id) => items.find((item) => item.id === id))
-    .filter((item): item is RelatedItem => Boolean(item));
+  const selectedObjects: T[] = selectedIds
+    .map((id) => items.find((item): item is T => item.id === id))
+    .filter((item): item is T => Boolean(item));
 
   return (
     <div className='flex flex-col gap-4'>
@@ -165,6 +174,8 @@ export function RelatedSections({
         itemLabel={itemLabel}
         itemImage={itemImage}
         itemCategory={itemCategory}
+        renderTableColumns={renderTableColumns}
+        renderTableRow={renderTableRow}
       />
     </div>
   );
