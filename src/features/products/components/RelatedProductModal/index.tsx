@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/modal';
 import { PRODUCT_CATEGORIES, PRODUCT_LABELS } from '@/constants/products';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Product {
   id: string;
@@ -22,59 +22,49 @@ interface RelatedProductModalProps {
   onConfirm: (selectedProducts: string[]) => void;
 }
 
-// Mock data
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Sản phẩm E',
-    image: '/product-1.png',
-    category: 'MORTAL'
-  },
-  {
-    id: '2',
-    name: 'Sản phẩm F',
-    image: '/product-2.png',
-    category: 'MORTAL'
-  },
-  {
-    id: '3',
-    name: 'Sản phẩm G',
-    image: '/product-3.png',
-    category: 'MORTAL'
-  },
-  {
-    id: '4',
-    name: 'Sản phẩm H',
-    image: '/product-4.png',
-    category: 'MORTAL'
-  },
-  {
-    id: '5',
-    name: 'Sản phẩm I',
-    image: '/product-5.png',
-    category: 'MORTAL'
-  },
-  {
-    id: '6',
-    name: 'Sản phẩm J',
-    image: '/product-6.png',
-    category: 'MORTAL'
-  }
-];
-
 export function RelatedProductModal({
   isOpen,
   onClose,
   onConfirm
 }: RelatedProductModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      setLoading(true);
+      const queryParams = new URLSearchParams();
+      queryParams.set('page', String(currentPage));
+      queryParams.set('perPage', String(itemsPerPage));
+      if (searchTerm) queryParams.set('search', searchTerm);
+      if (selectedCategory !== 'all')
+        queryParams.set('category', selectedCategory);
+      // Có thể thêm filter status/minPrice/maxPrice nếu API hỗ trợ
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/products?${queryParams}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data.products);
+        setTotalProducts(data.total_products);
+      }
+      setLoading(false);
+    }
+    fetchProducts();
+  }, [searchTerm, selectedCategory, currentPage, itemsPerPage]);
 
   // Filter products based on search and filters
-  const filteredProducts = mockProducts.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category === PRODUCT_CATEGORIES.MORTAL;
@@ -177,7 +167,7 @@ export function RelatedProductModal({
               className='block max-h-[calc(100vh-500px)] min-h-[calc(100vh-500px)] divide-y divide-gray-200 overflow-y-auto'
               style={{ display: 'block' }}
             >
-              {paginatedProducts.map((product) => (
+              {paginatedProducts.filter(Boolean).map((product) => (
                 <tr key={product.id} className='flex w-full hover:bg-gray-50'>
                   <td className='flex w-20 items-center justify-center px-4 py-3'>
                     <Checkbox
@@ -212,12 +202,12 @@ export function RelatedProductModal({
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalProducts > itemsPerPage && (
           <div className='flex items-center justify-between'>
             <div className='text-sm text-gray-600'>
-              Showing {startIndex + 1}-
-              {Math.min(startIndex + itemsPerPage, filteredProducts.length)} of{' '}
-              {filteredProducts.length} products
+              Showing {(currentPage - 1) * itemsPerPage + 1}-
+              {Math.min(currentPage * itemsPerPage, totalProducts)} of{' '}
+              {totalProducts} products
             </div>
             <div className='flex items-center gap-2'>
               <Button
@@ -226,32 +216,35 @@ export function RelatedProductModal({
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className='h-4 w-4' />
+                Previous
               </Button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
-                    size='sm'
-                    onClick={() => setCurrentPage(page)}
-                    className='h-8 w-8 p-0'
-                  >
-                    {page}
-                  </Button>
-                )
-              )}
-
+              {Array.from(
+                { length: Math.ceil(totalProducts / itemsPerPage) },
+                (_, i) => i + 1
+              ).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? 'default' : 'outline'}
+                  size='sm'
+                  onClick={() => setCurrentPage(page)}
+                  className='h-8 w-8 p-0'
+                >
+                  {page}
+                </Button>
+              ))}
               <Button
                 variant='outline'
                 size='sm'
                 onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  setCurrentPage((prev) =>
+                    Math.min(prev + 1, Math.ceil(totalProducts / itemsPerPage))
+                  )
                 }
-                disabled={currentPage === totalPages}
+                disabled={
+                  currentPage === Math.ceil(totalProducts / itemsPerPage)
+                }
               >
-                <ChevronRight className='h-4 w-4' />
+                Next
               </Button>
             </div>
           </div>
