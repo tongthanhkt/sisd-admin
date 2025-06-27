@@ -3,13 +3,10 @@
 import { IconUpload } from '@tabler/icons-react';
 import Image from 'next/image';
 import * as React from 'react';
-import Dropzone, {
-  type DropzoneProps,
-  type FileRejection
-} from 'react-dropzone';
-import { toast } from 'sonner';
+import Dropzone, { type DropzoneProps } from 'react-dropzone';
 
 import { useControllableState } from '@/hooks/use-controllable-state';
+import { useUploadFile } from '@/hooks/use-upload-file';
 import { cn, formatBytes } from '@/lib/utils';
 import { Pencil } from 'lucide-react';
 import { FormLabel } from './ui/form';
@@ -21,7 +18,6 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   accept?: DropzoneProps['accept'];
   maxSize?: DropzoneProps['maxSize'];
   maxFiles?: DropzoneProps['maxFiles'];
-  multiple?: boolean;
 }
 
 export function UploadImage(props: FileUploaderProps) {
@@ -32,7 +28,6 @@ export function UploadImage(props: FileUploaderProps) {
     accept = { 'image/*': [] },
     maxSize = 1024 * 1024 * 2,
     maxFiles = 1,
-    multiple = false,
     className
   } = props;
 
@@ -41,65 +36,14 @@ export function UploadImage(props: FileUploaderProps) {
     onChange: onValueChange
   });
 
-  const onDrop = React.useCallback(
-    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        })
-      );
-
-      const updatedFiles = newFiles.slice(0, 1);
-
-      setFiles(updatedFiles);
-
-      if (rejectedFiles.length > 0) {
-        rejectedFiles.forEach(({ file }) => {
-          toast.error(`File ${file.name} was rejected`);
-        });
-      }
-
-      if (
-        onUpload &&
-        updatedFiles.length > 0 &&
-        updatedFiles.length <= maxFiles
-      ) {
-        const target =
-          updatedFiles.length > 0 ? `${updatedFiles.length} files` : `file`;
-
-        toast.promise(onUpload(updatedFiles), {
-          loading: `Uploading ${target}...`,
-          success: () => {
-            setFiles([]);
-            return `${target} uploaded`;
-          },
-          error: `Failed to upload ${target}`
-        });
-      }
-    },
-
-    [maxFiles, , onUpload, setFiles]
-  );
-
-  function onRemove(index: number) {
-    if (!files) return;
-    const newFiles = files.filter((_, i) => i !== index);
-    setFiles(newFiles);
-    onValueChange?.(newFiles);
-  }
-
-  // Revoke preview url when component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (!files) return;
-      files.forEach((file) => {
-        if (isFileWithPreview(file)) {
-          URL.revokeObjectURL(file.preview);
-        }
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { onDrop, handleRemove } = useUploadFile({
+    value: files,
+    onValueChange: setFiles as React.Dispatch<React.SetStateAction<File[]>>,
+    maxFiles,
+    maxSize,
+    onUpload,
+    mode: 'single'
+  });
 
   // Helper to trigger file input click
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -117,7 +61,7 @@ export function UploadImage(props: FileUploaderProps) {
           accept={accept}
           maxSize={maxSize}
           maxFiles={maxFiles}
-          multiple={maxFiles > 1 || multiple}
+          multiple={false}
         >
           {({ getRootProps, getInputProps, isDragActive }) => (
             <div

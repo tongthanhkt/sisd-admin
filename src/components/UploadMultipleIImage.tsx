@@ -1,14 +1,11 @@
 'use client';
 
-import { IconX, IconUpload } from '@tabler/icons-react';
+import { IconUpload, IconX } from '@tabler/icons-react';
 import Image from 'next/image';
 import * as React from 'react';
-import Dropzone, {
-  type DropzoneProps,
-  type FileRejection
-} from 'react-dropzone';
-import { toast } from 'sonner';
+import Dropzone, { type DropzoneProps } from 'react-dropzone';
 
+import { useUploadFile } from '@/hooks';
 import { useControllableState } from '@/hooks/use-controllable-state';
 import { cn, formatBytes } from '@/lib/utils';
 import { FormLabel } from './ui/form';
@@ -46,65 +43,14 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     onChange: onValueChange
   });
 
-  const onDrop = React.useCallback(
-    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        })
-      );
-
-      const updatedFiles = [...(files || []), ...newFiles].slice(0, maxFiles);
-      setFiles(updatedFiles);
-
-      if (rejectedFiles.length > 0) {
-        rejectedFiles.forEach(({ file }) => {
-          toast.error(`File ${file.name} was rejected`);
-        });
-      }
-
-      if (onUpload && updatedFiles.length > 0) {
-        const target =
-          updatedFiles.length > 1 ? `${updatedFiles.length} files` : 'file';
-
-        toast.promise(onUpload(updatedFiles), {
-          loading: `Uploading ${target}...`,
-          success: () => {
-            setFiles([]);
-            return `${target} uploaded`;
-          },
-          error: `Failed to upload ${target}`
-        });
-      }
-    },
-    [files, maxFiles, onUpload, setFiles]
-  );
-
-  const handleRemove = (idx: number) => {
-    if (!files) return;
-
-    setFiles((prev) => {
-      if (!prev) return [];
-      const newArr = prev.filter((_, i) => i !== idx);
-      if ('preview' in prev[idx]) {
-        URL.revokeObjectURL((prev[idx] as any).preview);
-      }
-      return newArr;
-    });
-  };
-
-  // Revoke preview url when component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (!files) return;
-      files.forEach((file) => {
-        if (isFileWithPreview(file)) {
-          URL.revokeObjectURL(file.preview);
-        }
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { onDrop, handleRemove, canAddMore } = useUploadFile({
+    value: files,
+    onValueChange: setFiles as React.Dispatch<React.SetStateAction<File[]>>,
+    maxFiles,
+    maxSize,
+    onUpload,
+    mode: 'multiple'
+  });
 
   return (
     <div className={cn('flex flex-col gap-2', className)} {...rest}>
@@ -115,7 +61,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
         maxSize={maxSize}
         maxFiles={maxFiles}
         multiple={multiple}
-        disabled={disabled || (files && files.length >= maxFiles)}
+        disabled={disabled || !canAddMore}
       >
         {({ getRootProps, getInputProps, isDragActive }) => (
           <div
@@ -124,7 +70,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
             )}
           >
             {/* Upload box */}
-            {(!files || files.length < maxFiles) && (
+            {canAddMore && (
               <div
                 {...getRootProps()}
                 className={cn(
