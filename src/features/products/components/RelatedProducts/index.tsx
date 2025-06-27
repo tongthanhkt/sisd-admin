@@ -1,9 +1,17 @@
 'use client';
 
+import { SortableSpecItem } from '@/components';
+import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FormLabel } from '@/components/ui/form';
 import { PRODUCT_CATEGORIES, PRODUCT_LABELS } from '@/constants/products';
-import { IconX } from '@tabler/icons-react';
+import { useSortableList } from '@/hooks/use-sortable-list';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
+import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { RelatedProductModal } from '../RelatedProductModal';
@@ -51,77 +59,94 @@ export function RelatedProducts() {
     );
   };
 
+  const { sensors, handleDragEnd } = useSortableList({
+    items: relatedProducts,
+    onItemsChange: setRelatedProducts
+  });
+
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <div className='flex items-center justify-between'>
-            <CardTitle>Sản phẩm liên quan</CardTitle>
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              variant='outline'
-              size='sm'
+    <div className='flex flex-col gap-4'>
+      <FormLabel>Related Products</FormLabel>
+
+      <div className='flex flex-col gap-4'>
+        {relatedProducts.length === 0 ? (
+          <NoData />
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={relatedProducts.map((product) => product.id)}
+              strategy={verticalListSortingStrategy}
             >
-              Thêm sản phẩm
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {relatedProducts.length === 0 ? (
-            <div className='py-8 text-center text-gray-500'>
-              <p>Chưa có sản phẩm liên quan nào</p>
-              <p className='text-sm'>
-                Nhấn &quot;Thêm sản phẩm&quot; để bắt đầu
-              </p>
-            </div>
-          ) : (
-            <div className='space-y-4'>
-              {relatedProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className='flex items-center justify-between rounded-lg border p-4'
-                >
-                  <div className='flex items-center space-x-4'>
-                    <div className='relative h-16 w-16 overflow-hidden rounded-md'>
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className='object-cover'
-                        sizes='64px'
-                      />
-                    </div>
-                    <div>
-                      <h4 className='font-medium text-gray-900'>
-                        {product.name}
-                      </h4>
-                      <p className='text-sm text-gray-600'>
-                        Category: {PRODUCT_LABELS[product.category]}
-                      </p>
-                    </div>
-                  </div>
-                  <div className='flex items-center space-x-2'>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      onClick={() => handleRemoveProduct(product.id)}
-                      className='h-8 w-8'
-                    >
-                      <IconX className='h-4 w-4' />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              <div className='flex flex-col gap-4'>
+                {relatedProducts.map((product) => (
+                  <SortableSpecItem key={product.id} id={product.id}>
+                    {(listeners) => (
+                      <div className='flex items-center justify-between rounded-lg border p-4'>
+                        <div className='flex items-center space-x-4'>
+                          <div className='relative h-16 w-16 overflow-hidden rounded-md'>
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              className='object-cover'
+                              sizes='64px'
+                            />
+                          </div>
+                          <div>
+                            <h4 className='font-medium text-gray-900'>
+                              {product.name}
+                            </h4>
+                            <p className='text-sm text-gray-600'>
+                              Category: {PRODUCT_LABELS[product.category]}
+                            </p>
+                          </div>
+                        </div>
+                        <div className='flex items-center space-x-2'>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            onClick={() => handleRemoveProduct(product.id)}
+                            className='h-8 w-8'
+                          >
+                            <Trash2Icon className='size-5 text-red-600' />
+                          </Button>
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            {...listeners}
+                            className='h-8 w-8'
+                          >
+                            <GripVerticalIcon className='size-5' />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </SortableSpecItem>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          variant='outline'
+          size='sm'
+          className='ml-auto w-fit'
+        >
+          <PlusIcon className='size-4' />
+          Add product
+        </Button>
+      </div>
 
       <RelatedProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleAddProducts}
       />
-    </>
+    </div>
   );
 }
