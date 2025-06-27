@@ -34,6 +34,7 @@ import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RelatedProducts } from './RelatedProducts';
+import { RelatedBlogs } from './RelatedBlogs';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -500,6 +501,7 @@ export default function ProductForm({
             />
 
             <RelatedProducts />
+            <RelatedBlogs />
 
             <Button>Save Product</Button>
           </form>

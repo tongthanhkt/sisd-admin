@@ -29,6 +29,7 @@ export interface IMortalProduct extends Document {
   };
   createdAt?: Date;
   updatedAt?: Date;
+  id: string;
 }
 
 const MortalProductSchema: Schema = new Schema(
