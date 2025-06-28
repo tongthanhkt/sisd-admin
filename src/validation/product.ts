@@ -25,10 +25,10 @@ export const productFormSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        value: z.string()
+        value: z.string().min(1, { message: 'Advantage is required' })
       })
     )
-    .optional(),
+    .min(1, { message: 'At least one advantage is required' }),
   technicalSpecifications: z.object({
     standard: z.string().min(1, { message: 'Standard is required' }),
     specifications: z
@@ -44,13 +44,21 @@ export const productFormSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        value: z.string()
+        value: z
+          .string()
+          .min(1, { message: 'Transportation and storage is required' })
       })
     )
-    .optional(),
+    .min(1, { message: 'At least one transportation and storage is required' }),
   safetyRegulations: z.object({
     warning: z.string().min(1, { message: 'Warning is required' }),
     notes: z.string().optional()
   }),
-  isFeatured: z.boolean().optional()
+  isFeatured: z.boolean().optional(),
+  relatedBlogs: z
+    .array(z.string())
+    .min(1, { message: 'At least one blog is required' }),
+  relatedProduct: z
+    .array(z.string())
+    .min(1, { message: 'At least one product is required' })
 });

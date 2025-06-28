@@ -13,6 +13,7 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { FieldName } from '../../hooks/useProduct';
 import { RelatedProductModal } from '../RelatedProductModal';
 
 export interface RelatedItem {
@@ -41,6 +42,7 @@ export interface RelatedSectionsProps<T extends { id: string }> {
     disabled: boolean
   ) => React.ReactNode;
   helperText?: string;
+  fieldName: FieldName;
 }
 
 export function RelatedSections<T extends { id: string }>({
@@ -56,7 +58,8 @@ export function RelatedSections<T extends { id: string }>({
   modalComponent: ModalComponent = RelatedProductModal,
   renderTableColumns,
   renderTableRow,
-  helperText
+  helperText,
+  fieldName
 }: RelatedSectionsProps<T>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);

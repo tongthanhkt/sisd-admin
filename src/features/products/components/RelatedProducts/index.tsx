@@ -54,6 +54,7 @@ export function RelatedProducts() {
       itemCategory={(item) =>
         item.category ? PRODUCT_LABELS[item.category] : ''
       }
+      fieldName='relatedProduct'
     />
   );
 }

@@ -18,7 +18,7 @@ function Input({
   ...props
 }: InputProps) {
   return (
-    <div className='space-y-1'>
+    <div className='w-full space-y-1'>
       {label && (
         <FormLabel>
           {label}
@@ -39,7 +39,7 @@ function Input({
         )}
         {...props}
       />
-      {error && (
+      {helperText && (
         <FormMessage className='text-destructive'>{helperText}</FormMessage>
       )}
     </div>

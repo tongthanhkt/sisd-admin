@@ -47,7 +47,7 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
                 control={form.control}
                 name='name'
                 render={({ field, fieldState: { error } }) => (
-                  <FormItem className='flex-1'>
+                  <FormItem className='w-full'>
                     <FormControl>
                       <Input
                         placeholder='Enter product name'
@@ -75,7 +75,7 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
                     </FormControl>
                     <label
                       htmlFor='isFeatured'
-                      className='space-y-1 text-sm leading-none'
+                      className='w-max space-y-1 text-sm leading-none'
                     >
                       Mark as Featured
                     </label>
