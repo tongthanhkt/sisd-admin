@@ -1,8 +1,10 @@
 'use client';
 
 import { UploadImage } from '@/components';
+import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -22,116 +24,19 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Product } from '@/constants/data';
 import { productCategories } from '@/constants/products';
+import { productFormSchema } from '@/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { IconX } from '@tabler/icons-react';
-import Image from 'next/image';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
+import { RelatedBlogs } from './RelatedBlogs';
+import { RelatedProducts } from './RelatedProducts';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
-import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RelatedProducts } from './RelatedProducts';
-import { RelatedBlogs } from './RelatedBlogs';
 
-const MAX_FILE_SIZE = 5000000;
-const ACCEPTED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp'
-];
-
-const formSchema = z.object({
-  code: z.string().optional(),
-  href: z.string().optional(),
-  name: z.string().optional(),
-  category: z.string().optional(),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
-  image: z.string().optional(),
-  images: z.object({
-    main: z.string().optional(),
-    thumbnails: z.array(z.string()).optional()
-  }),
-  packaging: z.string().optional(),
-  advantages: z
-    .array(
-      z.object({
-        id: z.string(),
-        value: z.string()
-      })
-    )
-    .optional(),
-  technicalSpecifications: z.object({
-    standard: z.string().optional(),
-    specifications: z
-      .array(
-        z.object({
-          stt: z.number().optional(),
-          category: z.string().optional(),
-          performance: z.string().optional()
-        })
-      )
-      .optional()
-  }),
-  transportationAndStorage: z
-    .array(
-      z.object({
-        id: z.string(),
-        value: z.string()
-      })
-    )
-    .optional(),
-  safetyRegulations: z.object({
-    standard: z.string().optional(),
-    specifications: z
-      .array(
-        z.object({
-          stt: z.number().optional(),
-          performance: z.string().optional()
-        })
-      )
-      .optional(),
-    warning: z.string().optional(),
-    notes: z.string().optional()
-  }),
-  isFeatured: z.boolean().optional()
-});
-
-export type ProductFormValues = z.infer<typeof formSchema>;
+export type ProductFormValues = z.infer<typeof productFormSchema>;
 export type FieldName = keyof ProductFormValues;
-
-interface FileCardProps {
-  imageUrl: string;
-  onRemove: () => void;
-}
-
-function FileCard({ imageUrl, onRemove }: FileCardProps) {
-  return (
-    <div className='relative flex items-center space-x-4 rounded-lg border p-4'>
-      <div className='relative h-16 w-16 overflow-hidden rounded-md'>
-        <Image
-          src={imageUrl}
-          alt='Product image'
-          fill
-          className='object-cover'
-          sizes='64px'
-        />
-      </div>
-      <Button
-        variant='ghost'
-        size='icon'
-        className='absolute top-2 right-2 h-8 w-8'
-        onClick={onRemove}
-      >
-        <IconX className='h-4 w-4' />
-      </Button>
-    </div>
-  );
-}
 
 export default function ProductForm({
   initialData,
@@ -140,19 +45,13 @@ export default function ProductForm({
   initialData: Product | null;
   pageTitle: string;
 }) {
-  const [mounted, setMounted] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploadedMultipleFiles, setUploadedMultipleFiles] = useState<File[]>(
     []
   );
-  const [previewUrls, setPreviewUrls] = useState<{ id: string; url: string }[]>(
-    []
-  );
 
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       code: initialData?.code || '',
       name: initialData?.name || '',
@@ -181,7 +80,6 @@ export default function ProductForm({
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
-      setIsLoading(true);
       const payload = {
         ...values,
         image: values.image,
@@ -216,44 +114,11 @@ export default function ProductForm({
       }
       toast.success('Lưu sản phẩm thành công!');
       form.reset();
-      setPreviewUrls([]);
       setUploadedFiles([]);
     } catch (error) {
       toast.error('Có lỗi xảy ra khi lưu sản phẩm!');
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  // Set mounted to true after mount
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Initialize preview URLs with existing images
-  React.useEffect(() => {
-    if (mounted && initialData?.images?.thumbnails?.length) {
-      const initialPreviews = initialData.images.thumbnails.map((url) => ({
-        id: `existing-${url}`,
-        url
-      }));
-      setPreviewUrls(initialPreviews);
-    }
-  }, [initialData?.images?.thumbnails, mounted]);
-
-  // Cleanup preview URLs when component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (mounted) {
-        // Only revoke URLs that were created with createObjectURL
-        previewUrls.forEach(({ url }) => {
-          if (url.startsWith('blob:')) {
-            URL.revokeObjectURL(url);
-          }
-        });
-      }
-    };
-  }, [previewUrls, mounted]);
 
   return (
     <Card className='mx-auto w-full'>
@@ -311,18 +176,9 @@ export default function ProductForm({
                     value={uploadedFiles}
                     className='h-60'
                     onValueChange={async (files) => {
-                      if (files && mounted) {
-                        try {
-                          setIsUploading(true);
-                          // Update uploaded files
-                          setUploadedFiles(files);
-
-                          field.onChange(files);
-                        } catch (error) {
-                          console.error('Error uploading file:', error);
-                        } finally {
-                          setIsUploading(false);
-                        }
+                      if (files) {
+                        setUploadedFiles(files);
+                        field.onChange(files);
                       }
                     }}
                     maxFiles={1}
