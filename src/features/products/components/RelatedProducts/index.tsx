@@ -4,13 +4,17 @@ import { PRODUCT_LABELS } from '@/constants/products';
 import { IMortalProduct } from '@/models/MortalProduct';
 import { useEffect, useState } from 'react';
 import { RelatedSections } from '../RelatedSections';
+import { useFormContext } from 'react-hook-form';
+import { ProductFormValues } from '../../hooks/useProduct';
 
 export interface RelatedProduct {
   id: string;
 }
 
 export function RelatedProducts() {
-  const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
+  const methods = useFormContext<ProductFormValues>();
+  const { watch, setValue } = methods;
+  const relatedProducts = watch('relatedProduct');
   const [allProducts, setAllProducts] = useState<IMortalProduct[]>([]);
 
   useEffect(() => {
@@ -36,7 +40,7 @@ export function RelatedProducts() {
         typeof item.id === 'string' && item.id.length > 0
     )
     .map((item) => ({
-      id: item.id,
+      id: (item._id as string) || '',
       name: item.name || '',
       image: item.image || '',
       category: item.category || ''
@@ -45,8 +49,13 @@ export function RelatedProducts() {
   return (
     <RelatedSections
       items={validProducts}
-      value={relatedProducts.map((p) => p.id)}
-      onChange={(ids) => setRelatedProducts(ids.map((id) => ({ id })))}
+      value={relatedProducts}
+      onChange={(ids) =>
+        setValue(
+          'relatedProduct',
+          ids?.map((id) => id)
+        )
+      }
       label='Related Products'
       addButtonText='Add product'
       itemLabel={(item) => item.name || ''}
@@ -54,6 +63,7 @@ export function RelatedProducts() {
       itemCategory={(item) =>
         item.category ? PRODUCT_LABELS[item.category] : ''
       }
+      fieldName='relatedProduct'
     />
   );
 }

@@ -36,5 +36,5 @@ export default async function ProductViewPage({
     }
   }
 
-  return <ProductForm initialData={product} pageTitle={pageTitle} />;
+  return <ProductForm pageTitle={pageTitle} />;
 }

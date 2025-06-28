@@ -3,7 +3,7 @@
 import { SortableSpecItem } from '@/components';
 import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
-import { FormLabel } from '@/components/ui/form';
+import { FormLabel, FormMessage } from '@/components/ui/form';
 import { useSortableList } from '@/hooks/use-sortable-list';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
@@ -13,6 +13,7 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { FieldName } from '../../hooks/useProduct';
 import { RelatedProductModal } from '../RelatedProductModal';
 
 export interface RelatedItem {
@@ -40,6 +41,8 @@ export interface RelatedSectionsProps<T extends { id: string }> {
     onToggle: () => void,
     disabled: boolean
   ) => React.ReactNode;
+  helperText?: string;
+  fieldName: FieldName;
 }
 
 export function RelatedSections<T extends { id: string }>({
@@ -54,7 +57,9 @@ export function RelatedSections<T extends { id: string }>({
   maxSelected = 3,
   modalComponent: ModalComponent = RelatedProductModal,
   renderTableColumns,
-  renderTableRow
+  renderTableRow,
+  helperText,
+  fieldName
 }: RelatedSectionsProps<T>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
@@ -88,7 +93,9 @@ export function RelatedSections<T extends { id: string }>({
 
   return (
     <div className='flex flex-col gap-4'>
-      <FormLabel>{label}</FormLabel>
+      <FormLabel>
+        {label} <span className='text-destructive'>*</span>
+      </FormLabel>
       <div className='flex flex-col gap-4'>
         {selectedObjects.length === 0 ? (
           <NoData />
@@ -164,6 +171,9 @@ export function RelatedSections<T extends { id: string }>({
           {addButtonText}
         </Button>
       </div>
+      {helperText && (
+        <FormMessage className='text-destructive'>{helperText}</FormMessage>
+      )}
       <ModalComponent
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

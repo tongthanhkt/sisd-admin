@@ -54,7 +54,9 @@ export function UploadImage(props: FileUploaderProps) {
 
   return (
     <div className='flex flex-col gap-2'>
-      <FormLabel>Thumbnail</FormLabel>
+      <FormLabel>
+        Thumbnail <span className='text-destructive'>*</span>
+      </FormLabel>
       <div className='relative flex flex-col gap-6 overflow-hidden'>
         <Dropzone
           onDrop={onDrop}

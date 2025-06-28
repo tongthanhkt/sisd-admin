@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useSortableList } from '@/hooks/use-sortable-list';
-import { ProductFormValues } from '../product-form';
+import { ProductFormValues } from '../../hooks/useProduct';
 
 // Add a type for specification with id
 interface SpecWithId {
@@ -58,7 +58,10 @@ export const TechnicalSpecifications = () => {
       onItemsChange: (newSpecs) => {
         setValue('technicalSpecifications', {
           ...values.technicalSpecifications,
-          specifications: newSpecs
+          specifications: newSpecs.map((spec) => ({
+            category: spec.category || '',
+            performance: spec.performance || ''
+          }))
         });
       }
     });
@@ -67,14 +70,17 @@ export const TechnicalSpecifications = () => {
     <FormField
       control={control}
       name='technicalSpecifications'
-      render={({ field }) => {
+      render={({ field, fieldState: { error } }) => {
         const specs = ensureSpecIds(
           (field.value?.specifications as SpecWithId[]) || []
         );
 
         return (
           <FormItem>
-            <FormLabel>Technical Specifications</FormLabel>
+            <FormLabel>
+              Technical Specifications{' '}
+              <span className='text-destructive'>*</span>
+            </FormLabel>
             <FormControl>
               <div className='space-y-4'>
                 <Input
@@ -86,6 +92,8 @@ export const TechnicalSpecifications = () => {
                       standard: e.target.value
                     });
                   }}
+                  error={!!error}
+                  helperText={error?.message}
                 />
                 <div className='flex flex-col gap-4'>
                   <DndContext
@@ -162,9 +170,13 @@ export const TechnicalSpecifications = () => {
                     <PlusIcon className='size-5' /> Add Specification
                   </Button>
                 </div>
+                {error && (
+                  <FormMessage className='text-destructive'>
+                    {error.message}
+                  </FormMessage>
+                )}
               </div>
             </FormControl>
-            <FormMessage />
           </FormItem>
         );
       }}

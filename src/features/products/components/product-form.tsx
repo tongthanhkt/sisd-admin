@@ -1,8 +1,8 @@
 'use client';
 
-import { UploadImage } from '@/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -20,240 +20,17 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Product } from '@/constants/data';
 import { productCategories } from '@/constants/products';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { IconX } from '@tabler/icons-react';
-import Image from 'next/image';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import * as z from 'zod';
+import { cn } from '@/lib/utils';
+import { useProduct } from '../hooks/useProduct';
+import { ProductImages } from './ProductImages';
+import { RelatedBlogs } from './RelatedBlogs';
+import { RelatedProducts } from './RelatedProducts';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
-import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RelatedProducts } from './RelatedProducts';
-import { RelatedBlogs } from './RelatedBlogs';
 
-const MAX_FILE_SIZE = 5000000;
-const ACCEPTED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp'
-];
-
-const formSchema = z.object({
-  code: z.string().optional(),
-  href: z.string().optional(),
-  name: z.string().optional(),
-  category: z.string().optional(),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
-  image: z.string().optional(),
-  images: z.object({
-    main: z.string().optional(),
-    thumbnails: z.array(z.string()).optional()
-  }),
-  packaging: z.string().optional(),
-  advantages: z
-    .array(
-      z.object({
-        id: z.string(),
-        value: z.string()
-      })
-    )
-    .optional(),
-  technicalSpecifications: z.object({
-    standard: z.string().optional(),
-    specifications: z
-      .array(
-        z.object({
-          stt: z.number().optional(),
-          category: z.string().optional(),
-          performance: z.string().optional()
-        })
-      )
-      .optional()
-  }),
-  transportationAndStorage: z
-    .array(
-      z.object({
-        id: z.string(),
-        value: z.string()
-      })
-    )
-    .optional(),
-  safetyRegulations: z.object({
-    standard: z.string().optional(),
-    specifications: z
-      .array(
-        z.object({
-          stt: z.number().optional(),
-          performance: z.string().optional()
-        })
-      )
-      .optional(),
-    warning: z.string().optional(),
-    notes: z.string().optional()
-  }),
-  isFeatured: z.boolean().optional()
-});
-
-export type ProductFormValues = z.infer<typeof formSchema>;
-export type FieldName = keyof ProductFormValues;
-
-interface FileCardProps {
-  imageUrl: string;
-  onRemove: () => void;
-}
-
-function FileCard({ imageUrl, onRemove }: FileCardProps) {
-  return (
-    <div className='relative flex items-center space-x-4 rounded-lg border p-4'>
-      <div className='relative h-16 w-16 overflow-hidden rounded-md'>
-        <Image
-          src={imageUrl}
-          alt='Product image'
-          fill
-          className='object-cover'
-          sizes='64px'
-        />
-      </div>
-      <Button
-        variant='ghost'
-        size='icon'
-        className='absolute top-2 right-2 h-8 w-8'
-        onClick={onRemove}
-      >
-        <IconX className='h-4 w-4' />
-      </Button>
-    </div>
-  );
-}
-
-export default function ProductForm({
-  initialData,
-  pageTitle
-}: {
-  initialData: Product | null;
-  pageTitle: string;
-}) {
-  const [mounted, setMounted] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [uploadedMultipleFiles, setUploadedMultipleFiles] = useState<File[]>(
-    []
-  );
-  const [previewUrls, setPreviewUrls] = useState<{ id: string; url: string }[]>(
-    []
-  );
-
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      code: initialData?.code || '',
-      name: initialData?.name || '',
-      category: initialData?.category || 'MORTAL',
-      shortDescription: initialData?.shortDescription || '',
-      description: initialData?.description || '',
-      image: initialData?.image || '',
-      images: {
-        main: initialData?.images?.main || '',
-        thumbnails: initialData?.images?.thumbnails || []
-      },
-      packaging: initialData?.packaging || '',
-      advantages: initialData?.advantages || [],
-      technicalSpecifications: initialData?.technicalSpecifications || {
-        standard: '',
-        specifications: []
-      },
-      transportationAndStorage: initialData?.transportationAndStorage || [],
-      safetyRegulations: initialData?.safetyRegulations || {
-        standard: '',
-        specifications: []
-      },
-      isFeatured: initialData?.isFeatured || false
-    }
-  });
-
-  const onSubmit = async (values: ProductFormValues) => {
-    try {
-      setIsLoading(true);
-      const payload = {
-        ...values,
-        image: values.image,
-        images: {
-          thumbnails: values.images.thumbnails
-        },
-        technicalSpecifications: values.technicalSpecifications,
-        transportationAndStorage: values.transportationAndStorage,
-        safetyRegulations: values.safetyRegulations
-      };
-
-      let response;
-      if (initialData && initialData.id) {
-        response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/products/${initialData.id}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          }
-        );
-      } else {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
-
-      if (!response.ok) {
-        throw new Error('Lưu sản phẩm thất bại!');
-      }
-      toast.success('Lưu sản phẩm thành công!');
-      form.reset();
-      setPreviewUrls([]);
-      setUploadedFiles([]);
-    } catch (error) {
-      toast.error('Có lỗi xảy ra khi lưu sản phẩm!');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Set mounted to true after mount
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Initialize preview URLs with existing images
-  React.useEffect(() => {
-    if (mounted && initialData?.images?.thumbnails?.length) {
-      const initialPreviews = initialData.images.thumbnails.map((url) => ({
-        id: `existing-${url}`,
-        url
-      }));
-      setPreviewUrls(initialPreviews);
-    }
-  }, [initialData?.images?.thumbnails, mounted]);
-
-  // Cleanup preview URLs when component unmounts
-  React.useEffect(() => {
-    return () => {
-      if (mounted) {
-        // Only revoke URLs that were created with createObjectURL
-        previewUrls.forEach(({ url }) => {
-          if (url.startsWith('blob:')) {
-            URL.revokeObjectURL(url);
-          }
-        });
-      }
-    };
-  }, [previewUrls, mounted]);
+export default function ProductForm({ pageTitle }: { pageTitle: string }) {
+  const { form, onSubmit } = useProduct();
 
   return (
     <Card className='mx-auto w-full'>
@@ -269,13 +46,18 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='name'
-                render={({ field }) => (
-                  <FormItem className='flex-1'>
-                    <FormLabel>Product Name</FormLabel>
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem className='w-full'>
                     <FormControl>
-                      <Input placeholder='Enter product name' {...field} />
+                      <Input
+                        placeholder='Enter product name'
+                        {...field}
+                        error={!!error}
+                        helperText={error?.message}
+                        label='Product Name'
+                        required
+                      />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -293,7 +75,7 @@ export default function ProductForm({
                     </FormControl>
                     <label
                       htmlFor='isFeatured'
-                      className='space-y-1 text-sm leading-none'
+                      className='w-max space-y-1 text-sm leading-none'
                     >
                       Mark as Featured
                     </label>
@@ -302,73 +84,47 @@ export default function ProductForm({
               />
             </div>
 
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-              <FormField
-                control={form.control}
-                name='image'
-                render={({ field }) => (
-                  <UploadImage
-                    value={uploadedFiles}
-                    className='h-60'
-                    onValueChange={async (files) => {
-                      if (files && mounted) {
-                        try {
-                          setIsUploading(true);
-                          // Update uploaded files
-                          setUploadedFiles(files);
-
-                          field.onChange(files);
-                        } catch (error) {
-                          console.error('Error uploading file:', error);
-                        } finally {
-                          setIsUploading(false);
-                        }
-                      }
-                    }}
-                    maxFiles={1}
-                    maxSize={4 * 1024 * 1024}
-                  />
-                )}
-              />
-
-              <UploadMultipleIImage
-                value={uploadedMultipleFiles}
-                onValueChange={setUploadedMultipleFiles}
-              />
-            </div>
+            <ProductImages />
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
                 name='code'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Product Code</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter product code' {...field} />
+                      <Input
+                        placeholder='Enter product code'
+                        {...field}
+                        label='Product Code'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
+                      />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name='href'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Href</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Enter href'
                         className='resize-none'
                         {...field}
+                        label='Href'
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
@@ -390,23 +146,24 @@ export default function ProductForm({
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name='packaging'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Packaging</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Enter packaging information'
                         {...field}
+                        label='Packaging'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -416,34 +173,38 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='shortDescription'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Short Description</FormLabel>
                     <FormControl>
                       <Textarea
+                        label='Short Description'
+                        required
                         placeholder='Enter short description'
                         className='resize-none'
                         {...field}
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name='description'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder='Enter product description'
                         className='resize-none'
                         {...field}
+                        label='Description'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -468,9 +229,12 @@ export default function ProductForm({
             <FormField
               control={form.control}
               name='safetyRegulations'
-              render={({ field }) => (
+              render={({ field, fieldState: { error } }) => (
                 <FormItem>
-                  <FormLabel>Safety Regulations</FormLabel>
+                  <FormLabel>
+                    Safety Regulations{' '}
+                    <span className='text-destructive'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <div className='space-y-4'>
                       <Textarea
@@ -482,6 +246,9 @@ export default function ProductForm({
                             warning: e.target.value
                           });
                         }}
+                        required
+                        error={!!error}
+                        helperText={error?.message}
                       />
                       <Textarea
                         placeholder='Notes (optional)'
@@ -492,6 +259,7 @@ export default function ProductForm({
                             notes: e.target.value
                           });
                         }}
+                        required
                       />
                     </div>
                   </FormControl>
@@ -503,7 +271,7 @@ export default function ProductForm({
             <RelatedProducts />
             <RelatedBlogs />
 
-            <Button>Save Product</Button>
+            <Button type='submit'>Save Product</Button>
           </form>
         </Form>
       </CardContent>

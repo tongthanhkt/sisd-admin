@@ -16,9 +16,10 @@ import {
 } from '@dnd-kit/sortable';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
-import { FieldName, ProductFormValues } from '../product-form';
+import { useFormContext, useFieldArray } from 'react-hook-form';
 import NoData from '@/components/NoData';
+import { FieldName, ProductFormValues } from '../../hooks/useProduct';
+import { Path } from 'react-hook-form';
 
 // Define a type for list item with id
 interface ListItem {
@@ -86,12 +87,14 @@ export const SortableListField = ({
     <FormField
       control={control}
       name={fieldName}
-      render={({ field }) => {
+      render={({ field, fieldState: { error } }) => {
         const itemsArr = getItemArray(field.value);
 
         return (
-          <FormItem>
-            <FormLabel>{title}</FormLabel>
+          <FormItem className='w-full'>
+            <FormLabel>
+              {title} <span className='text-destructive'>*</span>
+            </FormLabel>
             <FormControl>
               <DndContext
                 sensors={sensors}
@@ -102,20 +105,36 @@ export const SortableListField = ({
                   items={itemsArr.map((item) => item.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className='flex flex-col gap-4'>
+                  <div className='flex w-full flex-col gap-4'>
                     {itemsArr.length === 0 ? (
                       <NoData />
                     ) : (
                       itemsArr.map((item, index) => (
                         <SortableSpecItem key={item.id} id={item.id}>
                           {(listeners) => (
-                            <div className='flex gap-2'>
-                              <Input
-                                placeholder={`${placeholder} ${index + 1}`}
-                                value={item.value}
-                                onChange={(e) => {
-                                  updateItem(index, { value: e.target.value });
-                                }}
+                            <div className='flex w-full flex-1'>
+                              <FormField
+                                control={control}
+                                name={
+                                  `${fieldName}.${index}.value` as Path<ProductFormValues>
+                                }
+                                render={({ field, fieldState: { error } }) => (
+                                  <FormItem className='!w-full'>
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder={`${placeholder} ${index + 1}`}
+                                        value={item.value}
+                                        onChange={(e) => {
+                                          updateItem(index, {
+                                            value: e.target.value
+                                          });
+                                        }}
+                                        error={!!error}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
                               />
                               <Button
                                 type='button'
@@ -152,7 +171,11 @@ export const SortableListField = ({
                 </SortableContext>
               </DndContext>
             </FormControl>
-            <FormMessage />
+            {error && (
+              <FormMessage className='text-destructive'>
+                {error.message}
+              </FormMessage>
+            )}
           </FormItem>
         );
       }}

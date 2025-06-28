@@ -6,16 +6,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
-
-interface ModalProps {
-  title: string;
-  description: string;
-  isOpen: boolean;
-  onClose: () => void;
-  children?: React.ReactNode;
-  className?: string;
-}
+import { ModalProps } from '@/types';
 
 export const Modal: React.FC<ModalProps> = ({
   title,
