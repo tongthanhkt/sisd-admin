@@ -54,7 +54,10 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
 
   return (
     <div className={cn('flex flex-col gap-2', className)} {...rest}>
-      <FormLabel>{label}</FormLabel>
+      <FormLabel>
+        {label}
+        <span className='text-destructive'>*</span>
+      </FormLabel>
       <Dropzone
         onDrop={onDrop}
         accept={accept}

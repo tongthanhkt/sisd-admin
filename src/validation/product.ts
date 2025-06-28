@@ -1,18 +1,26 @@
 import { z } from 'zod';
 
 export const productFormSchema = z.object({
-  code: z.string().optional(),
+  code: z.string().min(1, { message: 'Product code is required' }),
   href: z.string().optional(),
-  name: z.string().optional(),
+  name: z
+    .string()
+    .min(1, { message: 'Product name is required' })
+    .trim()
+    .refine((val) => val.length > 0, {
+      message: 'Product name is required'
+    }),
   category: z.string().optional(),
-  shortDescription: z.string().optional(),
-  description: z.string().optional(),
+  shortDescription: z
+    .string()
+    .min(1, { message: 'Short description is required' }),
+  description: z.string().min(1, { message: 'Description is required' }),
   image: z.string().optional(),
   images: z.object({
     main: z.string().optional(),
     thumbnails: z.array(z.string()).optional()
   }),
-  packaging: z.string().optional(),
+  packaging: z.string().min(1, { message: 'Packaging is required' }),
   advantages: z
     .array(
       z.object({
@@ -22,16 +30,15 @@ export const productFormSchema = z.object({
     )
     .optional(),
   technicalSpecifications: z.object({
-    standard: z.string().optional(),
+    standard: z.string().min(1, { message: 'Standard is required' }),
     specifications: z
       .array(
         z.object({
-          stt: z.number().optional(),
-          category: z.string().optional(),
-          performance: z.string().optional()
+          category: z.string().min(1, { message: 'Category is required' }),
+          performance: z.string().min(1, { message: 'Performance is required' })
         })
       )
-      .optional()
+      .min(1, { message: 'At least one specification is required' })
   }),
   transportationAndStorage: z
     .array(
@@ -42,16 +49,7 @@ export const productFormSchema = z.object({
     )
     .optional(),
   safetyRegulations: z.object({
-    standard: z.string().optional(),
-    specifications: z
-      .array(
-        z.object({
-          stt: z.number().optional(),
-          performance: z.string().optional()
-        })
-      )
-      .optional(),
-    warning: z.string().optional(),
+    warning: z.string().min(1, { message: 'Warning is required' }),
     notes: z.string().optional()
   }),
   isFeatured: z.boolean().optional()

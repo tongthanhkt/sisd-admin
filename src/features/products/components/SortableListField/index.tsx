@@ -17,8 +17,8 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FieldName, ProductFormValues } from '../product-form';
 import NoData from '@/components/NoData';
+import { FieldName, ProductFormValues } from '../../hooks/useProduct';
 
 // Define a type for list item with id
 interface ListItem {
@@ -86,12 +86,14 @@ export const SortableListField = ({
     <FormField
       control={control}
       name={fieldName}
-      render={({ field }) => {
+      render={({ field, fieldState: { error } }) => {
         const itemsArr = getItemArray(field.value);
 
         return (
           <FormItem>
-            <FormLabel>{title}</FormLabel>
+            <FormLabel>
+              {title} <span className='text-destructive'>*</span>
+            </FormLabel>
             <FormControl>
               <DndContext
                 sensors={sensors}
@@ -152,7 +154,11 @@ export const SortableListField = ({
                 </SortableContext>
               </DndContext>
             </FormControl>
-            <FormMessage />
+            {error && (
+              <FormMessage className='text-destructive'>
+                {error.message}
+              </FormMessage>
+            )}
           </FormItem>
         );
       }}

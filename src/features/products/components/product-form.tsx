@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { productCategories } from '@/constants/products';
+import { cn } from '@/lib/utils';
 import { useProduct } from '../hooks/useProduct';
 import { ProductImages } from './ProductImages';
 import { RelatedBlogs } from './RelatedBlogs';
@@ -45,13 +46,18 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
               <FormField
                 control={form.control}
                 name='name'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem className='flex-1'>
-                    <FormLabel>Product Name</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter product name' {...field} />
+                      <Input
+                        placeholder='Enter product name'
+                        {...field}
+                        error={!!error}
+                        helperText={error?.message}
+                        label='Product Name'
+                        required
+                      />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -84,30 +90,36 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
               <FormField
                 control={form.control}
                 name='code'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Product Code</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter product code' {...field} />
+                      <Input
+                        placeholder='Enter product code'
+                        {...field}
+                        label='Product Code'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
+                      />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name='href'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Href</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Enter href'
                         className='resize-none'
                         {...field}
+                        label='Href'
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -134,23 +146,24 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name='packaging'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Packaging</FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Enter packaging information'
                         {...field}
+                        label='Packaging'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -160,34 +173,38 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
               <FormField
                 control={form.control}
                 name='shortDescription'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Short Description</FormLabel>
                     <FormControl>
                       <Textarea
+                        label='Short Description'
+                        required
                         placeholder='Enter short description'
                         className='resize-none'
                         {...field}
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name='description'
-                render={({ field }) => (
+                render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder='Enter product description'
                         className='resize-none'
                         {...field}
+                        label='Description'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -212,9 +229,12 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
             <FormField
               control={form.control}
               name='safetyRegulations'
-              render={({ field }) => (
+              render={({ field, fieldState: { error } }) => (
                 <FormItem>
-                  <FormLabel>Safety Regulations</FormLabel>
+                  <FormLabel>
+                    Safety Regulations{' '}
+                    <span className='text-destructive'>*</span>
+                  </FormLabel>
                   <FormControl>
                     <div className='space-y-4'>
                       <Textarea
@@ -226,6 +246,9 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
                             warning: e.target.value
                           });
                         }}
+                        required
+                        error={!!error}
+                        helperText={error?.message}
                       />
                       <Textarea
                         placeholder='Notes (optional)'
@@ -236,6 +259,7 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
                             notes: e.target.value
                           });
                         }}
+                        required
                       />
                     </div>
                   </FormControl>
@@ -247,7 +271,7 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
             <RelatedProducts />
             <RelatedBlogs />
 
-            <Button>Save Product</Button>
+            <Button type='submit'>Save Product</Button>
           </form>
         </Form>
       </CardContent>
