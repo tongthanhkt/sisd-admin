@@ -8,7 +8,7 @@ import Dropzone, { type DropzoneProps } from 'react-dropzone';
 import { useUploadFile } from '@/hooks';
 import { useControllableState } from '@/hooks/use-controllable-state';
 import { cn, formatBytes } from '@/lib/utils';
-import { FormLabel } from './ui/form';
+import { FormLabel, FormMessage } from './ui/form';
 
 interface UploadMultipleImageProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -21,6 +21,8 @@ interface UploadMultipleImageProps
   multiple?: boolean;
   label?: string;
   disabled?: boolean;
+  error?: boolean;
+  helperText?: string;
 }
 
 export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
@@ -35,6 +37,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     label = 'Others Images',
     disabled = false,
     className,
+    error,
+    helperText,
     ...rest
   } = props;
 
@@ -54,7 +58,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
 
   return (
     <div className={cn('flex flex-col gap-2', className)} {...rest}>
-      <FormLabel>
+      <FormLabel className={cn(error && 'text-destructive')}>
         {label}
         <span className='text-destructive'>*</span>
       </FormLabel>
@@ -124,6 +128,11 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
           </div>
         )}
       </Dropzone>
+      {helperText && (
+        <FormMessage className={cn(error && 'text-destructive')}>
+          {helperText}
+        </FormMessage>
+      )}
     </div>
   );
 };

@@ -15,11 +15,22 @@ export const productFormSchema = z.object({
     .string()
     .min(1, { message: 'Short description is required' }),
   description: z.string().min(1, { message: 'Description is required' }),
-  image: z.string().optional(),
-  images: z.object({
-    main: z.string().optional(),
-    thumbnails: z.array(z.string()).optional()
-  }),
+  thumbnail: z
+    .array(z.any())
+    .min(1, { message: 'Thumbnail is required' })
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' || arr.every((f) => f instanceof File),
+      { message: 'All thumbnails must be files' }
+    ),
+  images: z
+    .array(z.any())
+    .min(1, { message: 'Images are required' })
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' || arr.every((f) => f instanceof File),
+      { message: 'All images must be files' }
+    ),
   packaging: z.string().min(1, { message: 'Packaging is required' }),
   advantages: z
     .array(

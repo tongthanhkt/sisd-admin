@@ -16,11 +16,8 @@ export const useProduct = () => {
       category: 'MORTAL',
       shortDescription: '',
       description: '',
-      image: '',
-      images: {
-        main: '',
-        thumbnails: []
-      },
+      thumbnail: undefined,
+      images: undefined,
       packaging: '',
       advantages: [],
       technicalSpecifications: {
@@ -32,22 +29,23 @@ export const useProduct = () => {
         warning: '',
         notes: ''
       },
-      isFeatured: false
+      isFeatured: false,
+      relatedBlogs: [],
+      relatedProduct: []
     }
   });
 
   const {
     formState: { errors }
   } = form;
+  console.log('🚀 ~ useProduct ~ errors:', errors);
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
       const payload = {
         ...values,
-        image: values.image,
-        images: {
-          thumbnails: values.images.thumbnails
-        },
+        thumbnail: values.thumbnail,
+        images: values.images,
         technicalSpecifications: values.technicalSpecifications,
         transportationAndStorage: values.transportationAndStorage,
         safetyRegulations: values.safetyRegulations

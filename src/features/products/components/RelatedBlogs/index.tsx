@@ -3,9 +3,13 @@
 import { IBlog } from '@/models/Blog';
 import { useEffect, useState } from 'react';
 import { RelatedItem, RelatedSections } from '../RelatedSections';
+import { ProductFormValues } from '../../hooks/useProduct';
+import { useFormContext } from 'react-hook-form';
 
 export function RelatedBlogs() {
-  const [relatedBlogs, setRelatedBlogs] = useState<{ id: string }[]>([]);
+  const methods = useFormContext<ProductFormValues>();
+  const { watch, setValue } = methods;
+  const relatedBlogs = watch('relatedBlogs');
   const [allBlogs, setAllBlogs] = useState<IBlog[]>([]);
 
   useEffect(() => {
@@ -39,12 +43,13 @@ export function RelatedBlogs() {
   return (
     <RelatedSections
       items={validBlogs}
-      value={relatedBlogs.map((p) => p.id)}
-      onChange={(ids) => setRelatedBlogs(ids.map((id) => ({ id })))}
+      value={relatedBlogs}
+      onChange={(ids) => setValue('relatedBlogs', ids)}
       label='Related Blogs'
       addButtonText='Add blog'
       itemLabel={(item) => item.name || ''}
       itemImage={(item) => item.image || ''}
+      fieldName='relatedBlogs'
     />
   );
 }
