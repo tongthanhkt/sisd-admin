@@ -4,10 +4,6 @@ import { IBlog } from '@/models/Blog';
 import { useEffect, useState } from 'react';
 import { RelatedItem, RelatedSections } from '../RelatedSections';
 
-export interface RelatedProduct {
-  id: string;
-}
-
 export function RelatedBlogs() {
   const [relatedBlogs, setRelatedBlogs] = useState<{ id: string }[]>([]);
   const [allBlogs, setAllBlogs] = useState<IBlog[]>([]);
