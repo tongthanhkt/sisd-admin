@@ -1,7 +1,5 @@
 'use client';
 
-import { UploadImage } from '@/components';
-import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -22,103 +20,16 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Product } from '@/constants/data';
 import { productCategories } from '@/constants/products';
-import { productFormSchema } from '@/validation';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
-import * as z from 'zod';
+import { useProduct } from '../hooks/useProduct';
+import { ProductImages } from './ProductImages';
 import { RelatedBlogs } from './RelatedBlogs';
 import { RelatedProducts } from './RelatedProducts';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 
-export type ProductFormValues = z.infer<typeof productFormSchema>;
-export type FieldName = keyof ProductFormValues;
-
-export default function ProductForm({
-  initialData,
-  pageTitle
-}: {
-  initialData: Product | null;
-  pageTitle: string;
-}) {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [uploadedMultipleFiles, setUploadedMultipleFiles] = useState<File[]>(
-    []
-  );
-
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: {
-      code: initialData?.code || '',
-      name: initialData?.name || '',
-      category: initialData?.category || 'MORTAL',
-      shortDescription: initialData?.shortDescription || '',
-      description: initialData?.description || '',
-      image: initialData?.image || '',
-      images: {
-        main: initialData?.images?.main || '',
-        thumbnails: initialData?.images?.thumbnails || []
-      },
-      packaging: initialData?.packaging || '',
-      advantages: initialData?.advantages || [],
-      technicalSpecifications: initialData?.technicalSpecifications || {
-        standard: '',
-        specifications: []
-      },
-      transportationAndStorage: initialData?.transportationAndStorage || [],
-      safetyRegulations: initialData?.safetyRegulations || {
-        standard: '',
-        specifications: []
-      },
-      isFeatured: initialData?.isFeatured || false
-    }
-  });
-
-  const onSubmit = async (values: ProductFormValues) => {
-    try {
-      const payload = {
-        ...values,
-        image: values.image,
-        images: {
-          thumbnails: values.images.thumbnails
-        },
-        technicalSpecifications: values.technicalSpecifications,
-        transportationAndStorage: values.transportationAndStorage,
-        safetyRegulations: values.safetyRegulations
-      };
-
-      let response;
-      if (initialData && initialData.id) {
-        response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/products/${initialData.id}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          }
-        );
-      } else {
-        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
-
-      if (!response.ok) {
-        throw new Error('Lưu sản phẩm thất bại!');
-      }
-      toast.success('Lưu sản phẩm thành công!');
-      form.reset();
-      setUploadedFiles([]);
-    } catch (error) {
-      toast.error('Có lỗi xảy ra khi lưu sản phẩm!');
-    }
-  };
+export default function ProductForm({ pageTitle }: { pageTitle: string }) {
+  const { form, onSubmit } = useProduct();
 
   return (
     <Card className='mx-auto w-full'>
@@ -167,31 +78,7 @@ export default function ProductForm({
               />
             </div>
 
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-              <FormField
-                control={form.control}
-                name='image'
-                render={({ field }) => (
-                  <UploadImage
-                    value={uploadedFiles}
-                    className='h-60'
-                    onValueChange={async (files) => {
-                      if (files) {
-                        setUploadedFiles(files);
-                        field.onChange(files);
-                      }
-                    }}
-                    maxFiles={1}
-                    maxSize={4 * 1024 * 1024}
-                  />
-                )}
-              />
-
-              <UploadMultipleIImage
-                value={uploadedMultipleFiles}
-                onValueChange={setUploadedMultipleFiles}
-              />
-            </div>
+            <ProductImages />
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
@@ -225,6 +112,7 @@ export default function ProductForm({
                 )}
               />
             </div>
+
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
