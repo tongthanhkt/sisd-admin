@@ -1,4 +1,4 @@
-import { IProductPagination } from '@/types/product';
+import { IMutateProduct, IProductPagination } from '@/types/product';
 import { api } from '../api';
 
 // Product types
@@ -60,7 +60,7 @@ export const productsApi = api.injectEndpoints({
     }),
 
     // Create new product
-    createProduct: builder.mutation<Product, CreateProductRequest>({
+    createProduct: builder.mutation<Product, IMutateProduct>({
       query: (product) => ({
         url: 'products',
         method: 'POST',
