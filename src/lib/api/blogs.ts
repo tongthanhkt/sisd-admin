@@ -1,18 +1,8 @@
+import { IBlog } from '@/models/Blog';
+import { IBlogPagination } from '@/types';
 import { api } from '../api';
 
 // Blog types
-export interface Blog {
-  _id: string;
-  title: string;
-  content: string;
-  excerpt?: string;
-  featuredImage?: string;
-  author?: string;
-  tags?: string[];
-  publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface CreateBlogRequest {
   title: string;
@@ -32,44 +22,35 @@ export interface UpdateBlogRequest extends Partial<CreateBlogRequest> {
 export const blogsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all blogs
-    getBlogs: builder.query<Blog[], void>({
+    getBlogs: builder.query<IBlogPagination, void>({
       query: () => 'blogs',
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ _id }) => ({ type: 'Blog' as const, id: _id })),
-              { type: 'Blog', id: 'LIST' }
-            ]
-          : [{ type: 'Blog', id: 'LIST' }]
+      providesTags: ['Blog']
     }),
 
     // Get single blog by ID
-    getBlog: builder.query<Blog, string>({
+    getBlog: builder.query<IBlog, string>({
       query: (id) => `blogs/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Blog', id }]
+      providesTags: ['Blog']
     }),
 
     // Create new blog
-    createBlog: builder.mutation<Blog, CreateBlogRequest>({
+    createBlog: builder.mutation<IBlog, CreateBlogRequest>({
       query: (blog) => ({
         url: 'blogs',
         method: 'POST',
         body: blog
       }),
-      invalidatesTags: [{ type: 'Blog', id: 'LIST' }]
+      invalidatesTags: ['Blog']
     }),
 
     // Update blog
-    updateBlog: builder.mutation<Blog, UpdateBlogRequest>({
+    updateBlog: builder.mutation<IBlog, UpdateBlogRequest>({
       query: ({ id, ...blog }) => ({
         url: `blogs/${id}`,
         method: 'PUT',
         body: blog
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: 'Blog', id },
-        { type: 'Blog', id: 'LIST' }
-      ]
+      invalidatesTags: ['Blog']
     }),
 
     // Delete blog
@@ -78,10 +59,7 @@ export const blogsApi = api.injectEndpoints({
         url: `blogs/${id}`,
         method: 'DELETE'
       }),
-      invalidatesTags: (result, error, id) => [
-        { type: 'Blog', id },
-        { type: 'Blog', id: 'LIST' }
-      ]
+      invalidatesTags: ['Blog']
     })
   })
 });
