@@ -42,7 +42,10 @@ export function useSortableList<T extends SortableItem>({
     (newItem: Omit<T, 'id'>) => {
       const itemWithId: T = {
         ...newItem,
-        id: `${Date.now()}-${Math.random()}`
+        id:
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random()}`
       } as T;
       onItemsChange([...items, itemWithId]);
     },

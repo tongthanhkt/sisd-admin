@@ -5,6 +5,7 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 // Aliased/internal imports
@@ -35,7 +36,7 @@ export const TechnicalSpecifications = () => {
   const { control, watch, setValue } = methods;
   const values = watch();
 
-  // Helper to ensure every spec has a unique id
+  // Helper to ensure every spec has a unique id - only generate new IDs when needed
   function ensureSpecIds(specs: SpecWithId[]) {
     return (specs || []).map((spec) => ({
       ...spec,
@@ -47,10 +48,12 @@ export const TechnicalSpecifications = () => {
     }));
   }
 
-  // Get current specifications array
-  const currentSpecs = ensureSpecIds(
-    (values.technicalSpecifications?.specifications as SpecWithId[]) || []
-  );
+  // Memoize the specifications to prevent unnecessary re-renders
+  const currentSpecs = useMemo(() => {
+    const specs =
+      (values.technicalSpecifications?.specifications as SpecWithId[]) || [];
+    return ensureSpecIds(specs);
+  }, [values.technicalSpecifications?.specifications]);
 
   const { sensors, handleDragEnd, addItem, updateItem, removeItem } =
     useSortableList<SpecWithId>({
@@ -59,6 +62,7 @@ export const TechnicalSpecifications = () => {
         setValue('technicalSpecifications', {
           ...values.technicalSpecifications,
           specifications: newSpecs.map((spec) => ({
+            id: spec.id, // Preserve the ID
             category: spec.category || '',
             performance: spec.performance || ''
           }))
@@ -69,11 +73,9 @@ export const TechnicalSpecifications = () => {
   return (
     <FormField
       control={control}
-      name='technicalSpecifications'
-      render={({ field, fieldState: { error } }) => {
-        const specs = ensureSpecIds(
-          (field.value?.specifications as SpecWithId[]) || []
-        );
+      name='technicalSpecifications.specifications'
+      render={({ fieldState: { error } }) => {
+        const specs = currentSpecs;
 
         return (
           <FormItem>
@@ -83,17 +85,17 @@ export const TechnicalSpecifications = () => {
             </FormLabel>
             <FormControl>
               <div className='space-y-4'>
-                <Input
-                  placeholder='Standard'
-                  value={field.value.standard}
-                  onChange={(e) => {
-                    field.onChange({
-                      ...field.value,
-                      standard: e.target.value
-                    });
-                  }}
-                  error={!!error}
-                  helperText={error?.message}
+                <FormField
+                  control={control}
+                  name='technicalSpecifications.standard'
+                  render={({ field, fieldState: { error } }) => (
+                    <Input
+                      placeholder='Standard'
+                      {...field}
+                      error={!!error}
+                      helperText={error?.message}
+                    />
+                  )}
                 />
                 <div className='flex flex-col gap-4'>
                   <DndContext
@@ -112,24 +114,34 @@ export const TechnicalSpecifications = () => {
                           <SortableSpecItem key={spec.id} id={spec.id}>
                             {(listeners) => (
                               <div className='grid grid-cols-2 gap-4'>
-                                <Input
-                                  placeholder='Category'
-                                  value={spec.category}
-                                  onChange={(e) => {
-                                    updateItem(index, {
-                                      category: e.target.value
-                                    });
-                                  }}
+                                <FormField
+                                  control={control}
+                                  name={`technicalSpecifications.specifications.${index}.category`}
+                                  render={({
+                                    field,
+                                    fieldState: { error }
+                                  }) => (
+                                    <Input
+                                      placeholder='Category'
+                                      {...field}
+                                      error={!!error}
+                                    />
+                                  )}
                                 />
                                 <div className='flex gap-2'>
-                                  <Input
-                                    placeholder='Performance'
-                                    value={spec.performance}
-                                    onChange={(e) => {
-                                      updateItem(index, {
-                                        performance: e.target.value
-                                      });
-                                    }}
+                                  <FormField
+                                    control={control}
+                                    name={`technicalSpecifications.specifications.${index}.performance`}
+                                    render={({
+                                      field,
+                                      fieldState: { error }
+                                    }) => (
+                                      <Input
+                                        placeholder='Performance'
+                                        {...field}
+                                        error={!!error}
+                                      />
+                                    )}
                                   />
                                   <Button
                                     type='button'
@@ -155,6 +167,11 @@ export const TechnicalSpecifications = () => {
                       )}
                     </SortableContext>
                   </DndContext>
+                  {error && (
+                    <FormMessage className='text-destructive'>
+                      {error.message}
+                    </FormMessage>
+                  )}
                   <Button
                     type='button'
                     variant='outline'
@@ -170,11 +187,6 @@ export const TechnicalSpecifications = () => {
                     <PlusIcon className='size-5' /> Add Specification
                   </Button>
                 </div>
-                {error && (
-                  <FormMessage className='text-destructive'>
-                    {error.message}
-                  </FormMessage>
-                )}
               </div>
             </FormControl>
           </FormItem>

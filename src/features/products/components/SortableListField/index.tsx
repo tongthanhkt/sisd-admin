@@ -157,6 +157,11 @@ export const SortableListField = ({
                         </SortableSpecItem>
                       ))
                     )}
+                    {error && (
+                      <FormMessage className='text-destructive'>
+                        {error.message}
+                      </FormMessage>
+                    )}
                     <Button
                       type='button'
                       variant='outline'
@@ -171,11 +176,6 @@ export const SortableListField = ({
                 </SortableContext>
               </DndContext>
             </FormControl>
-            {error && (
-              <FormMessage className='text-destructive'>
-                {error.message}
-              </FormMessage>
-            )}
           </FormItem>
         );
       }}

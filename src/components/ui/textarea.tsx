@@ -17,7 +17,7 @@ function Textarea({
   ...props
 }: TextareaProps) {
   return (
-    <div className='space-y-1'>
+    <div className='space-y-2'>
       {label && (
         <FormLabel>
           {label} {required && <span className='text-destructive'>*</span>}

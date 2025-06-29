@@ -13,7 +13,11 @@ export interface RelatedProduct {
 
 export function RelatedProducts() {
   const methods = useFormContext<ProductFormValues>();
-  const { watch, setValue } = methods;
+  const {
+    watch,
+    setValue,
+    formState: { errors }
+  } = methods;
   const relatedProducts = watch('relatedProduct');
   const [allProducts, setAllProducts] = useState<IMortalProduct[]>([]);
 
@@ -64,6 +68,7 @@ export function RelatedProducts() {
         item.category ? PRODUCT_LABELS[item.category] : ''
       }
       fieldName='relatedProduct'
+      helperText={errors.relatedProduct?.message}
     />
   );
 }

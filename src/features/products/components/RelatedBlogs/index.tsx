@@ -8,7 +8,11 @@ import { useFormContext } from 'react-hook-form';
 
 export function RelatedBlogs() {
   const methods = useFormContext<ProductFormValues>();
-  const { watch, setValue } = methods;
+  const {
+    watch,
+    setValue,
+    formState: { errors }
+  } = methods;
   const relatedBlogs = watch('relatedBlogs');
   const [allBlogs, setAllBlogs] = useState<IBlog[]>([]);
 
@@ -50,6 +54,7 @@ export function RelatedBlogs() {
       itemLabel={(item) => item.name || ''}
       itemImage={(item) => item.image || ''}
       fieldName='relatedBlogs'
+      helperText={errors.relatedBlogs?.message}
     />
   );
 }
