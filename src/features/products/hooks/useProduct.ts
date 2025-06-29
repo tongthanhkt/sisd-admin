@@ -151,10 +151,9 @@ export const useProduct = ({ productId }: { productId: string }) => {
       }
 
       if (productData.images) {
-        const allImages = [
-          productData.images.main,
-          ...(productData.images.thumbnails || [])
-        ].filter((url): url is string => Boolean(url));
+        const allImages = [...(productData.images.thumbnails || [])].filter(
+          (url): url is string => Boolean(url)
+        );
         imageFiles.push(...allImages);
       }
 
