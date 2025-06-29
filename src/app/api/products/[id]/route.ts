@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import MortalProduct from '@/models/MortalProduct';
 import { connectToDatabase } from '@/lib/mongodb';
 
@@ -8,10 +9,10 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
-    console.log('GET /api/products/[id] - ID:', id);
+    console.log('GET /api/products/[id] - ID:', id, new ObjectId(id));
     await connectToDatabase();
 
-    const product = await MortalProduct.findOne({ id });
+    const product = await MortalProduct.findOne({ _id: new ObjectId(id) });
     console.log('Found product:', product);
 
     if (!product) {
@@ -19,7 +20,7 @@ export async function GET(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(product.toObject());
   } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json(

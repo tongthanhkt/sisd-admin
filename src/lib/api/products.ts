@@ -1,5 +1,6 @@
 import { IMutateProduct } from '@/types';
 import { api } from '../api';
+import { IMortalProduct } from '@/models/MortalProduct';
 
 // Product types based on current MortalProduct schema
 export interface Product {
@@ -68,9 +69,12 @@ export const productsApi = api.injectEndpoints({
     }),
 
     // Get single product by ID
-    getProduct: builder.query<Product, string>({
-      query: (id) => `products/${id}`,
-      providesTags: (result, error, id) => [{ type: 'Product', id }]
+    getProduct: builder.query<IMortalProduct, string>({
+      query: (id) => ({
+        url: `products/${id}`,
+        method: 'GET'
+      }),
+      providesTags: ['Product']
     }),
 
     // Create new product

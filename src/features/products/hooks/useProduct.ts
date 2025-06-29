@@ -1,4 +1,7 @@
-import { useCreateProductMutation } from '@/lib/api/products';
+import {
+  useCreateProductMutation,
+  useGetProductQuery
+} from '@/lib/api/products';
 import { uploadFile } from '@/lib/upload';
 import { IMutateProduct } from '@/types';
 import { productFormSchema } from '@/validation';
@@ -11,7 +14,11 @@ import * as z from 'zod';
 export type ProductFormValues = z.infer<typeof productFormSchema>;
 export type FieldName = keyof ProductFormValues;
 
-export const useProduct = () => {
+export const useProduct = ({ productId }: { productId: string }) => {
+  const { data: productData } = useGetProductQuery(productId || '', {
+    skip: !productId || productId === 'new'
+  });
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     mode: 'onChange',

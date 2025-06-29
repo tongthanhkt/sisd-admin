@@ -6,6 +6,7 @@ import { columns } from './product-tables/columns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 
 type ProductListingPageProps = {
   searchParams: {
@@ -29,6 +30,8 @@ export default function ProductListingPage({
     return (
       <div className='space-y-4'>
         <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-8 w-40' />
         <Skeleton className='h-64 w-full' />
       </div>
     );
@@ -48,12 +51,6 @@ export default function ProductListingPage({
   // Filter products based on search params
   let filteredProducts = products || [];
 
-  if (search) {
-    filteredProducts = filteredProducts.filter((product: Product) =>
-      product.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
   if (categories) {
     filteredProducts = filteredProducts.filter(
       (product: Product) => product.category === categories
@@ -69,7 +66,7 @@ export default function ProductListingPage({
     <ProductTable
       data={paginatedProducts}
       totalItems={filteredProducts?.length || 0}
-      columns={columns}
+      columns={columns as ColumnDef<Product>[]}
       page={page}
       perPage={pageLimit}
     />

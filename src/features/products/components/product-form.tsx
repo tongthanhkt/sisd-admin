@@ -29,8 +29,14 @@ import { RelatedProducts } from './RelatedProducts';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 
-export default function ProductForm({ pageTitle }: { pageTitle: string }) {
-  const { form, onSubmit } = useProduct();
+export default function ProductForm({
+  pageTitle,
+  productId
+}: {
+  pageTitle: string;
+  productId: string;
+}) {
+  const { form, onSubmit } = useProduct({ productId });
 
   return (
     <Card className='mx-auto w-full'>
