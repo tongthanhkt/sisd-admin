@@ -4,6 +4,7 @@ import { dark } from '@clerk/themes';
 import { useTheme } from 'next-themes';
 import React, { useEffect, useState } from 'react';
 import { ActiveThemeProvider } from '../active-theme';
+import { ReduxProvider } from '../providers/redux-provider';
 
 export default function Providers({
   activeThemeValue,
@@ -20,13 +21,15 @@ export default function Providers({
   return (
     <>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
-        <ClerkProvider
-          appearance={{
-            baseTheme: mounted && resolvedTheme === 'dark' ? dark : undefined
-          }}
-        >
-          {children}
-        </ClerkProvider>
+        <ReduxProvider>
+          <ClerkProvider
+            appearance={{
+              baseTheme: mounted && resolvedTheme === 'dark' ? dark : undefined
+            }}
+          >
+            {children}
+          </ClerkProvider>
+        </ReduxProvider>
       </ActiveThemeProvider>
     </>
   );
