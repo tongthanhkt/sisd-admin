@@ -65,7 +65,7 @@ export function RelatedSections<T extends { id: string }>({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
   const { sensors, handleDragEnd } = useSortableList({
-    items: selectedIds.map((id) => ({ id })),
+    items: selectedIds?.map((id) => ({ id })),
     onItemsChange: (newArr) => {
       const newIds = newArr.map((item) => item.id);
       setSelectedIds(newIds);
@@ -74,11 +74,11 @@ export function RelatedSections<T extends { id: string }>({
   });
 
   useEffect(() => {
-    setSelectedIds(value);
+    setSelectedIds(value || []);
   }, [value]);
 
   const handleAdd = (ids: string[]) => {
-    setSelectedIds(ids);
+    setSelectedIds(ids || []);
     onChange(ids);
   };
 

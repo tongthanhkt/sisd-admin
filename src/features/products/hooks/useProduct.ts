@@ -7,6 +7,7 @@ import { IMutateProduct } from '@/types';
 import { productFormSchema } from '@/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -106,6 +107,36 @@ export const useProduct = ({ productId }: { productId: string }) => {
       relatedProduct: values.relatedProduct || []
     };
   };
+
+  useEffect(() => {
+    if (productData) {
+      form.reset({
+        code: productData.code,
+        name: productData.name,
+        category: productData.category,
+        shortDescription: productData.shortDescription,
+        description: productData.description,
+
+        packaging: productData.packaging,
+        advantages: productData.advantages?.map((advantage) => ({
+          value: advantage
+        })),
+        technicalSpecifications: productData.technicalSpecifications,
+        transportationAndStorage: productData.transportationAndStorage?.map(
+          (transportation) => ({
+            value: transportation
+          })
+        ),
+        safetyRegulations: {
+          warning: productData.safetyRegulations?.warning,
+          notes: productData.safetyRegulations?.notes
+        },
+        isFeatured: productData.isFeatured,
+        relatedBlogs: productData.relatedBlogs,
+        relatedProduct: productData.relatedProduct
+      });
+    }
+  }, [productData]);
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
