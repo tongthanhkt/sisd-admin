@@ -16,7 +16,6 @@ export default function BlogListingPage({}: BlogListingPage) {
   // Use RTK Query hook
   const { data: blogData, isLoading, error } = useGetBlogsQuery();
   const blogs = blogData?.blogs || [];
-  console.log('🚀 ~ BlogListingPage ~ blogs:', blogs);
 
   if (isLoading) {
     return (

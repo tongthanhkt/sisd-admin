@@ -1,10 +1,10 @@
 'use client';
 
+import { useGetBlogsQuery } from '@/lib/api/blogs';
 import { IBlog } from '@/models/Blog';
-import { useEffect, useState } from 'react';
-import { RelatedItem, RelatedSections } from '../RelatedSections';
-import { ProductFormValues } from '../../hooks/useProduct';
 import { useFormContext } from 'react-hook-form';
+import { ProductFormValues } from '../../hooks/useProduct';
+import { RelatedItem, RelatedSections } from '../RelatedSections';
 
 export function RelatedBlogs() {
   const methods = useFormContext<ProductFormValues>();
@@ -14,33 +14,17 @@ export function RelatedBlogs() {
     formState: { errors }
   } = methods;
   const relatedBlogs = watch('relatedBlogs');
-  const [allBlogs, setAllBlogs] = useState<IBlog[]>([]);
+  const { data: blogData } = useGetBlogsQuery();
+  const blogs = blogData?.blogs || [];
 
-  useEffect(() => {
-    async function fetchBlogs() {
-      const queryParams = new URLSearchParams();
-      queryParams.set('page', '1');
-      queryParams.set('perPage', '100');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${queryParams}`,
-        { cache: 'no-store' }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setAllBlogs(data.blogs);
-      }
-    }
-    fetchBlogs();
-  }, []);
-
-  const validBlogs: RelatedItem[] = allBlogs
+  const validBlogs: RelatedItem[] = blogs
     .filter(
       (item): item is IBlog => typeof item.id === 'string' && item.id.length > 0
     )
     .map((item) => ({
       id: item.id,
       name: item.title,
-      image: item.image,
+      image: item.image || item.imageSrc,
       category: item.category
     }));
 
