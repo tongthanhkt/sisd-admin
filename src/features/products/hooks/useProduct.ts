@@ -68,16 +68,35 @@ export const useProduct = () => {
     );
 
     return {
-      ...values,
+      code: values.code,
+      name: values.name,
+      category: values.category || '',
+      shortDescription: values.shortDescription,
+      description: values.description,
       image: thumbnailUrl.url || '',
       images: {
         main: imagesResponse?.[0]?.url || '',
         thumbnails: imagesResponse?.map((image) => image.url) || []
       },
-      category: values.category || '',
+      packaging: values.packaging,
       advantages,
+      technicalSpecifications: {
+        standard: values.technicalSpecifications.standard,
+        specifications: values.technicalSpecifications.specifications.map(
+          (spec) => ({
+            category: spec.category,
+            performance: spec.performance
+          })
+        )
+      },
       transportationAndStorage,
-      isFeatured: values.isFeatured || false
+      safetyRegulations: {
+        warning: values.safetyRegulations.warning,
+        notes: values.safetyRegulations.notes
+      },
+      isFeatured: values.isFeatured || false,
+      relatedBlogs: values.relatedBlogs || [],
+      relatedProduct: values.relatedProduct || []
     };
   };
 

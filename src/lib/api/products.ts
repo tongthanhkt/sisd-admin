@@ -1,40 +1,51 @@
-import { IMutateProduct, IProductPagination } from '@/types/product';
+import { IMutateProduct } from '@/types';
 import { api } from '../api';
 
-// Product types
+// Product types based on current MortalProduct schema
 export interface Product {
   _id: string;
-  name: string;
-  description?: string;
+  name?: string;
+  code?: string;
+  image?: string;
+  shortDescription?: string;
   category?: string;
-  images?: string[];
+  href?: string;
+  description?: string;
+  images?: {
+    main?: string;
+    thumbnails?: string[];
+  };
+  advantages?: string[];
+  packaging?: string;
   technicalSpecifications?: {
     standard?: string;
     specifications?: Array<{
-      id?: string;
+      stt?: number;
       category?: string;
       performance?: string;
     }>;
   };
+  transportationAndStorage?: string[];
+  safetyRegulations?: {
+    warning?: string;
+    notes?: string;
+  };
+  isFeatured?: boolean;
+  relatedBlogs?: string[];
+  relatedProduct?: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateProductRequest {
-  name: string;
-  description?: string;
-  category?: string;
-  images?: string[];
-  technicalSpecifications?: {
-    standard?: string;
-    specifications?: Array<{
-      category?: string;
-      performance?: string;
-    }>;
-  };
+// API Response structure
+export interface ProductsResponse {
+  products: Product[];
+  total_products: number;
+  current_page: number;
+  total_pages: number;
 }
 
-export interface UpdateProductRequest extends Partial<CreateProductRequest> {
+export interface UpdateProductRequest extends Partial<IMutateProduct> {
   id: string;
 }
 
@@ -42,21 +53,24 @@ export interface UpdateProductRequest extends Partial<CreateProductRequest> {
 export const productsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all products
-    getProducts: builder.query<IProductPagination, void>({
-      query: () => ({
-        url: 'products',
-        method: 'GET'
-      }),
-      providesTags: ['Product']
+    getProducts: builder.query<ProductsResponse, void>({
+      query: () => 'products',
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.products.map(({ _id }) => ({
+                type: 'Product' as const,
+                id: _id
+              })),
+              { type: 'Product', id: 'LIST' }
+            ]
+          : [{ type: 'Product', id: 'LIST' }]
     }),
 
     // Get single product by ID
     getProduct: builder.query<Product, string>({
-      query: (id) => ({
-        url: `products/${id}`,
-        method: 'GET'
-      }),
-      providesTags: ['Product']
+      query: (id) => `products/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Product', id }]
     }),
 
     // Create new product
@@ -66,7 +80,7 @@ export const productsApi = api.injectEndpoints({
         method: 'POST',
         body: product
       }),
-      invalidatesTags: ['Product']
+      invalidatesTags: [{ type: 'Product', id: 'LIST' }]
     }),
 
     // Update product
@@ -76,7 +90,10 @@ export const productsApi = api.injectEndpoints({
         method: 'PUT',
         body: product
       }),
-      invalidatesTags: ['Product']
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Product', id },
+        { type: 'Product', id: 'LIST' }
+      ]
     }),
 
     // Delete product
@@ -85,7 +102,10 @@ export const productsApi = api.injectEndpoints({
         url: `products/${id}`,
         method: 'DELETE'
       }),
-      invalidatesTags: ['Product']
+      invalidatesTags: (result, error, id) => [
+        { type: 'Product', id },
+        { type: 'Product', id: 'LIST' }
+      ]
     })
   })
 });
