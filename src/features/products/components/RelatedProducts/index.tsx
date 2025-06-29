@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { RelatedSections } from '../RelatedSections';
 import { useFormContext } from 'react-hook-form';
 import { ProductFormValues } from '../../hooks/useProduct';
+import { useGetProductsQuery } from '@/lib/api/products';
 
 export interface RelatedProduct {
   id: string;
@@ -13,28 +14,17 @@ export interface RelatedProduct {
 
 export function RelatedProducts() {
   const methods = useFormContext<ProductFormValues>();
-  const { watch, setValue } = methods;
+  const {
+    watch,
+    setValue,
+    formState: { errors }
+  } = methods;
   const relatedProducts = watch('relatedProduct');
-  const [allProducts, setAllProducts] = useState<IMortalProduct[]>([]);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      const queryParams = new URLSearchParams();
-      queryParams.set('page', '1');
-      queryParams.set('perPage', '100');
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/products?${queryParams}`,
-        { cache: 'no-store' }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setAllProducts(data.products);
-      }
-    }
-    fetchProducts();
-  }, []);
+  const { data: productData } = useGetProductsQuery();
+  const products = productData?.products || [];
 
-  const validProducts = allProducts
+  const validProducts = products
     .filter(
       (item): item is IMortalProduct =>
         typeof item.id === 'string' && item.id.length > 0
@@ -64,6 +54,7 @@ export function RelatedProducts() {
         item.category ? PRODUCT_LABELS[item.category] : ''
       }
       fieldName='relatedProduct'
+      helperText={errors.relatedProduct?.message}
     />
   );
 }

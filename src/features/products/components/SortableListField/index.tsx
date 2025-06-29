@@ -89,6 +89,7 @@ export const SortableListField = ({
       name={fieldName}
       render={({ field, fieldState: { error } }) => {
         const itemsArr = getItemArray(field.value);
+        console.log('🚀 ~ itemsArr:', itemsArr);
 
         return (
           <FormItem className='w-full'>
@@ -157,6 +158,11 @@ export const SortableListField = ({
                         </SortableSpecItem>
                       ))
                     )}
+                    {error && (
+                      <FormMessage className='text-destructive'>
+                        {error.message}
+                      </FormMessage>
+                    )}
                     <Button
                       type='button'
                       variant='outline'
@@ -171,11 +177,6 @@ export const SortableListField = ({
                 </SortableContext>
               </DndContext>
             </FormControl>
-            {error && (
-              <FormMessage className='text-destructive'>
-                {error.message}
-              </FormMessage>
-            )}
           </FormItem>
         );
       }}

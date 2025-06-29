@@ -27,6 +27,9 @@ export interface IMortalProduct extends Document {
     warning?: string;
     notes?: string;
   };
+  isFeatured?: boolean;
+  relatedBlogs?: string[];
+  relatedProduct?: string[];
   createdAt?: Date;
   updatedAt?: Date;
   id: string;
@@ -61,7 +64,10 @@ const MortalProductSchema: Schema = new Schema(
     safetyRegulations: {
       warning: { type: String, required: false },
       notes: { type: String, required: false }
-    }
+    },
+    isFeatured: { type: Boolean, required: false },
+    relatedBlogs: [{ type: String, required: false }],
+    relatedProduct: [{ type: String, required: false }]
   },
   { timestamps: true }
 );

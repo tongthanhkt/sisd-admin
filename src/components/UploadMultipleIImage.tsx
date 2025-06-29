@@ -5,16 +5,16 @@ import Image from 'next/image';
 import * as React from 'react';
 import Dropzone, { type DropzoneProps } from 'react-dropzone';
 
-import { useUploadFile } from '@/hooks';
+import { useUploadFileMixed } from '@/hooks/use-upload-file';
 import { useControllableState } from '@/hooks/use-controllable-state';
-import { cn, formatBytes } from '@/lib/utils';
+import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
 import { FormLabel, FormMessage } from './ui/form';
 
 interface UploadMultipleImageProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  value?: File[];
-  onValueChange?: React.Dispatch<React.SetStateAction<File[]>>;
-  onUpload?: (files: File[]) => Promise<void>;
+  value?: (File | string)[];
+  onValueChange?: React.Dispatch<React.SetStateAction<(File | string)[]>>;
+  onUpload?: (files: (File | string)[]) => Promise<void>;
   accept?: DropzoneProps['accept'];
   maxSize?: DropzoneProps['maxSize'];
   maxFiles?: number;
@@ -47,14 +47,26 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     onChange: onValueChange
   });
 
-  const { onDrop, handleRemove, canAddMore } = useUploadFile({
+  const { onDrop, handleRemove, canAddMore } = useUploadFileMixed({
     value: files,
-    onValueChange: setFiles as React.Dispatch<React.SetStateAction<File[]>>,
+    onValueChange: setFiles as React.Dispatch<
+      React.SetStateAction<(File | string)[]>
+    >,
     maxFiles,
     maxSize,
     onUpload,
     mode: 'multiple'
   });
+
+  // Get preview URL for display
+  const getPreviewUrl = (item: File | string): string => {
+    if (isFile(item)) {
+      return isFileWithPreview(item) ? item.preview : URL.createObjectURL(item);
+    } else if (isUrl(item)) {
+      return item;
+    }
+    return '';
+  };
 
   return (
     <div className={cn('flex flex-col gap-2', className)} {...rest}>
@@ -108,8 +120,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
                   className='group relative flex h-28 items-center justify-center overflow-hidden rounded-lg bg-gray-100'
                 >
                   <Image
-                    src={isFileWithPreview(file) ? file.preview : ''}
-                    alt={file.name}
+                    src={getPreviewUrl(file)}
+                    alt={isFile(file) ? file.name : `Image ${idx + 1}`}
                     fill
                     className='object-cover'
                     style={{ maxHeight: '100%', maxWidth: '100%' }}

@@ -35,3 +35,5 @@ export type MainNavItem = NavItemWithOptionalChildren;
 export type SidebarNavItem = NavItemWithChildren;
 
 export * from './modal';
+export * from './product';
+export * from './blog';

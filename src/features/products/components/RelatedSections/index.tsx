@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { FieldName } from '../../hooks/useProduct';
 import { RelatedProductModal } from '../RelatedProductModal';
+import { cn } from '@/lib/utils';
 
 export interface RelatedItem {
   id: string;
@@ -64,7 +65,7 @@ export function RelatedSections<T extends { id: string }>({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
   const { sensors, handleDragEnd } = useSortableList({
-    items: selectedIds.map((id) => ({ id })),
+    items: selectedIds?.map((id) => ({ id })),
     onItemsChange: (newArr) => {
       const newIds = newArr.map((item) => item.id);
       setSelectedIds(newIds);
@@ -73,11 +74,11 @@ export function RelatedSections<T extends { id: string }>({
   });
 
   useEffect(() => {
-    setSelectedIds(value);
+    setSelectedIds(value || []);
   }, [value]);
 
   const handleAdd = (ids: string[]) => {
-    setSelectedIds(ids);
+    setSelectedIds(ids || []);
     onChange(ids);
   };
 
@@ -93,7 +94,7 @@ export function RelatedSections<T extends { id: string }>({
 
   return (
     <div className='flex flex-col gap-4'>
-      <FormLabel>
+      <FormLabel className={cn(helperText && 'text-destructive')}>
         {label} <span className='text-destructive'>*</span>
       </FormLabel>
       <div className='flex flex-col gap-4'>

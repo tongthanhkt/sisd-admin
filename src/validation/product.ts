@@ -20,16 +20,28 @@ export const productFormSchema = z.object({
     .min(1, { message: 'Thumbnail is required' })
     .refine(
       (arr) =>
-        typeof window === 'undefined' || arr.every((f) => f instanceof File),
-      { message: 'All thumbnails must be files' }
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All thumbnails must be files or valid URLs' }
     ),
   images: z
     .array(z.any())
     .min(1, { message: 'Images are required' })
     .refine(
       (arr) =>
-        typeof window === 'undefined' || arr.every((f) => f instanceof File),
-      { message: 'All images must be files' }
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All images must be files or valid URLs' }
     ),
   packaging: z.string().min(1, { message: 'Packaging is required' }),
   advantages: z

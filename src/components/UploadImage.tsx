@@ -6,15 +6,15 @@ import * as React from 'react';
 import Dropzone, { type DropzoneProps } from 'react-dropzone';
 
 import { useControllableState } from '@/hooks/use-controllable-state';
-import { useUploadFile } from '@/hooks/use-upload-file';
-import { cn, formatBytes } from '@/lib/utils';
+import { useUploadFileMixed } from '@/hooks/use-upload-file';
+import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
 import { Pencil } from 'lucide-react';
 import { FormLabel } from './ui/form';
 
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  value?: File[];
-  onValueChange?: React.Dispatch<React.SetStateAction<File[]>>;
-  onUpload?: (files: File[]) => Promise<void>;
+  value?: (File | string)[];
+  onValueChange?: React.Dispatch<React.SetStateAction<(File | string)[]>>;
+  onUpload?: (files: (File | string)[]) => Promise<void>;
   accept?: DropzoneProps['accept'];
   maxSize?: DropzoneProps['maxSize'];
   maxFiles?: DropzoneProps['maxFiles'];
@@ -36,9 +36,11 @@ export function UploadImage(props: FileUploaderProps) {
     onChange: onValueChange
   });
 
-  const { onDrop, handleRemove } = useUploadFile({
+  const { onDrop, handleRemove } = useUploadFileMixed({
     value: files,
-    onValueChange: setFiles as React.Dispatch<React.SetStateAction<File[]>>,
+    onValueChange: setFiles as React.Dispatch<
+      React.SetStateAction<(File | string)[]>
+    >,
     maxFiles,
     maxSize,
     onUpload,
@@ -50,6 +52,16 @@ export function UploadImage(props: FileUploaderProps) {
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     fileInputRef.current?.click();
+  };
+
+  // Get preview URL for display
+  const getPreviewUrl = (item: File | string): string => {
+    if (isFile(item)) {
+      return isFileWithPreview(item) ? item.preview : URL.createObjectURL(item);
+    } else if (isUrl(item)) {
+      return item;
+    }
+    return '';
   };
 
   return (
@@ -83,11 +95,11 @@ export function UploadImage(props: FileUploaderProps) {
                 ref={fileInputRef}
                 style={{ display: 'none' }}
               />
-              {files && files.length > 0 && isFileWithPreview(files[0]) ? (
+              {files && files.length > 0 ? (
                 <div className='relative flex h-full w-full items-center justify-center'>
                   <Image
-                    src={files[0].preview}
-                    alt={files[0].name}
+                    src={getPreviewUrl(files[0])}
+                    alt={isFile(files[0]) ? files[0].name : 'Thumbnail'}
                     fill
                     className='z-0 rounded-md object-contain'
                     style={{ maxHeight: '100%', maxWidth: '100%' }}

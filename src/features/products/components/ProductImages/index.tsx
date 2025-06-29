@@ -2,17 +2,41 @@ import { FormField } from '@/components/ui/form';
 import { UploadImage } from '@/components/UploadImage';
 import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { useFormContext } from 'react-hook-form';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export const ProductImages = () => {
+interface ProductImagesProps {
+  isLoadingImages?: boolean;
+}
+
+export const ProductImages = ({
+  isLoadingImages = false
+}: ProductImagesProps) => {
   const methods = useFormContext();
   const {
     control,
     setValue,
     formState: { errors }
   } = methods;
-  console.log('🚀 ~ ProductImages ~ errors:', errors);
   const { watch } = methods;
   const images = watch('images');
+
+  if (isLoadingImages) {
+    return (
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+        <div className='space-y-2'>
+          <Skeleton className='h-4 w-20' />
+          <Skeleton className='h-60 w-full' />
+        </div>
+        <div className='space-y-2'>
+          <Skeleton className='h-4 w-24' />
+          <div className='grid grid-cols-2 gap-3'>
+            <Skeleton className='h-28 w-full' />
+            <Skeleton className='h-28 w-full' />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>

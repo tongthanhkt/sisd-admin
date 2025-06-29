@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { IMortalProduct } from '@/models/MortalProduct';
 import { Column, ColumnDef } from '@tanstack/react-table';
-import { CheckCircle2, Text, XCircle } from 'lucide-react';
+import { Text } from 'lucide-react';
 import Image from 'next/image';
 import { CellAction } from './cell-action';
 import { CATEGORY_OPTIONS } from './options';
@@ -17,8 +17,8 @@ export const columns: ColumnDef<IMortalProduct>[] = [
       return (
         <div className='relative aspect-square w-20'>
           <Image
-            src={row.original.image}
-            alt={row.original.name}
+            src={row.original.image || ''}
+            alt={row.original.name || ''}
             fill
             className='rounded-lg object-cover'
           />

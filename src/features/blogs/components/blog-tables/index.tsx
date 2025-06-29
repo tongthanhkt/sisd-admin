@@ -3,9 +3,9 @@
 import { DataTable } from '@/components/ui/table/data-table';
 import { useDataTable } from '@/hooks/use-data-table';
 import { ColumnDef, PaginationState, Updater } from '@tanstack/react-table';
-import { IBlog } from '@/models/Blog';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
+import { IBlog } from '@/models/Blog';
 
 interface BlogTableProps {
   data: IBlog[];

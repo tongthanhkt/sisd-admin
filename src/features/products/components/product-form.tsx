@@ -29,8 +29,14 @@ import { RelatedProducts } from './RelatedProducts';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 
-export default function ProductForm({ pageTitle }: { pageTitle: string }) {
-  const { form, onSubmit } = useProduct();
+export default function ProductForm({
+  pageTitle,
+  productId
+}: {
+  pageTitle: string;
+  productId: string;
+}) {
+  const { form, onSubmit, isLoadingImages } = useProduct({ productId });
 
   return (
     <Card className='mx-auto w-full'>
@@ -84,7 +90,7 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
               />
             </div>
 
-            <ProductImages />
+            <ProductImages isLoadingImages={isLoadingImages} />
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
