@@ -42,10 +42,14 @@ export async function PUT(
     const body = await request.json();
     console.log('Update body:', body);
 
-    const product = await MortalProduct.findOneAndUpdate({ id }, body, {
-      new: true,
-      runValidators: true
-    });
+    const product = await MortalProduct.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
 
     if (!product) {
       console.log('Product not found for update');

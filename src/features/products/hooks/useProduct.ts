@@ -1,24 +1,32 @@
 import {
   useCreateProductMutation,
-  useGetProductQuery
+  useGetProductQuery,
+  useUpdateProductMutation
 } from '@/lib/api/products';
 import { uploadFile } from '@/lib/upload';
 import { IMutateProduct } from '@/types';
+import { IMortalProduct } from '@/models/MortalProduct';
 import { productFormSchema } from '@/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import { urlToFile, isFile, isUrl } from '@/lib/utils';
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;
 export type FieldName = keyof ProductFormValues;
+
+// Extended File type with preview
+type FileWithPreview = File & { preview: string };
 
 export const useProduct = ({ productId }: { productId: string }) => {
   const { data: productData } = useGetProductQuery(productId || '', {
     skip: !productId || productId === 'new'
   });
+
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -51,6 +59,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
   const router = useRouter();
 
   const [createProduct] = useCreateProductMutation();
+  const [updateProduct] = useUpdateProductMutation();
 
   const {
     formState: { errors }
@@ -60,14 +69,35 @@ export const useProduct = ({ productId }: { productId: string }) => {
     values: ProductFormValues
   ): Promise<IMutateProduct> => {
     const { thumbnail, images } = values;
-    const thumbnailUrl = await uploadFile(thumbnail?.[0]);
 
-    const imagesResponse = await Promise.all(
-      images?.map(async (image) => {
-        const imageUrl = await uploadFile(image);
-        return imageUrl;
-      })
-    );
+    // Handle thumbnail upload
+    let thumbnailUrl = '';
+    if (thumbnail && thumbnail.length > 0) {
+      if (isFile(thumbnail[0])) {
+        // New file uploaded
+        const uploadResult = await uploadFile(thumbnail[0]);
+        thumbnailUrl = uploadResult.url || '';
+      } else if (isUrl(thumbnail[0])) {
+        // Existing URL, keep it
+        thumbnailUrl = thumbnail[0];
+      }
+    }
+
+    // Handle images upload
+    let imagesResponse: { url: string }[] = [];
+    if (images && images.length > 0) {
+      const uploadPromises = images.map(async (image) => {
+        if (isFile(image)) {
+          // New file uploaded
+          return await uploadFile(image);
+        } else if (isUrl(image)) {
+          // Existing URL, keep it
+          return { url: image };
+        }
+        return { url: '' };
+      });
+      imagesResponse = await Promise.all(uploadPromises);
+    }
 
     const advantages = values.advantages.map((advantage) => advantage.value);
 
@@ -81,7 +111,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
       category: values.category || '',
       shortDescription: values.shortDescription,
       description: values.description,
-      image: thumbnailUrl.url || '',
+      image: thumbnailUrl,
       images: {
         main: imagesResponse?.[0]?.url || '',
         thumbnails: imagesResponse?.map((image) => image.url) || []
@@ -108,40 +138,92 @@ export const useProduct = ({ productId }: { productId: string }) => {
     };
   };
 
-  useEffect(() => {
-    if (productData) {
-      form.reset({
-        code: productData.code,
-        name: productData.name,
-        category: productData.category,
-        shortDescription: productData.shortDescription,
-        description: productData.description,
+  // Convert API image URLs to displayable values (no fetch)
+  const convertImagesFromAPI = async (productData: IMortalProduct) => {
+    setIsLoadingImages(true);
+    try {
+      const thumbnailFiles: string[] = [];
+      const imageFiles: string[] = [];
 
-        packaging: productData.packaging,
-        advantages: productData.advantages?.map((advantage) => ({
-          value: advantage
-        })),
-        technicalSpecifications: productData.technicalSpecifications,
-        transportationAndStorage: productData.transportationAndStorage?.map(
-          (transportation) => ({
-            value: transportation
-          })
-        ),
-        safetyRegulations: {
-          warning: productData.safetyRegulations?.warning,
-          notes: productData.safetyRegulations?.notes
-        },
-        isFeatured: productData.isFeatured,
-        relatedBlogs: productData.relatedBlogs,
-        relatedProduct: productData.relatedProduct
-      });
+      // Just push the URL string
+      if (productData.image) {
+        thumbnailFiles.push(productData.image);
+      }
+
+      if (productData.images) {
+        const allImages = [
+          productData.images.main,
+          ...(productData.images.thumbnails || [])
+        ].filter((url): url is string => Boolean(url));
+        imageFiles.push(...allImages);
+      }
+
+      return { thumbnailFiles, imageFiles };
+    } finally {
+      setIsLoadingImages(false);
     }
+  };
+
+  useEffect(() => {
+    const loadProductData = async () => {
+      if (productData) {
+        try {
+          const { thumbnailFiles, imageFiles } =
+            await convertImagesFromAPI(productData);
+
+          form.reset({
+            code: productData.code || '',
+            name: productData.name || '',
+            category: productData.category || '',
+            shortDescription: productData.shortDescription || '',
+            description: productData.description || '',
+            thumbnail: thumbnailFiles,
+            images: imageFiles,
+            packaging: productData.packaging || '',
+            advantages:
+              productData.advantages?.map((advantage) => ({
+                value: advantage,
+                id: Math.random().toString(36).substring(2, 15)
+              })) || [],
+            technicalSpecifications: productData.technicalSpecifications || {
+              standard: '',
+              specifications: []
+            },
+            transportationAndStorage:
+              productData.transportationAndStorage?.map((transportation) => ({
+                value: transportation,
+                id: Math.random().toString(36).substring(2, 15)
+              })) || [],
+            safetyRegulations: {
+              warning: productData.safetyRegulations?.warning || '',
+              notes: productData.safetyRegulations?.notes || ''
+            },
+            isFeatured: productData.isFeatured || false,
+            relatedBlogs: productData.relatedBlogs || [],
+            relatedProduct: productData.relatedProduct || []
+          });
+        } catch (error) {
+          console.error('Error loading product data:', error);
+          toast.error('Error loading product images');
+        }
+      }
+    };
+
+    loadProductData();
   }, [productData]);
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
       const data = await prepareDataSubmit(values);
-      const response = await createProduct(data);
+
+      let response;
+      if (productId && productId !== 'new') {
+        // Update existing product
+        response = await updateProduct({ id: productId, ...data });
+      } else {
+        // Create new product
+        response = await createProduct(data);
+      }
 
       if ('error' in response && response.error) {
         const errorMessage =
@@ -154,15 +236,22 @@ export const useProduct = ({ productId }: { productId: string }) => {
         return;
       }
 
+      toast.success(
+        productId && productId !== 'new'
+          ? 'Product updated successfully'
+          : 'Product created successfully'
+      );
       form.reset();
       router.push('/dashboard/product');
     } catch (error) {
       console.error('🚀 ~ onSubmit error:', error);
+      toast.error('An error occurred while saving the product');
     }
   };
 
   return {
     form,
-    onSubmit
+    onSubmit,
+    isLoadingImages
   };
 };

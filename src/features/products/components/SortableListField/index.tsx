@@ -89,6 +89,7 @@ export const SortableListField = ({
       name={fieldName}
       render={({ field, fieldState: { error } }) => {
         const itemsArr = getItemArray(field.value);
+        console.log('🚀 ~ itemsArr:', itemsArr);
 
         return (
           <FormItem className='w-full'>

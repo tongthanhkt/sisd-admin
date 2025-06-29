@@ -94,10 +94,7 @@ export const productsApi = api.injectEndpoints({
         method: 'PUT',
         body: product
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: 'Product', id },
-        { type: 'Product', id: 'LIST' }
-      ]
+      invalidatesTags: ['Product']
     }),
 
     // Delete product

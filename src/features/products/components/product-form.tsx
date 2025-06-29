@@ -36,7 +36,7 @@ export default function ProductForm({
   pageTitle: string;
   productId: string;
 }) {
-  const { form, onSubmit } = useProduct({ productId });
+  const { form, onSubmit, isLoadingImages } = useProduct({ productId });
 
   return (
     <Card className='mx-auto w-full'>
@@ -90,7 +90,7 @@ export default function ProductForm({
               />
             </div>
 
-            <ProductImages />
+            <ProductImages isLoadingImages={isLoadingImages} />
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
