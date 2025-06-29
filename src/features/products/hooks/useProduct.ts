@@ -38,7 +38,6 @@ export const useProduct = () => {
   const {
     formState: { errors }
   } = form;
-  console.log('🚀 ~ useProduct ~ errors:', errors);
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
@@ -50,7 +49,6 @@ export const useProduct = () => {
         transportationAndStorage: values.transportationAndStorage,
         safetyRegulations: values.safetyRegulations
       };
-      console.log('🚀 ~ onSubmit ~ payload:', payload);
       form.reset();
     } catch (error) {
       console.error('🚀 ~ onSubmit error:', error);

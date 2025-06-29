@@ -10,7 +10,6 @@ export const ProductImages = () => {
     setValue,
     formState: { errors }
   } = methods;
-  console.log('🚀 ~ ProductImages ~ errors:', errors);
   const { watch } = methods;
   const images = watch('images');
 
