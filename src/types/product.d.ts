@@ -18,9 +18,6 @@ export interface IMutateProduct {
   technicalSpecifications: ITechnicalSpecifications;
   transportationAndStorage: string[];
   safetyRegulations: SafetyRegulations;
-  isFeatured: boolean;
-  relatedBlogs: string[];
-  relatedProduct: string[];
 }
 
 interface ITechnicalSpecifications {

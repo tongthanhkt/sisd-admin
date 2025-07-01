@@ -4,8 +4,9 @@ import {
   useUpdateProductMutation
 } from '@/lib/api/products';
 import { uploadFile } from '@/lib/upload';
-import { IMutateProduct } from '@/types';
+import { isFile, isUrl } from '@/lib/utils';
 import { IMortalProduct } from '@/models/MortalProduct';
+import { IMutateProduct } from '@/types';
 import { productFormSchema } from '@/validation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -13,13 +14,9 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import { urlToFile, isFile, isUrl } from '@/lib/utils';
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;
 export type FieldName = keyof ProductFormValues;
-
-// Extended File type with preview
-type FileWithPreview = File & { preview: string };
 
 export const useProduct = ({ productId }: { productId: string }) => {
   const { data: productData } = useGetProductQuery(productId || '', {
@@ -49,10 +46,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
       safetyRegulations: {
         warning: '',
         notes: ''
-      },
-      isFeatured: false,
-      relatedBlogs: [],
-      relatedProduct: []
+      }
     }
   });
 
@@ -131,10 +125,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
       safetyRegulations: {
         warning: values.safetyRegulations.warning,
         notes: values.safetyRegulations.notes
-      },
-      isFeatured: values.isFeatured || false,
-      relatedBlogs: values.relatedBlogs || [],
-      relatedProduct: values.relatedProduct || []
+      }
     };
   };
 
@@ -196,10 +187,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
             safetyRegulations: {
               warning: productData.safetyRegulations?.warning || '',
               notes: productData.safetyRegulations?.notes || ''
-            },
-            isFeatured: productData.isFeatured || false,
-            relatedBlogs: productData.relatedBlogs || [],
-            relatedProduct: productData.relatedProduct || []
+            }
           });
         } catch (error) {
           console.error('Error loading product data:', error);
