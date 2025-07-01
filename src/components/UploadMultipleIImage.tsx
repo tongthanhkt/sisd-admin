@@ -6,18 +6,13 @@ import * as React from 'react';
 import Dropzone, { type DropzoneProps } from 'react-dropzone';
 
 import { useUploadFileMixed } from '@/hooks/use-upload-file';
-import { useControllableState } from '@/hooks/use-controllable-state';
 import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
+import { IUploadMultipleImageItem } from '@/types';
 import { FormLabel, FormMessage } from './ui/form';
 
-interface UploadMultipleImageWithCaption {
-  file: File | string;
-  caption: string;
-}
-
-interface UploadMultipleImagePropsBase
+interface UploadMultipleImageProps
   extends React.HTMLAttributes<HTMLDivElement> {
-  onUpload?: (files: (File | string)[]) => Promise<void>;
+  onUpload?: (files: IUploadMultipleImageItem[]) => Promise<void>;
   accept?: DropzoneProps['accept'];
   maxSize?: DropzoneProps['maxSize'];
   maxFiles?: number;
@@ -28,27 +23,12 @@ interface UploadMultipleImagePropsBase
   helperText?: string;
   cardClassName?: string;
   listClassName?: string;
-}
-
-interface UploadMultipleImagePropsWithCaption
-  extends UploadMultipleImagePropsBase {
-  withCaption: true;
-  value?: UploadMultipleImageWithCaption[];
+  value?: IUploadMultipleImageItem[];
   onValueChange?: React.Dispatch<
-    React.SetStateAction<UploadMultipleImageWithCaption[]>
+    React.SetStateAction<IUploadMultipleImageItem[]>
   >;
+  withCaption?: boolean;
 }
-
-interface UploadMultipleImagePropsWithoutCaption
-  extends UploadMultipleImagePropsBase {
-  withCaption?: false;
-  value?: (File | string)[];
-  onValueChange?: React.Dispatch<React.SetStateAction<(File | string)[]>>;
-}
-
-type UploadMultipleImageProps =
-  | UploadMultipleImagePropsWithCaption
-  | UploadMultipleImagePropsWithoutCaption;
 
 export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
   const {
@@ -66,70 +46,41 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     helperText,
     cardClassName,
     listClassName,
-    withCaption,
+    withCaption = false,
     ...rest
   } = props;
 
-  // Always call both hooks
-  const [filesWithCaption, setFilesWithCaption] = useControllableState<
-    UploadMultipleImageWithCaption[]
-  >({
-    prop: (withCaption ? valueProp : undefined) as
-      | UploadMultipleImageWithCaption[]
-      | undefined,
-    onChange: (withCaption ? onValueChange : undefined) as
-      | React.Dispatch<React.SetStateAction<UploadMultipleImageWithCaption[]>>
-      | undefined,
-    defaultProp: []
-  });
-  const [filesNoCaption, setFilesNoCaption] = useControllableState<
-    (File | string)[]
-  >({
-    prop: (!withCaption ? valueProp : undefined) as
-      | (File | string)[]
-      | undefined,
-    onChange: (!withCaption ? onValueChange : undefined) as
-      | React.Dispatch<React.SetStateAction<(File | string)[]>>
-      | undefined,
-    defaultProp: []
-  });
-
-  // Select correct state and setter
-  const files = withCaption ? filesWithCaption : filesNoCaption;
-  const setFiles = withCaption ? setFilesWithCaption : setFilesNoCaption;
+  const files = valueProp ?? [];
+  const setFiles = onValueChange ?? (() => {});
 
   // Helper to get the files array for dropzone
-  const filesForDropzone = withCaption
-    ? (files as UploadMultipleImageWithCaption[]).map((f) => f.file)
-    : (files as (File | string)[]);
+  const filesForDropzone = (files ?? []).map((f) => f.file);
 
   // Drop handler
   const { onDrop, handleRemove, canAddMore } = useUploadFileMixed({
     value: filesForDropzone,
     onValueChange: (newFiles) => {
-      if (withCaption) {
-        const newValue = (newFiles as (File | string)[]).map((file, idx) => {
-          const old = (files as UploadMultipleImageWithCaption[]).find((f) =>
-            isFile(f.file) && isFile(file)
-              ? f.file.name === file.name
-              : f.file === file
-          );
-          return { file, caption: old?.caption || '' };
-        });
-        (
-          setFiles as React.Dispatch<
-            React.SetStateAction<UploadMultipleImageWithCaption[]>
-          >
-        )(newValue);
-      } else {
-        (setFiles as React.Dispatch<React.SetStateAction<(File | string)[]>>)(
-          newFiles as (File | string)[]
+      const newValue = (newFiles as (File | string)[]).map((file, idx) => {
+        const old = (files ?? []).find((f) =>
+          isFile(f.file) && isFile(file)
+            ? (f.file as File).name === (file as File).name
+            : f.file === file
         );
-      }
+        return { file, caption: old?.caption || '' };
+      });
+      setFiles(newValue);
     },
     maxFiles,
     maxSize,
-    onUpload,
+    onUpload: onUpload
+      ? (arr) =>
+          onUpload(
+            arr.map((file, idx) => ({
+              file,
+              caption: (files ?? [])[idx]?.caption || ''
+            }))
+          )
+      : undefined,
     mode: 'multiple'
   });
 
@@ -145,22 +96,16 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
 
   // Remove handler
   const handleRemoveImage = (idx: number) => {
-    if (withCaption) {
-      const arr = [...((files as UploadMultipleImageWithCaption[]) ?? [])];
-      arr.splice(idx, 1);
-      setFiles(arr as any);
-    } else {
-      handleRemove(idx);
-    }
+    const arr = [...(files ?? [])];
+    arr.splice(idx, 1);
+    setFiles(arr);
   };
 
   // Caption change handler
   const handleCaptionChange = (idx: number, caption: string) => {
-    if (withCaption) {
-      const arr = [...((files as UploadMultipleImageWithCaption[]) ?? [])];
-      arr[idx] = { ...arr[idx], caption };
-      setFiles(arr as any);
-    }
+    const arr = [...(files ?? [])];
+    arr[idx] = { ...arr[idx], caption };
+    setFiles(arr);
   };
 
   return (
@@ -210,47 +155,47 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
               </div>
             )}
             {/* Images */}
-            {filesForDropzone &&
-              filesForDropzone.map((file, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    'group relative flex h-28 items-center justify-center overflow-hidden rounded-lg bg-gray-100',
-                    cardClassName
-                  )}
+            {files.map((item, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  'group relative flex h-28 items-center justify-center overflow-hidden rounded-lg bg-gray-100',
+                  cardClassName
+                )}
+              >
+                <Image
+                  src={getPreviewUrl(item.file)}
+                  alt={
+                    isFile(item.file)
+                      ? (item.file as File).name
+                      : `Image ${idx + 1}`
+                  }
+                  fill
+                  className='object-cover'
+                  style={{ maxHeight: '100%', maxWidth: '100%' }}
+                />
+                <button
+                  type='button'
+                  onClick={() => handleRemoveImage(idx)}
+                  className='absolute top-1 right-1 rounded-full bg-white/80 p-1 opacity-0 transition group-hover:opacity-100'
+                  title='Delete'
+                  disabled={disabled}
                 >
-                  <Image
-                    src={getPreviewUrl(file)}
-                    alt={isFile(file) ? file.name : `Image ${idx + 1}`}
-                    fill
-                    className='object-cover'
-                    style={{ maxHeight: '100%', maxWidth: '100%' }}
-                  />
-                  <button
-                    type='button'
-                    onClick={() => handleRemoveImage(idx)}
-                    className='absolute top-1 right-1 rounded-full bg-white/80 p-1 opacity-0 transition group-hover:opacity-100'
-                    title='Delete'
+                  <IconX className='size-4 text-red-500' />
+                </button>
+                {/* Caption input */}
+                {withCaption && (
+                  <input
+                    type='text'
+                    className='absolute right-1 bottom-1 left-1 rounded border border-gray-300 bg-white/80 px-2 py-1 text-xs outline-none'
+                    placeholder='Enter caption...'
+                    value={item.caption || ''}
+                    onChange={(e) => handleCaptionChange(idx, e.target.value)}
                     disabled={disabled}
-                  >
-                    <IconX className='size-4 text-red-500' />
-                  </button>
-                  {/* Caption input */}
-                  {withCaption && (
-                    <input
-                      type='text'
-                      className='absolute right-1 bottom-1 left-1 rounded border border-gray-300 bg-white/80 px-2 py-1 text-xs outline-none'
-                      placeholder='Enter caption...'
-                      value={
-                        (files as UploadMultipleImageWithCaption[])?.[idx]
-                          ?.caption || ''
-                      }
-                      onChange={(e) => handleCaptionChange(idx, e.target.value)}
-                      disabled={disabled}
-                    />
-                  )}
-                </div>
-              ))}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         )}
       </Dropzone>

@@ -1,15 +1,10 @@
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel
-} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import React from 'react';
+import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
+import { IUploadMultipleImageItem } from '@/types';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
-import { Button } from '@/components/ui/button';
-import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 
 export const ArticleSection = () => {
   const methods = useFormContext<BlogFormValues>();
@@ -60,7 +55,10 @@ export const ArticleSection = () => {
                   label='Images'
                   value={articleSections[index].images || []}
                   onValueChange={(files) => {
-                    setValue(`articleSections.${index}.images`, files as any);
+                    setValue(
+                      `articleSections.${index}.images`,
+                      files as IUploadMultipleImageItem[]
+                    );
                   }}
                   cardClassName='h-40'
                   listClassName='lg:grid-cols-5'
