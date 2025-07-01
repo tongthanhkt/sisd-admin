@@ -24,6 +24,8 @@ import Image from 'next/image';
 import { BlogImages } from './BlogImages';
 import { Calendar } from '@/components/ui/calendar';
 import { DatePicker } from '@/components/ui/date-picker';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { BLOG_CATEGORIES_OPTIONS } from '@/constants/blog';
 
 interface BlogFormProps {
   blogId?: string;
@@ -181,7 +183,9 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
     isVertical: initialData?.isVertical ?? false,
     banner: [],
     thumbnail: [],
-    shortDescription: initialData?.shortDescription || ''
+    shortDescription: initialData?.shortDescription || '',
+    summary: initialData?.summary || '',
+    contact: initialData?.contact || ''
   };
 
   const form = useForm<BlogFormValues>({
@@ -337,157 +341,93 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
                 )}
               />
             </div>
-            <DatePicker />
-            <FormField
-              control={form.control}
-              name='category'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Danh mục</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Nhập danh mục' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='categoryColor'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Màu danh mục</FormLabel>
-                  <FormControl>
-                    <Input type='color' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mô tả</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder='Nhập mô tả bài viết' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='content'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nội dung</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder='Nhập nội dung bài viết' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Trường mảng: categories */}
-            <FormField
-              control={form.control}
-              name='categories'
-              render={({ field }) => (
-                <FormItem>
-                  <ArrayInput
-                    label='Danh mục phụ'
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder='Danh mục'
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Trường boolean */}
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <MultiSelect
+                options={BLOG_CATEGORIES_OPTIONS}
+                placeholder='Select categories'
+                label='Categories'
+                value={form.watch('categories')}
+                onChange={(value) => {
+                  form.setValue('categories', value);
+                }}
+              />
+              <div className='flex items-center gap-4'>
+                <DatePicker label='Date' />
+                <FormField
+                  control={form.control}
+                  name='showArrowDesktop'
+                  render={({ field }) => (
+                    <FormItem className='mt-5 flex items-center gap-2'>
+                      <FormLabel>Show Arrow Desktop</FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='isVertical'
+                  render={({ field }) => (
+                    <FormItem className='mt-5 flex items-center gap-2'>
+                      <FormLabel>Display Vertically</FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+            {/* TODO: Add article sections */}
+
+            <div className='grid grid-cols-1 gap-6'>
               <FormField
                 control={form.control}
-                name='isOustanding'
-                render={({ field }) => (
-                  <FormItem className='flex items-center gap-2'>
-                    <FormLabel>Bài viết nổi bật</FormLabel>
+                name='summary'
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                      <Textarea
+                        label='Summary'
+                        placeholder='Enter summary'
+                        className='resize-none'
+                        {...field}
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name='showArrowDesktop'
-                render={({ field }) => (
-                  <FormItem className='flex items-center gap-2'>
-                    <FormLabel>Hiện mũi tên desktop</FormLabel>
+                name='contact'
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                      <Textarea
+                        placeholder='Enter contact'
+                        className='resize-none'
+                        {...field}
+                        label='Contact'
+                        error={!!error}
+                        helperText={error?.message}
                       />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='isVertical'
-                render={({ field }) => (
-                  <FormItem className='flex items-center gap-2'>
-                    <FormLabel>Hiển thị dọc</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            {/* Trường mảng: relatedProducts */}
-            <FormField
-              control={form.control}
-              name='relatedProducts'
-              render={({ field }) => (
-                <FormItem>
-                  <ArrayInput
-                    label='Sản phẩm liên quan'
-                    value={field.value || []}
-                    onChange={field.onChange}
-                    placeholder='Sản phẩm'
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Trường động: relatedPosts */}
-            <FormField
-              control={form.control}
-              name='relatedPosts'
-              render={({ field }) => (
-                <FormItem>
-                  <RelatedPostsInput
-                    value={field.value || []}
-                    onChange={field.onChange}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <Button type='submit' disabled={loading}>
               {loading ? 'Đang xử lý...' : blogId ? 'Cập nhật' : 'Tạo mới'}
             </Button>

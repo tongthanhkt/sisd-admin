@@ -13,14 +13,14 @@ import {
 } from '@/components/ui/popover';
 import { FormLabel } from './form';
 
-export function DatePicker() {
+export function DatePicker({ label }: { label: string }) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   return (
     <div className='flex flex-col gap-2'>
       <FormLabel htmlFor='date' className='px-1'>
-        Date of birth
+        {label}
       </FormLabel>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -42,6 +42,7 @@ export function DatePicker() {
               setDate(date);
               setOpen(false);
             }}
+            className='w-full'
           />
         </PopoverContent>
       </Popover>

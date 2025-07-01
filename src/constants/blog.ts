@@ -21,3 +21,10 @@ export const BLOG_CATEGORIES_COLORS = {
   [BLOG_CATEGORIES.MATERIAL]: '#00A738',
   [BLOG_CATEGORIES.WATERPROOFING]: 'text-orange-500'
 };
+
+export const BLOG_CATEGORIES_OPTIONS = Object.entries(
+  BLOG_CATEGORIES_LABELS
+).map(([key, value]) => ({
+  label: value,
+  value: key
+}));

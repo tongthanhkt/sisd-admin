@@ -80,7 +80,9 @@ export const blogFormSchema = z.object({
               (f.startsWith('http') || f.startsWith('/')))
         ),
       { message: 'All thumbnails must be files or valid URLs' }
-    )
+    ),
+  summary: z.string().optional(),
+  contact: z.string().optional()
 });
 
 export type BlogFormValues = z.infer<typeof blogFormSchema>;
