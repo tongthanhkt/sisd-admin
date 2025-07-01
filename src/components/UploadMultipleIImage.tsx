@@ -4,11 +4,20 @@ import { IconUpload, IconX } from '@tabler/icons-react';
 import Image from 'next/image';
 import * as React from 'react';
 import Dropzone, { type DropzoneProps } from 'react-dropzone';
+import { DndContext, closestCenter, DragOverlay } from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 import { useUploadFileMixed } from '@/hooks/use-upload-file';
 import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
 import { IUploadMultipleImageItem } from '@/types';
 import { FormLabel, FormMessage } from './ui/form';
+import { GripVerticalIcon } from 'lucide-react';
 
 function generateId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -35,6 +44,95 @@ interface UploadMultipleImageProps
     React.SetStateAction<IUploadMultipleImageItem[]>
   >;
   withCaption?: boolean;
+}
+
+function SortableImageItem({
+  item,
+  idx,
+  disabled,
+  handleRemoveImage,
+  handleCaptionChange,
+  withCaption,
+  getPreviewUrl,
+  cardClassName
+}: {
+  item: IUploadMultipleImageItem;
+  idx: number;
+  disabled: boolean;
+  handleRemoveImage: (idx: number) => void;
+  handleCaptionChange: (idx: number, caption: string) => void;
+  withCaption: boolean;
+  getPreviewUrl: (item: File | string) => string;
+  cardClassName?: string;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: item.id || idx });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'group relative flex h-28 items-center justify-center overflow-hidden rounded-lg bg-gray-100',
+        isDragging && 'ring-2 ring-blue-400',
+        cardClassName
+      )}
+    >
+      {/* Nút delete và drag cạnh nhau, phía trên ảnh */}
+      <div className='absolute top-1 right-1 z-10 flex gap-1'>
+        <button
+          type='button'
+          onClick={() => handleRemoveImage(idx)}
+          className='rounded-full bg-white/80 p-1'
+          title='Delete'
+          disabled={disabled}
+        >
+          <IconX className='size-4 text-red-500' />
+        </button>
+        <button
+          type='button'
+          {...attributes}
+          {...listeners}
+          className='cursor-grab rounded-full bg-white/80 p-1'
+          title='Drag to reorder'
+          disabled={disabled}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Drag icon */}
+          <GripVerticalIcon className='size-4' />
+        </button>
+      </div>
+      {/* Ảnh */}
+      <Image
+        src={getPreviewUrl(item.file)}
+        alt={isFile(item.file) ? (item.file as File).name : `Image ${idx + 1}`}
+        fill
+        className='object-cover'
+        style={{ maxHeight: '100%', maxWidth: '100%' }}
+      />
+      {/* Caption input */}
+      {withCaption && (
+        <input
+          type='text'
+          className='absolute right-1 bottom-1 left-1 rounded border border-gray-300 bg-white/80 px-2 py-1 text-xs outline-none'
+          placeholder='Enter caption...'
+          value={item.caption || ''}
+          onChange={(e) => handleCaptionChange(idx, e.target.value)}
+          disabled={disabled}
+        />
+      )}
+    </div>
+  );
 }
 
 export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
@@ -123,6 +221,21 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     setFiles(arr);
   };
 
+  // DnD handler for images
+  const handleDragEndImage = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = files.findIndex((f) => f.id === active.id);
+      const newIndex = files.findIndex((f) => f.id === over?.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        setFiles(arrayMove(files, oldIndex, newIndex));
+      }
+    }
+  };
+
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const activeItem = files.find((f) => f.id === activeId);
+
   return (
     <div className={cn('flex flex-col gap-2', className)} {...rest}>
       <FormLabel className={cn(error && 'text-destructive')}>
@@ -138,80 +251,78 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
         disabled={disabled || !canAddMore}
       >
         {({ getRootProps, getInputProps, isDragActive }) => (
-          <div
-            className={cn(
-              'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
-              listClassName
-            )}
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEndImage}
+            onDragStart={(event) => setActiveId(event.active.id as string)}
+            onDragCancel={() => setActiveId(null)}
+            onDragOver={() => {}}
           >
-            {/* Upload box */}
-            {canAddMore && (
+            <SortableContext
+              items={files.map((item, idx) => item.id || idx)}
+              strategy={verticalListSortingStrategy}
+            >
               <div
-                {...getRootProps()}
                 className={cn(
-                  'relative flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition hover:bg-gray-50',
-                  isDragActive && 'border-blue-400',
-                  disabled && 'cursor-not-allowed opacity-50',
-                  cardClassName
+                  'grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+                  listClassName
                 )}
               >
-                <input {...getInputProps({ multiple: true })} />
-                <IconUpload className='mb-1 size-7 text-gray-400' />
-                <span className='text-center text-xs text-gray-500'>
-                  Drag & Drop your files here
-                  <br />
-                  Or Browse
-                </span>
-                {maxSize && (
-                  <span className='mt-1 text-center text-xs text-gray-400'>
-                    Max {formatBytes(maxSize)} per file
-                  </span>
+                {/* Upload box */}
+                {canAddMore && (
+                  <div
+                    {...getRootProps()}
+                    className={cn(
+                      'relative flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition hover:bg-gray-50',
+                      isDragActive && 'border-blue-400',
+                      disabled && 'cursor-not-allowed opacity-50',
+                      cardClassName
+                    )}
+                  >
+                    <input {...getInputProps({ multiple: true })} />
+                    <IconUpload className='mb-1 size-7 text-gray-400' />
+                    <span className='text-center text-xs text-gray-500'>
+                      Drag & Drop your files here
+                      <br />
+                      Or Browse
+                    </span>
+                    {maxSize && (
+                      <span className='mt-1 text-center text-xs text-gray-400'>
+                        Max {formatBytes(maxSize)} per file
+                      </span>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
-            {/* Images */}
-            {files.map((item, idx) => (
-              <div
-                key={item.id || idx}
-                className={cn(
-                  'group relative flex h-28 items-center justify-center overflow-hidden rounded-lg bg-gray-100',
-                  cardClassName
-                )}
-              >
-                <Image
-                  src={getPreviewUrl(item.file)}
-                  alt={
-                    isFile(item.file)
-                      ? (item.file as File).name
-                      : `Image ${idx + 1}`
-                  }
-                  fill
-                  className='object-cover'
-                  style={{ maxHeight: '100%', maxWidth: '100%' }}
-                />
-                <button
-                  type='button'
-                  onClick={() => handleRemoveImage(idx)}
-                  className='absolute top-1 right-1 rounded-full bg-white/80 p-1 opacity-0 transition group-hover:opacity-100'
-                  title='Delete'
-                  disabled={disabled}
-                >
-                  <IconX className='size-4 text-red-500' />
-                </button>
-                {/* Caption input */}
-                {withCaption && (
-                  <input
-                    type='text'
-                    className='absolute right-1 bottom-1 left-1 rounded border border-gray-300 bg-white/80 px-2 py-1 text-xs outline-none'
-                    placeholder='Enter caption...'
-                    value={item.caption || ''}
-                    onChange={(e) => handleCaptionChange(idx, e.target.value)}
+                {/* Images DnD */}
+                {files.map((item, idx) => (
+                  <SortableImageItem
+                    key={item.id || idx}
+                    item={item}
+                    idx={idx}
                     disabled={disabled}
+                    handleRemoveImage={handleRemoveImage}
+                    handleCaptionChange={handleCaptionChange}
+                    withCaption={withCaption}
+                    getPreviewUrl={getPreviewUrl}
+                    cardClassName={cardClassName}
                   />
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+            <DragOverlay>
+              {activeItem ? (
+                <SortableImageItem
+                  item={activeItem}
+                  idx={-1}
+                  disabled={true}
+                  handleRemoveImage={() => {}}
+                  handleCaptionChange={() => {}}
+                  withCaption={withCaption}
+                  getPreviewUrl={getPreviewUrl}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
       </Dropzone>
       {helperText && (
