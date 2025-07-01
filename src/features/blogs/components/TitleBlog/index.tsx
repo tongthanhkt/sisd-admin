@@ -19,9 +19,13 @@ export const TitleBlog = () => {
         name='title'
         render={({ field }) => (
           <FormItem className='w-full'>
-            <FormLabel>Title</FormLabel>
             <FormControl>
-              <Input placeholder='Enter title' {...field} />
+              <Input
+                placeholder='Enter title'
+                {...field}
+                label='Title'
+                required
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -5,6 +5,7 @@ import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
 import { FormLabel, FormMessage } from '@/components/ui/form';
 import { useSortableList } from '@/hooks/use-sortable-list';
+import { cn } from '@/lib/utils';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -13,10 +14,8 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { FieldName } from '../../../products/hooks/useProduct';
-import { RelatedProductModal } from '../RelatedProductModal';
-import { cn } from '@/lib/utils';
 import { BlogFormValues } from '../../utils/form-schema';
+import { RelatedProductModal } from '../RelatedProductModal';
 
 export interface RelatedItem {
   id: string;
@@ -164,6 +163,9 @@ export function RelatedSections<T extends { id: string }>({
             </SortableContext>
           </DndContext>
         )}
+        {helperText && (
+          <FormMessage className='text-destructive'>{helperText}</FormMessage>
+        )}
         <Button
           onClick={() => setIsModalOpen(true)}
           variant='outline'
@@ -175,9 +177,7 @@ export function RelatedSections<T extends { id: string }>({
           {addButtonText}
         </Button>
       </div>
-      {helperText && (
-        <FormMessage className='text-destructive'>{helperText}</FormMessage>
-      )}
+
       <ModalComponent
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

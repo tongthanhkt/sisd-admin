@@ -25,6 +25,7 @@ import {
   AccordionContent
 } from '@/components/ui/accordion';
 import { useMemo } from 'react';
+import NoData from '@/components/NoData';
 
 function SortableSubHeading({
   id,
@@ -141,17 +142,21 @@ export const BlogSubHeading = ({ name }: { name: Path<BlogFormValues> }) => {
               strategy={verticalListSortingStrategy}
             >
               <Accordion type='multiple' className='flex flex-col gap-2'>
-                {fields.map((field, index) => (
-                  <SortableSubHeading
-                    key={field.id}
-                    id={field.id}
-                    index={index}
-                    name={name}
-                    remove={remove}
-                    control={control}
-                    fields={fields}
-                  />
-                ))}
+                {fields?.length > 0 ? (
+                  fields.map((field, index) => (
+                    <SortableSubHeading
+                      key={field.id}
+                      id={field.id}
+                      index={index}
+                      name={name}
+                      remove={remove}
+                      control={control}
+                      fields={fields}
+                    />
+                  ))
+                ) : (
+                  <NoData />
+                )}
               </Accordion>
             </SortableContext>
           </DndContext>

@@ -7,6 +7,7 @@ export const useBlogForm = (blogId?: string) => {
   const router = useRouter();
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(blogFormSchema),
+    mode: 'onChange',
     defaultValues: {
       title: '',
       image: '',
@@ -18,7 +19,6 @@ export const useBlogForm = (blogId?: string) => {
       imageSrc: '',
       imageAlt: '',
       category: '',
-      categoryColor: '',
       slug: '',
       categories: [],
       relatedPosts: [],

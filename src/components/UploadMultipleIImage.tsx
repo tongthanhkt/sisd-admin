@@ -44,6 +44,7 @@ interface UploadMultipleImageProps
     React.SetStateAction<IUploadMultipleImageItem[]>
   >;
   withCaption?: boolean;
+  required?: boolean;
 }
 
 function SortableImageItem({
@@ -152,6 +153,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     cardClassName,
     listClassName,
     withCaption = false,
+    required = false,
     ...rest
   } = props;
 
@@ -240,7 +242,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     <div className={cn('flex flex-col gap-2', className)} {...rest}>
       <FormLabel className={cn(error && 'text-destructive')}>
         {label}
-        <span className='text-destructive'>*</span>
+        {required && <span className='text-destructive'>*</span>}
       </FormLabel>
       <Dropzone
         onDrop={onDrop}

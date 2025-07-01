@@ -5,6 +5,7 @@ import { Popover, PopoverTrigger, PopoverContent } from './popover';
 import { Checkbox } from './checkbox';
 import { Button } from './button';
 import { Badge } from './badge';
+import { FormLabel, FormMessage } from './form';
 
 export interface MultiSelectOption {
   label: string;
@@ -20,6 +21,9 @@ interface MultiSelectProps {
   label?: string;
   disabled?: boolean;
   className?: string;
+  required?: boolean;
+  error?: boolean;
+  helperText?: string;
 }
 
 export function MultiSelect({
@@ -29,7 +33,10 @@ export function MultiSelect({
   placeholder = 'Select...',
   label,
   disabled,
-  className
+  className,
+  required,
+  error,
+  helperText
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -62,7 +69,11 @@ export function MultiSelect({
 
   return (
     <div className={cn('w-full', className)}>
-      {label && <div className='mb-1 text-sm font-medium'>{label}</div>}
+      {label && (
+        <FormLabel className='mb-1 text-sm font-medium' htmlFor={label}>
+          {label} {required && <span className='text-destructive'>*</span>}
+        </FormLabel>
+      )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

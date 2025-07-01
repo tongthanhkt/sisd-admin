@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/accordion';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import NoData from '@/components/NoData';
 
 export const ArticleContent = ({
   name,
@@ -66,18 +67,22 @@ export const ArticleContent = ({
             type='multiple'
             className={cn('flex flex-col gap-2', contentClassName)}
           >
-            {fields.map((field, index) => (
-              <SortableItem
-                key={field.id}
-                id={field.id}
-                index={index}
-                name={name}
-                remove={remove}
-                setValue={setValue}
-                watch={watch}
-                isAccordion
-              />
-            ))}
+            {fields?.length > 0 ? (
+              fields.map((field, index) => (
+                <SortableItem
+                  key={field.id}
+                  id={field.id}
+                  index={index}
+                  name={name}
+                  remove={remove}
+                  setValue={setValue}
+                  watch={watch}
+                  isAccordion
+                />
+              ))
+            ) : (
+              <NoData />
+            )}
           </Accordion>
         </SortableContext>
       </DndContext>
