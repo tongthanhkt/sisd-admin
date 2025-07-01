@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { BlogFormValues } from '@/features/blogs/utils/form-schema';
 import { IUploadMultipleImageItem } from '@/types';
+import { GripVerticalIcon, Trash2Icon, TrashIcon } from 'lucide-react';
 import React from 'react';
 import {
   Path,
@@ -24,31 +25,46 @@ export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
       <div className='flex flex-col gap-2'>
         {fields.map((field, index) => (
           <div
-            className='flex flex-col gap-2 rounded-lg border border-solid border-neutral-200 p-4'
+            className='flex gap-2 rounded-lg border border-solid border-neutral-200 p-4'
             key={field.id}
           >
-            <FormField
-              key={field.id}
-              control={control}
-              name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
-              render={({ field }) => <Textarea {...field} />}
-            />
-            <UploadMultipleIImage
-              value={
-                watch(`${name}.${index}.images` as FieldPath<BlogFormValues>) ||
-                []
-              }
-              onValueChange={(images) => {
-                setValue(
-                  `${name}.${index}.images` as FieldPath<BlogFormValues>,
-                  images as IUploadMultipleImageItem[]
-                );
-              }}
-              cardClassName='h-40'
-              listClassName='lg:grid-cols-5'
-              withCaption
-              label='Images'
-            />
+            <div className='flex flex-1 flex-col gap-4'>
+              <FormField
+                key={field.id}
+                control={control}
+                name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
+                render={({ field }) => <Textarea {...field} />}
+              />
+              <UploadMultipleIImage
+                value={
+                  watch(
+                    `${name}.${index}.images` as FieldPath<BlogFormValues>
+                  ) || []
+                }
+                onValueChange={(images) => {
+                  setValue(
+                    `${name}.${index}.images` as FieldPath<BlogFormValues>,
+                    images as IUploadMultipleImageItem[]
+                  );
+                }}
+                cardClassName='h-40'
+                listClassName='lg:grid-cols-5'
+                withCaption
+                label='Images'
+              />
+            </div>
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={() => remove(index)}
+              className='h-8 w-8'
+              type='button'
+            >
+              <Trash2Icon className='size-5 text-red-600' />
+            </Button>
+            <Button type='button' variant='ghost' className='h-8 w-8'>
+              <GripVerticalIcon className='size-5' />
+            </Button>
           </div>
         ))}
         <Button type='button' onClick={() => append({ content: '' })}>
