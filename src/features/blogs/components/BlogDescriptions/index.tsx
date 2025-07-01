@@ -9,18 +9,17 @@ export const BlogDescriptions = () => {
 
   return (
     <div className='grid grid-cols-1 gap-6'>
-      <Description fieldName='description' title='Description' />
       <FormField
         control={control}
-        name='description'
+        name='shortDescription'
         render={({ field, fieldState: { error } }) => (
           <FormItem>
             <FormControl>
               <Textarea
-                placeholder='Enter description'
+                placeholder='Enter short description'
                 className='resize-none'
                 {...field}
-                label='Description'
+                label='Short Description'
                 required
                 error={!!error}
                 helperText={error?.message}
@@ -29,6 +28,7 @@ export const BlogDescriptions = () => {
           </FormItem>
         )}
       />
+      <Description fieldName='description' title='Description' />
     </div>
   );
 };
