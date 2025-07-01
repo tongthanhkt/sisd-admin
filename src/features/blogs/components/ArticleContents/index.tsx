@@ -11,7 +11,7 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVerticalIcon, Trash2Icon } from 'lucide-react';
+import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import {
   FieldPath,
   Path,
@@ -27,8 +27,15 @@ import {
   AccordionContent
 } from '@/components/ui/accordion';
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 
-export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
+export const ArticleContent = ({
+  name,
+  contentClassName
+}: {
+  name: Path<BlogFormValues>;
+  contentClassName?: string;
+}) => {
   const { control, setValue, watch } = useFormContext<BlogFormValues>();
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -55,7 +62,10 @@ export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
           items={fields.map((f) => f.id)}
           strategy={verticalListSortingStrategy}
         >
-          <Accordion type='multiple' className='flex flex-col gap-2'>
+          <Accordion
+            type='multiple'
+            className={cn('flex flex-col gap-2', contentClassName)}
+          >
             {fields.map((field, index) => (
               <SortableItem
                 key={field.id}
@@ -77,7 +87,7 @@ export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
         onClick={() => append({ content: '' })}
         className='ml-auto w-fit'
       >
-        Add content
+        <PlusIcon className='size-4' /> Add content
       </Button>
     </div>
   );
