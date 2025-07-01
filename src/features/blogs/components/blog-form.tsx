@@ -21,6 +21,9 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
+import { BlogImages } from './BlogImages';
+import { Calendar } from '@/components/ui/calendar';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface BlogFormProps {
   blogId?: string;
@@ -175,7 +178,10 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
     articleSections: initialData?.articleSections || [],
     relatedProducts: initialData?.relatedProducts || [],
     showArrowDesktop: initialData?.showArrowDesktop ?? false,
-    isVertical: initialData?.isVertical ?? false
+    isVertical: initialData?.isVertical ?? false,
+    banner: [],
+    thumbnail: [],
+    shortDescription: initialData?.shortDescription || ''
   };
 
   const form = useForm<BlogFormValues>({
@@ -226,68 +232,94 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-            {/* Ảnh đại diện */}
-            <FormField
-              control={form.control}
-              name='imageSrc'
-              render={({ field }) => (
-                <FormItem className='w-full'>
-                  <FormLabel>Ảnh đại diện</FormLabel>
-                  <FormControl>
-                    <FileUploader
-                      value={uploadedFiles}
-                      onValueChange={async (files) => {
-                        if (files && (files as File[]).length > 0) {
-                          const fileArr = files as File[];
-                          setUploadedFiles(fileArr);
-                          // Giả lập upload, chỉ lấy url local
-                          const file = fileArr[0];
-                          if (file) {
-                            const url = URL.createObjectURL(file);
-                            setPreviewUrl(url);
-                            field.onChange(url);
-                          }
-                        }
-                      }}
-                      maxFiles={1}
-                      maxSize={4 * 1024 * 1024}
-                      multiple={false}
-                    />
-                  </FormControl>
-                  {previewUrl && (
-                    <div className='mt-4'>
-                      <p className='text-muted-foreground mb-2 text-sm'>
-                        Preview:
-                      </p>
-                      <ScrollArea className='h-fit w-full'>
-                        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4'>
-                          <div className='relative aspect-square'>
-                            <Image
-                              src={previewUrl}
-                              alt='Preview'
-                              fill
-                              className='rounded-md object-cover'
-                            />
-                          </div>
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+            <div className='flex items-center gap-4'>
               <FormField
                 control={form.control}
                 name='title'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tiêu đề</FormLabel>
+                  <FormItem className='w-full'>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <Input placeholder='Nhập tiêu đề bài viết' {...field} />
+                      <Input placeholder='Enter title' {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='isOustanding'
+                render={({ field }) => (
+                  <FormItem className='mt-5 flex items-center gap-2'>
+                    <FormLabel className='w-max'>Mark as Featured</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <BlogImages />
+            <div className='grid grid-cols-1 gap-6'>
+              <FormField
+                control={form.control}
+                name='shortDescription'
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        label='Short Description'
+                        required
+                        placeholder='Enter short description'
+                        className='resize-none'
+                        {...field}
+                        error={!!error}
+                        helperText={error?.message}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Enter description'
+                        className='resize-none'
+                        {...field}
+                        label='Description'
+                        required
+                        error={!!error}
+                        helperText={error?.message}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='href'
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        label='Href'
+                        required
+                        placeholder='Enter href'
+                        {...field}
+                        error={!!error}
+                        helperText={error?.message}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
@@ -304,33 +336,35 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='category'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Danh mục</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Nhập danh mục' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='categoryColor'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Màu danh mục</FormLabel>
-                    <FormControl>
-                      <Input type='color' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
+            <DatePicker />
+            <FormField
+              control={form.control}
+              name='category'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Danh mục</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Nhập danh mục' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='categoryColor'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Màu danh mục</FormLabel>
+                  <FormControl>
+                    <Input type='color' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name='description'

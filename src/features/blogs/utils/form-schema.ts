@@ -34,6 +34,7 @@ export const blogFormSchema = z.object({
   categoryColor: z.string(),
   title: z.string().min(1, 'Tiêu đề không được để trống'),
   description: z.string().min(1, 'Mô tả không được để trống'),
+  shortDescription: z.string().min(1, 'Mô tả không được để trống'),
   slug: z.string().min(1, 'Slug không được để trống'),
   categories: z.array(z.string()).default([]),
   date: z.string(),
@@ -51,7 +52,35 @@ export const blogFormSchema = z.object({
   articleSections: z.array(articleSectionSchema).default([]),
   relatedProducts: z.array(z.any()).optional().default([]),
   showArrowDesktop: z.boolean().default(false),
-  isVertical: z.boolean().default(false)
+  isVertical: z.boolean().default(false),
+  thumbnail: z
+    .array(z.any())
+    .min(1, { message: 'Thumbnail is required' })
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All thumbnails must be files or valid URLs' }
+    ),
+  banner: z
+    .array(z.any())
+    .min(1, { message: 'Thumbnail is required' })
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All thumbnails must be files or valid URLs' }
+    )
 });
 
 export type BlogFormValues = z.infer<typeof blogFormSchema>;

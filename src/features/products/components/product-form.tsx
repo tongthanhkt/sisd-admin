@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { productCategories } from '@/constants/products';
-import { cn } from '@/lib/utils';
 import { useProduct } from '../hooks/useProduct';
 import { ProductImages } from './ProductImages';
 import { RelatedBlogs } from './RelatedBlogs';
