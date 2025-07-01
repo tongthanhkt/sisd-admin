@@ -48,6 +48,7 @@ export const ArticleSection = () => {
         return (
           <FormItem>
             <FormLabel>Article Sections</FormLabel>
+
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -62,14 +63,14 @@ export const ArticleSection = () => {
                     <SortableSpecItem key={field.id} id={field.id}>
                       {(listeners) => (
                         <AccordionItem value={`item-${field.id}`}>
-                          <AccordionTrigger className='group flex items-center justify-between gap-2'>
-                            <div className='flex flex-1 items-center gap-2'>
-                              <span className='truncate'>
+                          <div className='flex items-center gap-2 px-2 py-1'>
+                            <AccordionTrigger className='flex min-w-0 flex-1 flex-row-reverse items-center px-0'>
+                              <div className='w-full truncate text-left'>
                                 {articleSections[index]?.headline ||
                                   `Article Section ${index + 1}`}
-                              </span>
-                            </div>
-                            <div className='flex items-center gap-1'>
+                              </div>
+                            </AccordionTrigger>
+                            <div className='flex flex-shrink-0 items-center'>
                               <Button
                                 variant='ghost'
                                 size='icon'
@@ -79,21 +80,21 @@ export const ArticleSection = () => {
                                   e.stopPropagation();
                                   removeItem(index);
                                 }}
-                                className='hover:bg-red-50'
+                                className='ml-1 hover:bg-red-50'
                               >
-                                <Trash2Icon className='size-4 text-red-500' />
+                                <Trash2Icon className='size-5 text-red-500' />
                               </Button>
                               <button
                                 type='button'
                                 {...listeners}
                                 tabIndex={-1}
-                                className='hover:bg-accent cursor-grab rounded p-1'
+                                className='hover:bg-accent mr-1 cursor-grab rounded p-1'
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <GripVerticalIcon className='size-4' />
+                                <GripVerticalIcon className='size-5' />
                               </button>
                             </div>
-                          </AccordionTrigger>
+                          </div>
                           <AccordionContent>
                             <div className='space-y-4 rounded-lg border border-solid p-4'>
                               <FormField
