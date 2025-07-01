@@ -1,19 +1,17 @@
 'use client';
 
 import { PRODUCT_LABELS } from '@/constants/products';
-import { IMortalProduct } from '@/models/MortalProduct';
-import { useEffect, useState } from 'react';
-import { RelatedSections } from '../RelatedSections';
-import { useFormContext } from 'react-hook-form';
-import { ProductFormValues } from '../../hooks/useProduct';
 import { useGetProductsQuery } from '@/lib/api/products';
+import { useFormContext } from 'react-hook-form';
+import { BlogFormValues } from '../../utils/form-schema';
+import { RelatedSections } from '../RelatedSections';
 
 export interface RelatedProduct {
   id: string;
 }
 
 export function RelatedProducts() {
-  const methods = useFormContext<ProductFormValues>();
+  const methods = useFormContext<BlogFormValues>();
   const {
     watch,
     setValue,
@@ -25,10 +23,7 @@ export function RelatedProducts() {
   const products = productData?.products || [];
 
   const validProducts = products
-    .filter(
-      (item): item is IMortalProduct =>
-        typeof item.id === 'string' && item.id.length > 0
-    )
+    .filter((item) => typeof item._id === 'string' && item._id.length > 0)
     .map((item) => ({
       id: (item._id as string) || '',
       name: item.name || '',

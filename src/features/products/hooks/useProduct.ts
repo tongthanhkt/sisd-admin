@@ -47,9 +47,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
         warning: '',
         notes: ''
       },
-      isFeatured: false,
-      relatedBlogs: [],
-      relatedProduct: []
+      isFeatured: false
     }
   });
 
@@ -129,9 +127,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
         warning: values.safetyRegulations.warning,
         notes: values.safetyRegulations.notes
       },
-      isFeatured: values.isFeatured || false,
-      relatedBlogs: values.relatedBlogs || [],
-      relatedProduct: values.relatedProduct || []
+      isFeatured: values.isFeatured || false
     };
   };
 
@@ -194,9 +190,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
               warning: productData.safetyRegulations?.warning || '',
               notes: productData.safetyRegulations?.notes || ''
             },
-            isFeatured: productData.isFeatured || false,
-            relatedBlogs: productData.relatedBlogs || [],
-            relatedProduct: productData.relatedProduct || []
+            isFeatured: productData.isFeatured || false
           });
         } catch (error) {
           console.error('Error loading product data:', error);

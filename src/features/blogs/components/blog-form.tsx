@@ -1,6 +1,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   Form,
   FormControl,
@@ -10,145 +12,23 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { BLOG_CATEGORIES_OPTIONS } from '@/constants/blog';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { blogFormSchema, type BlogFormValues } from '../utils/form-schema';
-import { Switch } from '@/components/ui/switch';
-import { FileUploader } from '@/components/file-uploader';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import Image from 'next/image';
 import { BlogImages } from './BlogImages';
-import { Calendar } from '@/components/ui/calendar';
-import { DatePicker } from '@/components/ui/date-picker';
-import { MultiSelect } from '@/components/ui/multi-select';
-import { BLOG_CATEGORIES_OPTIONS } from '@/constants/blog';
+import { RelatedBlogs } from './RelatedBlogs';
+import { RelatedProducts } from './RelatedProducts';
 
 interface BlogFormProps {
   blogId?: string;
   initialData?: Partial<BlogFormValues>;
   pageTitle?: string;
-}
-
-// Thêm các helper component nhỏ cho mảng động
-function ArrayInput({
-  label,
-  value,
-  onChange,
-  placeholder
-}: {
-  label: string;
-  value: string[];
-  onChange: (v: string[]) => void;
-  placeholder?: string;
-}) {
-  return (
-    <div className='space-y-2'>
-      <div className='mb-1 font-medium'>{label}</div>
-      {(value || []).map((item, idx) => (
-        <div key={idx} className='flex gap-2'>
-          <Input
-            placeholder={
-              placeholder ? `${placeholder} ${idx + 1}` : `Item ${idx + 1}`
-            }
-            value={item}
-            onChange={(e) => {
-              const newValue = [...(value || [])];
-              newValue[idx] = e.target.value;
-              onChange(newValue);
-            }}
-          />
-          <Button
-            type='button'
-            variant='destructive'
-            onClick={() => {
-              const newValue = (value || []).filter((_, i) => i !== idx);
-              onChange(newValue);
-            }}
-          >
-            Xóa
-          </Button>
-        </div>
-      ))}
-      <Button
-        type='button'
-        onClick={() => {
-          onChange([...(value || []), '']);
-        }}
-      >
-        Thêm
-      </Button>
-    </div>
-  );
-}
-
-function RelatedPostsInput({
-  value,
-  onChange
-}: {
-  value: any[];
-  onChange: (v: any[]) => void;
-}) {
-  return (
-    <div className='space-y-2'>
-      <div className='mb-1 font-medium'>Bài viết liên quan</div>
-      {(value || []).map((item, idx) => (
-        <div
-          key={idx}
-          className='mb-2 flex flex-col gap-2 rounded-md border p-2'
-        >
-          <Input
-            placeholder='Tiêu đề'
-            value={item.title || ''}
-            onChange={(e) => {
-              const newValue = [...value];
-              newValue[idx] = { ...newValue[idx], title: e.target.value };
-              onChange(newValue);
-            }}
-          />
-          <Input
-            placeholder='Danh mục'
-            value={item.category || ''}
-            onChange={(e) => {
-              const newValue = [...value];
-              newValue[idx] = { ...newValue[idx], category: e.target.value };
-              onChange(newValue);
-            }}
-          />
-          <Input
-            placeholder='Slug'
-            value={item.slug || ''}
-            onChange={(e) => {
-              const newValue = [...value];
-              newValue[idx] = { ...newValue[idx], slug: e.target.value };
-              onChange(newValue);
-            }}
-          />
-          <Button
-            type='button'
-            variant='destructive'
-            onClick={() => {
-              const newValue = value.filter((_, i) => i !== idx);
-              onChange(newValue);
-            }}
-          >
-            Xóa bài viết
-          </Button>
-        </div>
-      ))}
-      <Button
-        type='button'
-        onClick={() => {
-          onChange([...(value || []), { title: '', category: '', slug: '' }]);
-        }}
-      >
-        Thêm bài viết
-      </Button>
-    </div>
-  );
 }
 
 export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
@@ -166,9 +46,7 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
       : initialData?.content || '',
     description: initialData?.description || '',
     href: initialData?.href || '',
-    date: initialData?.date
-      ? new Date(initialData.date).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
+    date: initialData?.date ? new Date(initialData.date) : new Date(),
     isOustanding: initialData?.isOustanding ?? false,
     imageSrc: initialData?.imageSrc || '',
     imageAlt: initialData?.imageAlt || '',
@@ -185,7 +63,8 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
     thumbnail: [],
     shortDescription: initialData?.shortDescription || '',
     summary: initialData?.summary || '',
-    contact: initialData?.contact || ''
+    contact: initialData?.contact || '',
+    relatedProduct: initialData?.relatedProduct || []
   };
 
   const form = useForm<BlogFormValues>({
@@ -388,6 +267,9 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
               </div>
             </div>
             {/* TODO: Add article sections */}
+
+            <RelatedProducts />
+            <RelatedBlogs />
 
             <div className='grid grid-cols-1 gap-6'>
               <FormField

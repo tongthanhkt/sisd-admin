@@ -23,8 +23,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { productCategories } from '@/constants/products';
 import { useProduct } from '../hooks/useProduct';
 import { ProductImages } from './ProductImages';
-import { RelatedBlogs } from './RelatedBlogs';
-import { RelatedProducts } from './RelatedProducts';
 import { SortableListField } from './SortableListField';
 import { TechnicalSpecifications } from './TechnicalSpecifications.tsx';
 
@@ -272,9 +270,6 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
-
-            <RelatedProducts />
-            <RelatedBlogs />
 
             <Button type='submit'>Save Product</Button>
           </form>

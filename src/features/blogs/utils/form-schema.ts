@@ -37,18 +37,10 @@ export const blogFormSchema = z.object({
   shortDescription: z.string().min(1, 'Mô tả không được để trống'),
   slug: z.string().min(1, 'Slug không được để trống'),
   categories: z.array(z.string()).default([]),
-  date: z.string(),
+  date: z.date(),
   image: z.any(),
   content: z.string(),
-  relatedPosts: z
-    .array(
-      z.object({
-        title: z.string(),
-        category: z.string(),
-        slug: z.string()
-      })
-    )
-    .default([]),
+
   articleSections: z.array(articleSectionSchema).default([]),
   relatedProducts: z.array(z.any()).optional().default([]),
   showArrowDesktop: z.boolean().default(false),
@@ -82,7 +74,13 @@ export const blogFormSchema = z.object({
       { message: 'All thumbnails must be files or valid URLs' }
     ),
   summary: z.string().optional(),
-  contact: z.string().optional()
+  contact: z.string().optional(),
+  relatedPosts: z
+    .array(z.string())
+    .min(1, { message: 'At least one blog is required' }),
+  relatedProduct: z
+    .array(z.string())
+    .min(1, { message: 'At least one product is required' })
 });
 
 export type BlogFormValues = z.infer<typeof blogFormSchema>;

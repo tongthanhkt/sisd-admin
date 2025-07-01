@@ -13,9 +13,10 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { FieldName } from '../../hooks/useProduct';
+import { FieldName } from '../../../products/hooks/useProduct';
 import { RelatedProductModal } from '../RelatedProductModal';
 import { cn } from '@/lib/utils';
+import { BlogFormValues } from '../../utils/form-schema';
 
 export interface RelatedItem {
   id: string;
@@ -43,7 +44,7 @@ export interface RelatedSectionsProps<T extends { id: string }> {
     disabled: boolean
   ) => React.ReactNode;
   helperText?: string;
-  fieldName: FieldName;
+  fieldName: keyof BlogFormValues;
 }
 
 export function RelatedSections<T extends { id: string }>({

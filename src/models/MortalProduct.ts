@@ -28,11 +28,10 @@ export interface IMortalProduct extends Document {
     notes?: string;
   };
   isFeatured?: boolean;
-  relatedBlogs?: string[];
-  relatedProduct?: string[];
   createdAt?: Date;
   updatedAt?: Date;
   id: string;
+  _id: string;
 }
 
 const MortalProductSchema: Schema = new Schema(
