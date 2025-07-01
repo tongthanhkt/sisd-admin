@@ -18,7 +18,7 @@ export default function ProductListingPage({
   searchParams
 }: ProductListingPageProps) {
   const page = Number(searchParams?.page || '1');
-  const pageLimit = Number(searchParams?.perPage || '10');
+  const pageLimit = 20;
   const search = searchParams?.name as string;
   const categories = searchParams?.category as string;
 

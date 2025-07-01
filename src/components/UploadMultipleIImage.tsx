@@ -31,8 +31,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     onValueChange,
     onUpload,
     accept = { 'image/*': [] },
-    maxSize = 1024 * 1024 * 2, // 2MB
-    maxFiles = 6,
+    maxSize = 1024 * 1024 * 5, // 2MB
+    maxFiles = 10,
     multiple = true,
     label = 'Others Images',
     disabled = false,
