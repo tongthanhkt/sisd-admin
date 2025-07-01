@@ -10,6 +10,13 @@ import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
 import { IUploadMultipleImageItem } from '@/types';
 import { FormLabel, FormMessage } from './ui/form';
 
+function generateId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15);
+}
+
 interface UploadMultipleImageProps
   extends React.HTMLAttributes<HTMLDivElement> {
   onUpload?: (files: IUploadMultipleImageItem[]) => Promise<void>;
@@ -60,13 +67,20 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
   const { onDrop, handleRemove, canAddMore } = useUploadFileMixed({
     value: filesForDropzone,
     onValueChange: (newFiles) => {
+      // Preserve id for existing files, assign new id for new files
       const newValue = (newFiles as (File | string)[]).map((file, idx) => {
         const old = (files ?? []).find((f) =>
           isFile(f.file) && isFile(file)
-            ? (f.file as File).name === (file as File).name
+            ? (f.file as File).name === (file as File).name &&
+              (f.file as File).size === (file as File).size &&
+              (f.file as File).lastModified === (file as File).lastModified
             : f.file === file
         );
-        return { file, caption: old?.caption || '' };
+        return {
+          file,
+          caption: old?.caption || '',
+          id: old?.id || generateId()
+        };
       });
       setFiles(newValue);
     },
@@ -77,7 +91,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
           onUpload(
             arr.map((file, idx) => ({
               file,
-              caption: (files ?? [])[idx]?.caption || ''
+              caption: (files ?? [])[idx]?.caption || '',
+              id: (files ?? [])[idx]?.id || generateId()
             }))
           )
       : undefined,
@@ -157,7 +172,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
             {/* Images */}
             {files.map((item, idx) => (
               <div
-                key={idx}
+                key={item.id || idx}
                 className={cn(
                   'group relative flex h-28 items-center justify-center overflow-hidden rounded-lg bg-gray-100',
                   cardClassName
