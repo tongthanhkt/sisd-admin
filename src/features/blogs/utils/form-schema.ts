@@ -1,27 +1,34 @@
 import * as z from 'zod';
 
-const articleSectionImageSchema = z.object({
-  src: z.string(),
-  alt: z.string(),
-  caption: z.string().optional()
-});
+const articleSectionImageSchema = z
+  .array(z.any())
+  .refine(
+    (arr) =>
+      typeof window === 'undefined' ||
+      arr.every(
+        (f) =>
+          f instanceof File ||
+          (typeof f === 'string' && (f.startsWith('http') || f.startsWith('/')))
+      ),
+    { message: 'All images must be files or valid URLs' }
+  );
 
 const articleSectionContentSchema = z.object({
   content: z.string(),
-  images: z.array(articleSectionImageSchema).optional()
+  images: articleSectionImageSchema
 });
 
 const articleSectionSubHeadlineSchema = z.object({
   title: z.string(),
   contents: z.array(articleSectionContentSchema),
-  images: z.array(articleSectionImageSchema).optional()
+  images: articleSectionImageSchema
 });
 
 const articleSectionSchema = z.object({
   headline: z.string().optional(),
   headline2: z.string().optional(),
   contents: z.array(articleSectionContentSchema),
-  images: z.array(articleSectionImageSchema).optional(),
+  images: articleSectionImageSchema,
   subHeadline: z.array(articleSectionSubHeadlineSchema).optional()
 });
 

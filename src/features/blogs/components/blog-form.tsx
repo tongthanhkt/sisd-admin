@@ -2,18 +2,18 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+import { Form } from '@/components/ui/form';
 import { useBlogForm } from '../hooks/useBlogForm';
 import { type BlogFormValues } from '../utils/form-schema';
 import { BlogAdditionalInfo } from './BlogAdditionalInfo';
 import { BlogDescriptions } from './BlogDescriptions';
 import { BlogImages } from './BlogImages';
+import { BlogSummary } from './BlogSummary';
 import { PathInfo } from './PathInfo';
 import { RelatedBlogs } from './RelatedBlogs';
 import { RelatedProducts } from './RelatedProducts';
 import { TitleBlog } from './TitleBlog';
-import { BlogSummary } from './BlogSummary';
+import { ArticleSection } from './ArticleSection';
 
 interface BlogFormProps {
   blogId?: string;
@@ -39,12 +39,9 @@ export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
             <BlogDescriptions />
             <PathInfo />
             <BlogAdditionalInfo />
-
-            {/* TODO: Add article sections */}
-
+            <ArticleSection />
             <RelatedProducts />
             <RelatedBlogs />
-
             <BlogSummary />
             <Button type='submit'>{blogId ? 'Update' : 'Create'}</Button>
           </form>
