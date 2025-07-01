@@ -20,6 +20,13 @@ import {
   UseFormSetValue,
   UseFormWatch
 } from 'react-hook-form';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent
+} from '@/components/ui/accordion';
+import { useMemo } from 'react';
 
 export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
   const { control, setValue, watch } = useFormContext<BlogFormValues>();
@@ -48,7 +55,7 @@ export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
           items={fields.map((f) => f.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className='flex flex-col gap-2'>
+          <Accordion type='multiple' className='flex flex-col gap-2'>
             {fields.map((field, index) => (
               <SortableItem
                 key={field.id}
@@ -58,9 +65,10 @@ export const ArticleContent = ({ name }: { name: Path<BlogFormValues> }) => {
                 remove={remove}
                 setValue={setValue}
                 watch={watch}
+                isAccordion
               />
             ))}
-          </div>
+          </Accordion>
         </SortableContext>
       </DndContext>
       <Button
@@ -81,7 +89,8 @@ function SortableItem({
   name,
   remove,
   setValue,
-  watch
+  watch,
+  isAccordion
 }: {
   id: string;
   index: number;
@@ -89,6 +98,7 @@ function SortableItem({
   remove: (index: number) => void;
   setValue: UseFormSetValue<BlogFormValues>;
   watch: UseFormWatch<BlogFormValues>;
+  isAccordion?: boolean;
 }) {
   const {
     attributes,
@@ -109,51 +119,126 @@ function SortableItem({
     `${name}.${index}.images` as FieldPath<BlogFormValues>
   );
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className='flex gap-2 rounded-lg border border-solid border-neutral-200 bg-white p-4'
-    >
-      <div className='flex flex-1 flex-col gap-4'>
-        <FormField
-          key={id}
-          control={undefined as any}
-          name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
-          render={({ field }) => <Textarea {...field} />}
-        />
-        <UploadMultipleIImage
-          value={imagesValue || []}
-          onValueChange={(images) => {
-            setValue(
-              `${name}.${index}.images` as FieldPath<BlogFormValues>,
-              images as IUploadMultipleImageItem[]
-            );
-          }}
-          cardClassName='h-40'
-          listClassName='lg:grid-cols-5'
-          withCaption
-          label='Images'
-        />
+  const content = watch(
+    `${name}.${index}.content` as FieldPath<BlogFormValues>
+  );
+
+  const preview = useMemo(() => {
+    if (!content || content.trim() === '') {
+      return `Content ${index + 1}`;
+    }
+    return content.length > 50 ? `${content.slice(0, 50)}...` : content;
+  }, [content, index]);
+
+  if (!isAccordion) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className='flex gap-2 rounded-lg border border-solid border-neutral-200 bg-white p-4'
+      >
+        <div className='flex flex-1 flex-col gap-4'>
+          <FormField
+            key={id}
+            control={undefined as any}
+            name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
+            render={({ field }) => <Textarea {...field} />}
+          />
+          <UploadMultipleIImage
+            value={imagesValue || []}
+            onValueChange={(images) => {
+              setValue(
+                `${name}.${index}.images` as FieldPath<BlogFormValues>,
+                images as IUploadMultipleImageItem[]
+              );
+            }}
+            cardClassName='h-40'
+            listClassName='lg:grid-cols-5'
+            withCaption
+            label='Images'
+          />
+        </div>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => remove(index)}
+          className='h-8 w-8'
+          type='button'
+        >
+          <Trash2Icon className='size-5 text-red-600' />
+        </Button>
+        <Button
+          type='button'
+          variant='ghost'
+          className='h-8 w-8 cursor-grab'
+          {...attributes}
+          {...listeners}
+        >
+          <GripVerticalIcon className='size-5' />
+        </Button>
       </div>
-      <Button
-        variant='ghost'
-        size='icon'
-        onClick={() => remove(index)}
-        className='h-8 w-8'
-        type='button'
+    );
+  }
+
+  // Accordion style
+  return (
+    <AccordionItem value={id}>
+      <div
+        ref={setNodeRef}
+        style={style}
+        className='flex items-center gap-2 px-2 py-1'
       >
-        <Trash2Icon className='size-5 text-red-600' />
-      </Button>
-      <Button
-        type='button'
-        variant='ghost'
-        className='h-8 w-8 cursor-grab'
-        {...attributes}
-        {...listeners}
-      >
-        <GripVerticalIcon className='size-5' />
-      </Button>
-    </div>
+        <AccordionTrigger className='flex min-w-0 flex-1 flex-row-reverse items-center px-0'>
+          <div className='w-full truncate text-left'>
+            {preview.slice(0, 100)}
+          </div>
+        </AccordionTrigger>
+        <div className='flex flex-shrink-0 items-center'>
+          <Button
+            variant='ghost'
+            size='icon'
+            type='button'
+            tabIndex={-1}
+            onClick={() => remove(index)}
+            className='ml-1 hover:bg-red-50'
+          >
+            <Trash2Icon className='size-5 text-red-600' />
+          </Button>
+          <button
+            type='button'
+            {...attributes}
+            {...listeners}
+            tabIndex={-1}
+            className='hover:bg-accent mr-1 cursor-grab rounded p-1'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVerticalIcon className='size-5' />
+          </button>
+        </div>
+      </div>
+      <AccordionContent>
+        <div className='flex flex-1 flex-col gap-4'>
+          <FormField
+            key={id}
+            control={undefined as any}
+            name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
+            render={({ field }) => <Textarea {...field} />}
+          />
+          <UploadMultipleIImage
+            value={imagesValue || []}
+            onValueChange={(images) => {
+              setValue(
+                `${name}.${index}.images` as FieldPath<BlogFormValues>,
+                images as IUploadMultipleImageItem[]
+              );
+            }}
+            cardClassName='h-40'
+            listClassName='lg:grid-cols-5'
+            withCaption
+            label='Images'
+          />
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
