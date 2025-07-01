@@ -26,6 +26,7 @@ const articleSectionSubHeadlineSchema = z.object({
 });
 
 const articleSectionSchema = z.object({
+  id: z.string().optional(),
   headline: z.string().optional(),
   headline2: z.string().optional(),
   contents: z.array(articleSectionContentSchema),
