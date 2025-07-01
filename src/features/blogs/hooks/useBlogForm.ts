@@ -12,7 +12,7 @@ export const useBlogForm = (blogId?: string) => {
       title: '',
       image: '',
       content: '',
-      description: '',
+      description: [],
       href: '',
       date: new Date(),
       isOustanding: false,
@@ -34,6 +34,16 @@ export const useBlogForm = (blogId?: string) => {
       relatedProduct: []
     }
   });
+
+  const prepareData = (data: BlogFormValues) => {
+    return {
+      ...data,
+      articleSections: data.articleSections.map((section) => ({
+        ...section,
+        images: section.images.map((image) => image.file)
+      }))
+    };
+  };
 
   const onSubmit = async (data: BlogFormValues) => {
     if (blogId) {

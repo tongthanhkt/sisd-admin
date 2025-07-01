@@ -8,6 +8,10 @@ const articleSectionImageSchema = z
       arr.every(
         (f) =>
           f instanceof File ||
+          (typeof f === 'object' &&
+            f !== null &&
+            'file' in f &&
+            f.file instanceof File) ||
           (typeof f === 'string' && (f.startsWith('http') || f.startsWith('/')))
       ),
     { message: 'All images must be files or valid URLs' }
@@ -21,8 +25,8 @@ const articleSectionContentSchema = z.object({
 const articleSectionSubHeadlineSchema = z.object({
   title: z.string(),
   subTitle: z.string(),
-  contents: z.array(articleSectionContentSchema),
-  images: articleSectionImageSchema
+  contents: z.array(articleSectionContentSchema)
+  // images: articleSectionImageSchema
 });
 
 const articleSectionSchema = z.object({
@@ -63,6 +67,10 @@ export const blogFormSchema = z.object({
         arr.every(
           (f) =>
             f instanceof File ||
+            (typeof f === 'object' &&
+              f !== null &&
+              'file' in f &&
+              f.file instanceof File) ||
             (typeof f === 'string' &&
               (f.startsWith('http') || f.startsWith('/')))
         ),
@@ -77,6 +85,10 @@ export const blogFormSchema = z.object({
         arr.every(
           (f) =>
             f instanceof File ||
+            (typeof f === 'object' &&
+              f !== null &&
+              'file' in f &&
+              f.file instanceof File) ||
             (typeof f === 'string' &&
               (f.startsWith('http') || f.startsWith('/')))
         ),
