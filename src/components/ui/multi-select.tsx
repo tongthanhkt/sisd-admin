@@ -34,9 +34,7 @@ export function MultiSelect({
   label,
   disabled,
   className,
-  required,
-  error,
-  helperText
+  required
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 

@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { BlogFormValues } from '../../utils/form-schema';
 import { RelatedProductModal } from '../RelatedProductModal';
+import { useFormContext } from 'react-hook-form';
 
 export interface RelatedItem {
   id: string;
@@ -64,12 +65,14 @@ export function RelatedSections<T extends { id: string }>({
 }: RelatedSectionsProps<T>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
+  const { trigger } = useFormContext();
   const { sensors, handleDragEnd } = useSortableList({
     items: selectedIds?.map((id) => ({ id })),
     onItemsChange: (newArr) => {
       const newIds = newArr.map((item) => item.id);
       setSelectedIds(newIds);
       onChange(newIds);
+      trigger(fieldName);
     }
   });
 
@@ -80,12 +83,14 @@ export function RelatedSections<T extends { id: string }>({
   const handleAdd = (ids: string[]) => {
     setSelectedIds(ids || []);
     onChange(ids);
+    trigger(fieldName);
   };
 
   const handleRemove = (id: string) => {
     const newIds = selectedIds.filter((itemId) => itemId !== id);
     setSelectedIds(newIds);
     onChange(newIds);
+    trigger(fieldName);
   };
 
   const selectedObjects: T[] = selectedIds

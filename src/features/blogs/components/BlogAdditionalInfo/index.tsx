@@ -13,7 +13,7 @@ import { useFormContext } from 'react-hook-form';
 
 export const BlogAdditionalInfo = () => {
   const methods = useFormContext();
-  const { control, watch, setValue } = methods;
+  const { control, watch, setValue, trigger } = methods;
 
   const categories = watch('categories');
 
@@ -26,12 +26,14 @@ export const BlogAdditionalInfo = () => {
           <FormItem>
             <FormControl>
               <MultiSelect
+                {...field}
                 options={BLOG_CATEGORIES_OPTIONS}
                 placeholder='Select categories'
                 label='Categories'
                 value={categories}
                 onChange={(value) => {
                   setValue('categories', value);
+                  trigger('categories');
                 }}
                 required
                 error={!!error}
