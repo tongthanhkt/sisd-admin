@@ -46,8 +46,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
       safetyRegulations: {
         warning: '',
         notes: ''
-      },
-      isFeatured: false
+      }
     }
   });
 
@@ -126,8 +125,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
       safetyRegulations: {
         warning: values.safetyRegulations.warning,
         notes: values.safetyRegulations.notes
-      },
-      isFeatured: values.isFeatured || false
+      }
     };
   };
 
@@ -189,8 +187,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
             safetyRegulations: {
               warning: productData.safetyRegulations?.warning || '',
               notes: productData.safetyRegulations?.notes || ''
-            },
-            isFeatured: productData.isFeatured || false
+            }
           });
         } catch (error) {
           console.error('Error loading product data:', error);

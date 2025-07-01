@@ -76,6 +76,5 @@ export const productFormSchema = z.object({
   safetyRegulations: z.object({
     warning: z.string().min(1, { message: 'Warning is required' }),
     notes: z.string().optional()
-  }),
-  isFeatured: z.boolean().optional()
+  })
 });

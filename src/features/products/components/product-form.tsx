@@ -45,47 +45,24 @@ export default function ProductForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-            <div className='flex items-center gap-6'>
-              <FormField
-                control={form.control}
-                name='name'
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem className='w-full'>
-                    <FormControl>
-                      <Input
-                        placeholder='Enter product name'
-                        {...field}
-                        error={!!error}
-                        helperText={error?.message}
-                        label='Product Name'
-                        required
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='isFeatured'
-                render={({ field }) => (
-                  <FormItem className='mt-5 flex flex-row items-start space-y-0 space-x-1 text-neutral-700'>
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        id='isFeatured'
-                      />
-                    </FormControl>
-                    <label
-                      htmlFor='isFeatured'
-                      className='w-max space-y-1 text-sm leading-none'
-                    >
-                      Mark as Featured
-                    </label>
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field, fieldState: { error } }) => (
+                <FormItem className='w-full'>
+                  <FormControl>
+                    <Input
+                      placeholder='Enter product name'
+                      {...field}
+                      error={!!error}
+                      helperText={error?.message}
+                      label='Product Name'
+                      required
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <ProductImages isLoadingImages={isLoadingImages} />
 
