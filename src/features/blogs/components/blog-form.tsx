@@ -13,6 +13,7 @@ import { PathInfo } from './PathInfo';
 import { RelatedBlogs } from './RelatedBlogs';
 import { RelatedProducts } from './RelatedProducts';
 import { TitleBlog } from './TitleBlog';
+import { BlogSummary } from './BlogSummary';
 
 interface BlogFormProps {
   blogId?: string;
@@ -20,7 +21,7 @@ interface BlogFormProps {
   pageTitle?: string;
 }
 
-export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
+export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
   const { form, onSubmit } = useBlogForm(blogId);
 
   return (
@@ -44,45 +45,7 @@ export function BlogForm({ initialData, pageTitle, blogId }: BlogFormProps) {
             <RelatedProducts />
             <RelatedBlogs />
 
-            <div className='grid grid-cols-1 gap-6'>
-              <FormField
-                control={form.control}
-                name='summary'
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        label='Summary'
-                        placeholder='Enter summary'
-                        className='resize-none'
-                        {...field}
-                        error={!!error}
-                        helperText={error?.message}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='contact'
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder='Enter contact'
-                        className='resize-none'
-                        {...field}
-                        label='Contact'
-                        error={!!error}
-                        helperText={error?.message}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-
+            <BlogSummary />
             <Button type='submit'>{blogId ? 'Update' : 'Create'}</Button>
           </form>
         </Form>
