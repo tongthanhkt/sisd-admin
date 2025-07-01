@@ -143,6 +143,7 @@ export function RelatedSections<T extends { id: string }>({
                             size='icon'
                             onClick={() => handleRemove(item.id)}
                             className='h-8 w-8'
+                            type='button'
                           >
                             <Trash2Icon className='size-5 text-red-600' />
                           </Button>
@@ -168,6 +169,7 @@ export function RelatedSections<T extends { id: string }>({
           variant='outline'
           size='sm'
           className='ml-auto w-fit'
+          type='button'
         >
           <PlusIcon className='size-4' />
           {addButtonText}

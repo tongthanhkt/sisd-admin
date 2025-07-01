@@ -5,6 +5,7 @@ import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { IUploadMultipleImageItem } from '@/types';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
+import { ArticleContent } from '../ArticleContents';
 
 export const ArticleSection = () => {
   const methods = useFormContext<BlogFormValues>();
@@ -64,6 +65,7 @@ export const ArticleSection = () => {
                   listClassName='lg:grid-cols-5'
                   withCaption
                 />
+                <ArticleContent name={`articleSections.${index}.contents`} />
               </div>
             ))}
             <Button
