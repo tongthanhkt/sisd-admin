@@ -39,12 +39,15 @@ export const ArticleSection = () => {
     }
   });
 
+  const articleSections = (watch('articleSections') || []).filter(
+    (s) => !!s && !!s.id
+  );
+
   return (
     <FormField
       control={control}
       name='articleSections'
       render={({ field }) => {
-        const articleSections = watch('articleSections');
         return (
           <FormItem>
             <FormLabel>Article Sections</FormLabel>
@@ -55,18 +58,21 @@ export const ArticleSection = () => {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={fields.map((f) => f.id)}
+                items={articleSections.map((section) => section.id as string)}
                 strategy={verticalListSortingStrategy}
               >
                 <Accordion type='multiple' className='mb-4'>
-                  {fields.map((field, index) => (
-                    <SortableSpecItem key={field.id} id={field.id}>
+                  {articleSections.map((section, index) => (
+                    <SortableSpecItem
+                      key={section.id as string}
+                      id={section.id as string}
+                    >
                       {(listeners) => (
-                        <AccordionItem value={`item-${field.id}`}>
+                        <AccordionItem value={`item-${section.id as string}`}>
                           <div className='flex items-center gap-2 px-2 py-1'>
                             <AccordionTrigger className='flex min-w-0 flex-1 flex-row-reverse items-center px-0'>
                               <div className='w-full truncate text-left'>
-                                {articleSections[index]?.headline ||
+                                {section?.headline ||
                                   `Article Section ${index + 1}`}
                               </div>
                             </AccordionTrigger>
@@ -121,7 +127,7 @@ export const ArticleSection = () => {
                               />
                               <UploadMultipleIImage
                                 label='Images'
-                                value={articleSections[index].images || []}
+                                value={section.images || []}
                                 onValueChange={(files) => {
                                   setValue(
                                     `articleSections.${index}.images`,
