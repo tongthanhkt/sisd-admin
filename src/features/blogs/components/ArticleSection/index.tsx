@@ -6,6 +6,7 @@ import { IUploadMultipleImageItem } from '@/types';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
 import { ArticleContent } from '../ArticleContents';
+import { BlogSubHeading } from '../BlogSubHeading';
 
 export const ArticleSection = () => {
   const methods = useFormContext<BlogFormValues>();
@@ -66,6 +67,7 @@ export const ArticleSection = () => {
                   withCaption
                 />
                 <ArticleContent name={`articleSections.${index}.contents`} />
+                <BlogSubHeading name={`articleSections.${index}.subHeadline`} />
               </div>
             ))}
             <Button
@@ -79,6 +81,8 @@ export const ArticleSection = () => {
                 })
               }
               type='button'
+              variant='outline'
+              className='ml-auto w-fit'
             >
               Add article
             </Button>

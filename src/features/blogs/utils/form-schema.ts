@@ -20,6 +20,7 @@ const articleSectionContentSchema = z.object({
 
 const articleSectionSubHeadlineSchema = z.object({
   title: z.string(),
+  subTitle: z.string(),
   contents: z.array(articleSectionContentSchema),
   images: articleSectionImageSchema
 });
@@ -47,7 +48,6 @@ export const blogFormSchema = z.object({
   date: z.date(),
   image: z.any(),
   content: z.string(),
-
   articleSections: z.array(articleSectionSchema).default([]),
   relatedProducts: z.array(z.any()).optional().default([]),
   showArrowDesktop: z.boolean().default(false),
