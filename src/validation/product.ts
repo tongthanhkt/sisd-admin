@@ -30,16 +30,21 @@ export const productFormSchema = z.object({
       { message: 'All thumbnails must be files or valid URLs' }
     ),
   images: z
-    .array(z.any())
+    .array(
+      z.object({
+        file: z.any(),
+        caption: z.string().optional()
+      })
+    )
     .min(1, { message: 'Images are required' })
     .refine(
       (arr) =>
         typeof window === 'undefined' ||
         arr.every(
           (f) =>
-            f instanceof File ||
-            (typeof f === 'string' &&
-              (f.startsWith('http') || f.startsWith('/')))
+            f.file instanceof File ||
+            (typeof f.file === 'string' &&
+              (f.file.startsWith('http') || f.file.startsWith('/')))
         ),
       { message: 'All images must be files or valid URLs' }
     ),

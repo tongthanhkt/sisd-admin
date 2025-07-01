@@ -5,6 +5,7 @@ import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
 import { FormLabel, FormMessage } from '@/components/ui/form';
 import { useSortableList } from '@/hooks/use-sortable-list';
+import { cn } from '@/lib/utils';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -13,10 +14,9 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { FieldName } from '../../../products/hooks/useProduct';
-import { RelatedProductModal } from '../RelatedProductModal';
-import { cn } from '@/lib/utils';
 import { BlogFormValues } from '../../utils/form-schema';
+import { RelatedProductModal } from '../RelatedProductModal';
+import { useFormContext } from 'react-hook-form';
 
 export interface RelatedItem {
   id: string;
@@ -65,12 +65,14 @@ export function RelatedSections<T extends { id: string }>({
 }: RelatedSectionsProps<T>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
+  const { trigger } = useFormContext();
   const { sensors, handleDragEnd } = useSortableList({
     items: selectedIds?.map((id) => ({ id })),
     onItemsChange: (newArr) => {
       const newIds = newArr.map((item) => item.id);
       setSelectedIds(newIds);
       onChange(newIds);
+      trigger(fieldName);
     }
   });
 
@@ -81,12 +83,14 @@ export function RelatedSections<T extends { id: string }>({
   const handleAdd = (ids: string[]) => {
     setSelectedIds(ids || []);
     onChange(ids);
+    trigger(fieldName);
   };
 
   const handleRemove = (id: string) => {
     const newIds = selectedIds.filter((itemId) => itemId !== id);
     setSelectedIds(newIds);
     onChange(newIds);
+    trigger(fieldName);
   };
 
   const selectedObjects: T[] = selectedIds
@@ -143,6 +147,7 @@ export function RelatedSections<T extends { id: string }>({
                             size='icon'
                             onClick={() => handleRemove(item.id)}
                             className='h-8 w-8'
+                            type='button'
                           >
                             <Trash2Icon className='size-5 text-red-600' />
                           </Button>
@@ -163,19 +168,21 @@ export function RelatedSections<T extends { id: string }>({
             </SortableContext>
           </DndContext>
         )}
+        {helperText && (
+          <FormMessage className='text-destructive'>{helperText}</FormMessage>
+        )}
         <Button
           onClick={() => setIsModalOpen(true)}
           variant='outline'
           size='sm'
           className='ml-auto w-fit'
+          type='button'
         >
           <PlusIcon className='size-4' />
           {addButtonText}
         </Button>
       </div>
-      {helperText && (
-        <FormMessage className='text-destructive'>{helperText}</FormMessage>
-      )}
+
       <ModalComponent
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

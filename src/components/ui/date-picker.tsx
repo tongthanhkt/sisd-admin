@@ -11,16 +11,30 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover';
-import { FormLabel } from './form';
+import { FormLabel, FormMessage } from './form';
 
-export function DatePicker({ label }: { label: string }) {
+export function DatePicker({
+  label,
+  required,
+  error,
+  helperText,
+  date,
+  setDate
+}: {
+  label: string;
+  required?: boolean;
+  error?: boolean;
+  helperText?: string;
+  date: Date;
+  setDate: (date: Date) => void;
+}) {
   const [open, setOpen] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(undefined);
 
   return (
     <div className='flex flex-col gap-2'>
       <FormLabel htmlFor='date' className='px-1'>
         {label}
+        {required && <span className='text-destructive'>*</span>}
       </FormLabel>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -39,13 +53,14 @@ export function DatePicker({ label }: { label: string }) {
             selected={date}
             captionLayout='dropdown'
             onSelect={(date) => {
-              setDate(date);
+              setDate(date as Date);
               setOpen(false);
             }}
             className='w-full'
           />
         </PopoverContent>
       </Popover>
+      {error && <FormMessage>{helperText}</FormMessage>}
     </div>
   );
 }

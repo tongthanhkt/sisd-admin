@@ -1,4 +1,5 @@
 import { SortableSpecItem } from '@/components';
+import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
 import {
   FormControl,
@@ -15,11 +16,9 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import React from 'react';
-import { useFormContext, useFieldArray } from 'react-hook-form';
-import NoData from '@/components/NoData';
-import { FieldName, ProductFormValues } from '../../hooks/useProduct';
-import { Path } from 'react-hook-form';
+import { Path, useFormContext } from 'react-hook-form';
+import { BlogFormValues } from '../../utils/form-schema';
+import { Textarea } from '@/components/ui/textarea';
 
 // Define a type for list item with id
 interface ListItem {
@@ -28,19 +27,19 @@ interface ListItem {
 }
 
 interface SortableListFieldProps {
-  fieldName: FieldName;
+  fieldName: keyof BlogFormValues;
   title: string;
   addButtonText?: string;
   placeholder?: string;
 }
 
-export const SortableListField = ({
+export const Description = ({
   fieldName,
   title,
   addButtonText = 'Add Item',
   placeholder = 'Enter item'
 }: SortableListFieldProps) => {
-  const methods = useFormContext<ProductFormValues>();
+  const methods = useFormContext<BlogFormValues>();
   const { control, watch, setValue } = methods;
   const values = watch();
 
@@ -116,12 +115,12 @@ export const SortableListField = ({
                               <FormField
                                 control={control}
                                 name={
-                                  `${fieldName}.${index}.value` as Path<ProductFormValues>
+                                  `${fieldName}.${index}.value` as Path<BlogFormValues>
                                 }
                                 render={({ field, fieldState: { error } }) => (
                                   <FormItem className='!w-full'>
                                     <FormControl>
-                                      <Input
+                                      <Textarea
                                         {...field}
                                         placeholder={`${placeholder} ${index + 1}`}
                                         value={item.value}

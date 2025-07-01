@@ -77,18 +77,20 @@ export const useProduct = ({ productId }: { productId: string }) => {
       }
     }
 
-    // Handle images upload
-    let imagesResponse: { url: string }[] = [];
+    // Handle images upload (now array of { file, caption? })
+    let imagesResponse: { url: string; caption?: string }[] = [];
     if (images && images.length > 0) {
-      const uploadPromises = images.map(async (image) => {
-        if (isFile(image)) {
+      const uploadPromises = images.map(async (imgObj) => {
+        const { file, caption } = imgObj;
+        if (isFile(file)) {
           // New file uploaded
-          return await uploadFile(image);
-        } else if (isUrl(image)) {
+          const uploadResult = await uploadFile(file);
+          return { url: uploadResult.url || '', caption };
+        } else if (isUrl(file)) {
           // Existing URL, keep it
-          return { url: image };
+          return { url: file, caption };
         }
-        return { url: '' };
+        return { url: '', caption };
       });
       imagesResponse = await Promise.all(uploadPromises);
     }
@@ -134,7 +136,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
     setIsLoadingImages(true);
     try {
       const thumbnailFiles: string[] = [];
-      const imageFiles: string[] = [];
+      const imageFiles: { file: string }[] = [];
 
       // Just push the URL string
       if (productData.image) {
@@ -145,7 +147,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
         const allImages = [...(productData.images.thumbnails || [])].filter(
           (url): url is string => Boolean(url)
         );
-        imageFiles.push(...allImages);
+        imageFiles.push(...allImages.map((url) => ({ file: url })));
       }
 
       return { thumbnailFiles, imageFiles };

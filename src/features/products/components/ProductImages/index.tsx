@@ -65,6 +65,7 @@ export const ProductImages = ({
         }}
         error={!!errors.images}
         helperText={errors.images?.message as string}
+        required
       />
     </div>
   );
