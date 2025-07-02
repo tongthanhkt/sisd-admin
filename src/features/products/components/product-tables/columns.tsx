@@ -1,12 +1,11 @@
 'use client';
 import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
+import { CATEGORY_PRODUCT_OPTIONS, PRODUCT_LABELS } from '@/constants/products';
 import { IMortalProduct } from '@/models/MortalProduct';
 import { Column, ColumnDef } from '@tanstack/react-table';
-import { Text } from 'lucide-react';
 import Image from 'next/image';
 import { CellAction } from './cell-action';
-import { CATEGORY_OPTIONS } from './options';
 
 export const columns: ColumnDef<IMortalProduct>[] = [
   {
@@ -56,7 +55,7 @@ export const columns: ColumnDef<IMortalProduct>[] = [
       const category = cell.getValue<string>();
       return (
         <Badge variant='outline' className='capitalize'>
-          {category}
+          {PRODUCT_LABELS[category] || '--'}
         </Badge>
       );
     },
@@ -64,7 +63,7 @@ export const columns: ColumnDef<IMortalProduct>[] = [
     meta: {
       label: 'categories',
       variant: 'multiSelect',
-      options: CATEGORY_OPTIONS
+      options: CATEGORY_PRODUCT_OPTIONS
     }
   },
   {

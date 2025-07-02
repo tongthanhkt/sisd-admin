@@ -22,6 +22,8 @@ export default function ProductListingPage() {
     searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
   );
   const search = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
+
   // Use RTK Query hook
   const {
     data: productData,
@@ -30,7 +32,8 @@ export default function ProductListingPage() {
   } = useGetProductsQuery({
     page,
     perPage: pageLimit,
-    search
+    search,
+    category
   });
   const products = productData?.products || [];
   const totalItems = productData?.total_products || 0;
