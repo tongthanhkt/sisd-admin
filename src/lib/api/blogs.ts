@@ -1,20 +1,10 @@
 import { IBlog } from '@/models/Blog';
-import { IBlogPagination } from '@/types';
+import { IBlogPagination, IMutateBlog } from '@/types';
 import { api } from '../api';
 
 // Blog types
 
-export interface CreateBlogRequest {
-  title: string;
-  content: string;
-  excerpt?: string;
-  featuredImage?: string;
-  author?: string;
-  tags?: string[];
-  publishedAt?: string;
-}
-
-export interface UpdateBlogRequest extends Partial<CreateBlogRequest> {
+export interface UpdateBlogRequest extends IMutateBlog {
   id: string;
 }
 
@@ -34,7 +24,7 @@ export const blogsApi = api.injectEndpoints({
     }),
 
     // Create new blog
-    createBlog: builder.mutation<IBlog, CreateBlogRequest>({
+    createBlog: builder.mutation<IBlog, IMutateBlog>({
       query: (blog) => ({
         url: 'blogs',
         method: 'POST',

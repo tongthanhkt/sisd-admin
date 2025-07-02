@@ -45,7 +45,7 @@ export const blogFormSchema = z.object({
   imageAlt: z.string(),
   category: z.string(),
   title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
+  descriptions: z.array(z.string()).min(1, 'Description is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
   slug: z.string().min(1, 'Slug is required'),
   categories: z.array(z.string()).min(1, 'Categories is required'),
