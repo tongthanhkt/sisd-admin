@@ -33,12 +33,7 @@ export const columns: ColumnDef<IMortalProduct>[] = [
       <DataTableColumnHeader column={column} title='Name' />
     ),
     cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
-    meta: {
-      label: 'Name',
-      placeholder: 'Search products...',
-      variant: 'text',
-      icon: Text
-    },
+
     enableColumnFilter: true
   },
   {
@@ -48,12 +43,7 @@ export const columns: ColumnDef<IMortalProduct>[] = [
       <DataTableColumnHeader column={column} title='Code' />
     ),
     cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
-    meta: {
-      label: 'Code',
-      placeholder: 'Search by code...',
-      variant: 'text',
-      icon: Text
-    },
+
     enableColumnFilter: true
   },
   {

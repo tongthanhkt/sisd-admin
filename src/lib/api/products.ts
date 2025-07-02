@@ -56,9 +56,10 @@ export const productsApi = api.injectEndpoints({
     // Get all products
     getProducts: builder.query<
       ProductsResponse,
-      { page: number; perPage: number }
+      { page: number; perPage: number; search: string }
     >({
-      query: ({ page, perPage }) => `products?page=${page}&perPage=${perPage}`,
+      query: ({ page, perPage, search }) =>
+        `products?page=${page}&perPage=${perPage}&search=${search}`,
       providesTags: (result) =>
         result
           ? [

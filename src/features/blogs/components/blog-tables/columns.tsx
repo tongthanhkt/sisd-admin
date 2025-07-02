@@ -42,12 +42,7 @@ export const columns: ColumnDef<IBlog>[] = [
       <DataTableColumnHeader column={column} title='Tiêu đề' />
     ),
     cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
-    meta: {
-      label: 'Title',
-      placeholder: 'Tìm kiếm bài viết...',
-      variant: 'text',
-      icon: Text
-    },
+
     enableColumnFilter: true
   },
   {

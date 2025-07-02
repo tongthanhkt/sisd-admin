@@ -20,6 +20,7 @@ export default function BlogListingPage() {
   const pageLimit = parseInt(
     searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
   );
+  const search = searchParams.get('search') || '';
 
   // Use RTK Query hook with pagination params
   const {
@@ -28,7 +29,8 @@ export default function BlogListingPage() {
     error
   } = useGetBlogsQuery({
     page,
-    perPage: pageLimit
+    perPage: pageLimit,
+    search
   });
   const blogs = blogData?.blogs || [];
   const totalItems = blogData?.total_blogs || 0;

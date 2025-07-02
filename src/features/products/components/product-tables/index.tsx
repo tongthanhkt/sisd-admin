@@ -1,5 +1,6 @@
 'use client';
 
+import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
 import { useDataTable } from '@/hooks/use-data-table';
@@ -57,8 +58,26 @@ export function ProductTable<TData, TValue>({
     enableMultiSort: true
   });
 
+  // Debounced search handler (500ms)
+  const onSearch = useMemo(() => {
+    let timeout: NodeJS.Timeout;
+    return (value: string) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const params = new URLSearchParams();
+        params.set('search', value);
+        router.push(`?${params.toString()}`);
+      }, 500);
+    };
+  }, [router]);
+
   return (
     <DataTable table={table}>
+      <Input
+        type='text'
+        placeholder='Search products...'
+        onChange={(e) => onSearch(e.target.value)}
+      />
       <DataTableToolbar table={table} />
     </DataTable>
   );

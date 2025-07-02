@@ -21,7 +21,7 @@ export default function ProductListingPage() {
   const pageLimit = parseInt(
     searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
   );
-
+  const search = searchParams.get('search') || '';
   // Use RTK Query hook
   const {
     data: productData,
@@ -29,7 +29,8 @@ export default function ProductListingPage() {
     error
   } = useGetProductsQuery({
     page,
-    perPage: pageLimit
+    perPage: pageLimit,
+    search
   });
   const products = productData?.products || [];
   const totalItems = productData?.total_products || 0;
