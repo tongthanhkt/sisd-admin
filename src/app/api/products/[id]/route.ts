@@ -72,10 +72,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
-    console.log('DELETE /api/products/[id] - ID:', id);
     await connectToDatabase();
 
-    const product = await MortalProduct.findOneAndDelete({ id });
+    const product = await MortalProduct.findByIdAndDelete(id);
 
     if (!product) {
       console.log('Product not found for deletion');

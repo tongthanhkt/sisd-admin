@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { AlertModal } from '@/components/modal/alert-modal';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +9,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { AlertModal } from '@/components/modal/alert-modal';
+import { useDeleteBlogMutation } from '@/lib/api/blogs';
 import { IBlog } from '@/models/Blog';
 import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CellActionProps {
   data: IBlog;
@@ -22,16 +24,13 @@ export function CellAction({ data }: CellActionProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleteBlog] = useDeleteBlogMutation();
 
   const onDelete = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/blogs/${data.id}`,
-        {
-          method: 'DELETE'
-        }
-      );
+      await deleteBlog(data.id);
+      toast.success('Blog deleted successfully');
       router.refresh();
     } catch (error) {
       console.error('Error deleting blog:', error);
