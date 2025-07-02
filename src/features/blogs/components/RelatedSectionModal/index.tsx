@@ -103,9 +103,6 @@ export function RelatedSectionModal<T>({
               className='pl-10'
             />
           </div>
-          <Button variant='outline' size='sm'>
-            Search
-          </Button>
         </div>
         {/* Table */}
         <div className='overflow-x-auto rounded-lg border'>

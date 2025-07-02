@@ -12,6 +12,8 @@ import {
 } from '@/constants/pagination';
 import { useState, useEffect } from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
+import { BLOG_CATEGORIES_LABELS } from '@/constants/blog';
+import { Badge } from '@/components/ui/badge';
 
 export function RelatedBlogs() {
   const methods = useFormContext<BlogFormValues>();
@@ -67,7 +69,15 @@ export function RelatedBlogs() {
       id: item.id,
       name: item.title,
       image: item.image || item.thumbnail || item.imageSrc || '',
-      category: item.category || ''
+      category: (
+        <div className='flex flex-wrap gap-2'>
+          {item?.categories?.map((c) => (
+            <Badge key={c} variant='outline' className='capitalize'>
+              {BLOG_CATEGORIES_LABELS[c]}
+            </Badge>
+          ))}
+        </div>
+      )
     }));
 
   return (

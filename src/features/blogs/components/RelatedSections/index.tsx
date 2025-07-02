@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/sortable';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { BlogFormValues } from '../../utils/form-schema';
 import { RelatedProductModal } from '../RelatedProductModal';
 import { useFormContext } from 'react-hook-form';
@@ -22,7 +22,7 @@ export interface RelatedItem {
   id: string;
   name: string;
   image: string;
-  category: string;
+  category: string | ReactNode;
 }
 
 export interface RelatedSectionsProps<T extends { id: string }> {

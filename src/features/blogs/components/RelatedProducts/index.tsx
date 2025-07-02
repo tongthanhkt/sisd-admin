@@ -70,7 +70,7 @@ export function RelatedProducts() {
       id: (item._id as string) || '',
       name: item.name || '',
       image: item.image || '',
-      category: item.category || ''
+      category: item.category ? PRODUCT_LABELS[item.category] : ''
     }));
 
   return (
