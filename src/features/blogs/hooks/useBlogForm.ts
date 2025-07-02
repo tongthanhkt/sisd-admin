@@ -103,45 +103,50 @@ export const useBlogForm = (blogId?: string) => {
     // Handle article sections images
     const processedArticleSections = await Promise.all(
       data.articleSections.map(async (section) => {
+        console.log('🚀 ~ data.articleSections.map ~ section:', section);
         // Handle section images
         const sectionImages = await Promise.all(
-          section.images.map(async (image) => {
-            if (isFile(image)) {
-              const uploadResult = await uploadFile(image);
+          (section.images ?? []).map(async (image) => {
+            console.log('🚀 ~ imssssssage:', image);
+            if (isFile(image.file)) {
+              const uploadResult = await uploadFile(image.file);
               return {
                 src: uploadResult.url || '',
-                id: Math.random().toString(36).substring(2, 15)
+                caption: image.caption || ''
               };
-            } else if (isUrl(image)) {
+            } else if (isUrl(image.src)) {
               return {
-                src: image,
-                id: Math.random().toString(36).substring(2, 15)
+                caption: image.caption || '',
+                src: image.src || ''
               };
             }
-            return { src: '', id: Math.random().toString(36).substring(2, 15) };
+            return {
+              src: '',
+              caption: ''
+            };
           })
         );
 
         // Handle contents images
         const processedContents = await Promise.all(
-          section.contents.map(async (content) => {
+          (section.contents ?? []).map(async (content) => {
             const contentImages = await Promise.all(
-              content.images.map(async (image) => {
-                if (isFile(image)) {
-                  const uploadResult = await uploadFile(image);
+              (content.images ?? []).map(async (image) => {
+                if (isFile(image.file)) {
+                  const uploadResult = await uploadFile(image.file);
                   return {
                     src: uploadResult.url || '',
-                    id: Math.random().toString(36).substring(2, 15)
+                    caption: image.caption || ''
                   };
-                } else if (isUrl(image)) {
+                } else if (isUrl(image.src)) {
                   return {
-                    src: image,
-                    id: Math.random().toString(36).substring(2, 15)
+                    src: image.src || '',
+                    caption: image.caption || ''
                   };
                 }
                 return {
                   src: '',
-                  id: Math.random().toString(36).substring(2, 15)
+                  caption: ''
                 };
               })
             );
@@ -160,22 +165,24 @@ export const useBlogForm = (blogId?: string) => {
                 const processedSubContents = await Promise.all(
                   subHeadline.contents.map(async (content) => {
                     const contentImages = await Promise.all(
-                      content.images.map(async (image) => {
-                        if (isFile(image)) {
-                          const uploadResult = await uploadFile(image);
+                      (content.images ?? []).map(async (image) => {
+                        if (isFile(image.file)) {
+                          const uploadResult = await uploadFile(image.file);
                           return {
                             src: uploadResult.url || '',
-                            id: Math.random().toString(36).substring(2, 15)
+
+                            caption: image.caption || ''
                           };
-                        } else if (isUrl(image)) {
+                        } else if (isUrl(image.src)) {
                           return {
-                            src: image,
-                            id: Math.random().toString(36).substring(2, 15)
+                            src: image.src || '',
+
+                            caption: image.caption || ''
                           };
                         }
                         return {
                           src: '',
-                          id: Math.random().toString(36).substring(2, 15)
+                          caption: ''
                         };
                       })
                     );
@@ -310,6 +317,7 @@ export const useBlogForm = (blogId?: string) => {
   const onSubmit = async (data: BlogFormValues) => {
     try {
       const preparedData = await prepareDataSubmit(data);
+      console.log('🚀 ~ onSubmit ~ preparedData:', preparedData);
 
       let response;
       if (blogId && blogId !== 'new') {
