@@ -24,8 +24,8 @@ export function RelatedBlogs() {
     .map((item) => ({
       id: item.id,
       name: item.title,
-      image: item.image || item.imageSrc,
-      category: item.category
+      image: item.image || item.thumbnail || item.imageSrc || '',
+      category: item.category || ''
     }));
 
   return (

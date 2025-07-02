@@ -15,13 +15,12 @@ import { blogFormSchema, BlogFormValues } from '../utils/form-schema';
 
 export const useBlogForm = (blogId?: string) => {
   const router = useRouter();
-  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // RTK Query hooks
   const { data: blogData } = useGetBlogQuery(blogId || '', {
     skip: !blogId || blogId === 'new'
   });
-  console.log('🚀 ~ useBlogForm ~ blogData:', blogData);
 
   const [createBlog] = useCreateBlogMutation();
   const [updateBlog] = useUpdateBlogMutation();
@@ -49,12 +48,6 @@ export const useBlogForm = (blogId?: string) => {
       contact: ''
     }
   });
-  const {
-    formState: { errors },
-    watch
-  } = form;
-  const values = watch();
-  console.log('🚀 ~ useBlogForm ~ values:', values, errors);
 
   const prepareDataSubmit = async (
     data: BlogFormValues
@@ -289,8 +282,8 @@ export const useBlogForm = (blogId?: string) => {
 
   const onSubmit = async (data: BlogFormValues) => {
     try {
+      setIsLoading(true);
       const preparedData = await prepareDataSubmit(data);
-      console.log('🚀 ~ onSubmit ~ preparedData:', preparedData);
 
       let response;
       if (blogId && blogId !== 'new') {
@@ -320,10 +313,11 @@ export const useBlogForm = (blogId?: string) => {
       form.reset();
       router.push('/dashboard/blogs');
     } catch (error) {
-      console.error('🚀 ~ onSubmit error:', error);
       toast.error('An error occurred while saving the blog');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return { form, onSubmit, isLoadingImages };
+  return { form, onSubmit, isLoading };
 };

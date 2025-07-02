@@ -10,7 +10,6 @@ export async function GET(
 ) {
   try {
     const { blogId } = await context.params;
-    console.log('GET /api/blogs/[blogId] - ID:', blogId);
     await connectToDatabase();
 
     if (!mongoose.Types.ObjectId.isValid(blogId)) {
@@ -18,10 +17,8 @@ export async function GET(
     }
 
     const blog = await Blog.findById(blogId);
-    console.log('Found blog:', blog);
 
     if (!blog) {
-      console.log('Blog not found');
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
@@ -41,7 +38,6 @@ export async function PUT(
 ) {
   try {
     const { blogId } = await context.params;
-    console.log('PUT /api/blogs/[blogId] - ID:', blogId);
     await connectToDatabase();
 
     if (!mongoose.Types.ObjectId.isValid(blogId)) {
@@ -52,7 +48,6 @@ export async function PUT(
     if (!body.slug || body.slug === null || body.slug === '') {
       body.slug = generateSlug(body.title);
     }
-    console.log('🚀 ~ body:', body);
 
     const blog = await Blog.findByIdAndUpdate(blogId, body, {
       new: true,
@@ -60,7 +55,6 @@ export async function PUT(
     });
 
     if (!blog) {
-      console.log('Blog not found for update');
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
