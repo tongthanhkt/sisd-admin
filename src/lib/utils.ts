@@ -64,3 +64,17 @@ export function isUrl(value: any): value is string {
       value.startsWith('/'))
   );
 }
+
+export function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/--+/g, '-')
+    .trim()
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}

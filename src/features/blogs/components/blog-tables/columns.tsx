@@ -23,7 +23,11 @@ export const columns: ColumnDef<IBlog>[] = [
       return (
         <div className='relative aspect-square w-20'>
           <img
-            src={row.original.imageSrc || '/placeholder.png'}
+            src={
+              row.original.imageSrc ||
+              row.original.thumbnail ||
+              '/placeholder.png'
+            }
             alt={row.original.title || 'Blog image'}
             className='h-full w-full rounded-lg object-cover'
           />

@@ -1,21 +1,25 @@
 import * as z from 'zod';
 
+const fileType =
+  typeof window !== 'undefined'
+    ? z.union([z.string(), z.instanceof(File)])
+    : z.string();
+
 const articleSectionImageSchema = z
-  .array(z.any())
+  .array(
+    z.object({
+      file: fileType,
+      caption: z.string().optional()
+    })
+  )
   .refine(
     (arr) =>
       typeof window === 'undefined' ||
       arr.every(
-        (f) =>
-          f instanceof File ||
-          (typeof f === 'object' &&
-            f !== null &&
-            'file' in f &&
-            f.file instanceof File) ||
-          (typeof f === 'string' &&
-            (f.startsWith('http') || f.startsWith('/'))) ||
-          f === null ||
-          f === undefined
+        (img) =>
+          (typeof img.file === 'string' &&
+            (img.file.startsWith('http') || img.file.startsWith('/'))) ||
+          img.file instanceof File
       ),
     { message: 'All images must be files or valid URLs' }
   );
@@ -44,9 +48,6 @@ const articleSectionSchema = z.object({
 export const blogFormSchema = z.object({
   isOustanding: z.boolean().default(false),
   href: z.string().min(1, 'Href is required'),
-  imageSrc: z.string(),
-  imageAlt: z.string(),
-  category: z.string(),
   title: z.string().min(1, 'Title is required'),
   descriptions: z
     .array(
@@ -57,15 +58,12 @@ export const blogFormSchema = z.object({
     )
     .min(1, 'At least one description is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
-  slug: z.string().min(1, 'Slug is required'),
+  slug: z.string(),
   categories: z.array(z.string()).min(1, 'Categories is required'),
   date: z.date(),
-  image: z.any(),
-  content: z.string(),
   articleSections: z
     .array(articleSectionSchema)
     .min(1, 'Article sections is required'),
-  relatedProducts: z.array(z.any()).optional().default([]),
   showArrowDesktop: z.boolean().default(false),
   isVertical: z.boolean().default(false),
   thumbnail: z
@@ -109,7 +107,7 @@ export const blogFormSchema = z.object({
   relatedPosts: z
     .array(z.string())
     .min(1, { message: 'At least one blog is required' }),
-  relatedProduct: z
+  relatedProducts: z
     .array(z.string())
     .min(1, { message: 'At least one product is required' })
 });

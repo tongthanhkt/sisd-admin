@@ -1,18 +1,17 @@
-import { useForm } from 'react-hook-form';
-import { blogFormSchema, BlogFormValues } from '../utils/form-schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
-import { IMutateBlog } from '@/types';
-import { uploadFile } from '@/lib/upload';
-import { isFile, isUrl } from '@/lib/utils';
-import { toast } from 'sonner';
 import {
   useCreateBlogMutation,
-  useUpdateBlogMutation,
-  useGetBlogQuery
+  useGetBlogQuery,
+  useUpdateBlogMutation
 } from '@/lib/api/blogs';
-import { IBlog } from '@/models/Blog';
+import { uploadFile } from '@/lib/upload';
+import { isFile, isUrl } from '@/lib/utils';
+import { IMutateBlog } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { blogFormSchema, BlogFormValues } from '../utils/form-schema';
 
 export const useBlogForm = (blogId?: string) => {
   const router = useRouter();
@@ -22,6 +21,7 @@ export const useBlogForm = (blogId?: string) => {
   const { data: blogData } = useGetBlogQuery(blogId || '', {
     skip: !blogId || blogId === 'new'
   });
+  console.log('🚀 ~ useBlogForm ~ blogData:', blogData);
 
   const [createBlog] = useCreateBlogMutation();
   const [updateBlog] = useUpdateBlogMutation();
@@ -31,15 +31,10 @@ export const useBlogForm = (blogId?: string) => {
     mode: 'onChange',
     defaultValues: {
       title: '',
-      image: '',
-      content: '',
       descriptions: [],
       href: '',
       date: new Date(),
       isOustanding: false,
-      imageSrc: '',
-      imageAlt: '',
-      category: '',
       slug: '',
       categories: [],
       relatedPosts: [],
@@ -51,8 +46,7 @@ export const useBlogForm = (blogId?: string) => {
       thumbnail: [],
       shortDescription: '',
       summary: '',
-      contact: '',
-      relatedProduct: []
+      contact: ''
     }
   });
   const {
@@ -65,19 +59,6 @@ export const useBlogForm = (blogId?: string) => {
   const prepareDataSubmit = async (
     data: BlogFormValues
   ): Promise<IMutateBlog> => {
-    // Handle image upload
-    let imageUrl = '';
-    if (data.image && data.image.length > 0) {
-      if (isFile(data.image[0])) {
-        // New file uploaded
-        const uploadResult = await uploadFile(data.image[0]);
-        imageUrl = uploadResult.url || '';
-      } else if (isUrl(data.image[0])) {
-        // Existing URL, keep it
-        imageUrl = data.image[0];
-      }
-    }
-
     // Handle thumbnail upload
     let thumbnailUrl = '';
     if (data.thumbnail && data.thumbnail.length > 0) {
@@ -103,21 +84,19 @@ export const useBlogForm = (blogId?: string) => {
     // Handle article sections images
     const processedArticleSections = await Promise.all(
       data.articleSections.map(async (section) => {
-        console.log('🚀 ~ data.articleSections.map ~ section:', section);
         // Handle section images
         const sectionImages = await Promise.all(
           (section.images ?? []).map(async (image) => {
-            console.log('🚀 ~ imssssssage:', image);
             if (isFile(image.file)) {
               const uploadResult = await uploadFile(image.file);
               return {
                 src: uploadResult.url || '',
                 caption: image.caption || ''
               };
-            } else if (isUrl(image.src)) {
+            } else if (isUrl(image.file)) {
               return {
                 caption: image.caption || '',
-                src: image.src || ''
+                src: image.file || ''
               };
             }
             return {
@@ -138,9 +117,9 @@ export const useBlogForm = (blogId?: string) => {
                     src: uploadResult.url || '',
                     caption: image.caption || ''
                   };
-                } else if (isUrl(image.src)) {
+                } else if (isUrl(image.file)) {
                   return {
-                    src: image.src || '',
+                    src: image.file || '',
                     caption: image.caption || ''
                   };
                 }
@@ -173,9 +152,9 @@ export const useBlogForm = (blogId?: string) => {
 
                             caption: image.caption || ''
                           };
-                        } else if (isUrl(image.src)) {
+                        } else if (isUrl(image.file)) {
                           return {
-                            src: image.src || '',
+                            src: image.file || '',
 
                             caption: image.caption || ''
                           };
@@ -222,7 +201,6 @@ export const useBlogForm = (blogId?: string) => {
       slug: data.slug,
       categories: data.categories,
       date: data.date.toISOString(),
-      image: imageUrl,
       articleSections: processedArticleSections,
       relatedProducts: data.relatedProducts || [],
       relatedPosts: data.relatedPosts,
@@ -237,72 +215,67 @@ export const useBlogForm = (blogId?: string) => {
     };
   };
 
-  // Convert API image URLs to displayable values (no fetch)
-  const convertImagesFromAPI = async (blogData: IBlog) => {
-    setIsLoadingImages(true);
-    try {
-      const imageFiles: string[] = [];
-      const thumbnailFiles: string[] = [];
-      const bannerFiles: string[] = [];
-
-      // Handle main image
-      if (blogData.image) {
-        imageFiles.push(blogData.image);
-      }
-
-      // Handle thumbnail (assuming it's stored in imageSrc or similar field)
-      if (blogData.imageSrc) {
-        thumbnailFiles.push(blogData.imageSrc);
-      }
-
-      // Handle banner (you might need to adjust this based on your actual data structure)
-      if (blogData.image) {
-        bannerFiles.push(blogData.image);
-      }
-
-      return { imageFiles, thumbnailFiles, bannerFiles };
-    } finally {
-      setIsLoadingImages(false);
-    }
+  // Convert API articleSections images to displayable values for the form
+  const convertBlogImagesFromAPI = (articleSections: any[]) => {
+    return (articleSections ?? []).map((section) => ({
+      ...section,
+      images: (section.images ?? []).map((img: any) => ({
+        file: img.src,
+        caption: img.caption || ''
+      })),
+      contents: (section.contents ?? []).map((content: any) => ({
+        ...content,
+        images: (content.images ?? []).map((img: any) => ({
+          file: img.src,
+          caption: img.caption || ''
+        }))
+      })),
+      subHeadline: (section.subHeadline ?? []).map((sub: any) => ({
+        ...sub,
+        contents: (sub.contents ?? []).map((content: any) => ({
+          ...content,
+          images: (content.images ?? []).map((img: any) => ({
+            file: img.src,
+            caption: img.caption || ''
+          }))
+        }))
+      }))
+    }));
   };
 
   useEffect(() => {
     const loadBlogData = async () => {
       if (blogData) {
         try {
-          const { imageFiles, thumbnailFiles, bannerFiles } =
-            await convertImagesFromAPI(blogData);
+          // Map images for articleSections
+          const mappedArticleSections = convertBlogImagesFromAPI(
+            blogData.articleSections
+          );
+          const bannerFiles = blogData.banner ? [blogData.banner] : [];
+          const thumbnailFiles = blogData.thumbnail ? [blogData.thumbnail] : [];
 
           form.reset({
             title: blogData.title || '',
-            image: imageFiles,
-            content: Array.isArray(blogData.content)
-              ? blogData.content.join('\n')
-              : blogData.content || '',
-            descriptions: blogData.description
-              ? [{ value: blogData.description }]
-              : [],
+            descriptions:
+              blogData.descriptions?.map((d: string) => ({
+                value: d,
+                id: Math.random().toString(36).substring(2, 15)
+              })) || [],
             href: blogData.href || '',
-            date: new Date(blogData.date || Date.now()),
+            date: blogData.date ? new Date(blogData.date) : new Date(),
             isOustanding: blogData.isOustanding || false,
-            imageSrc: blogData.imageSrc || '',
-            imageAlt: blogData.imageAlt || '',
-            category: blogData.category || '',
             slug: blogData.slug || '',
             categories: blogData.categories || [],
             relatedPosts: blogData.relatedPosts || [],
-            articleSections: blogData.articleSections || [],
+            articleSections: mappedArticleSections,
             relatedProducts: blogData.relatedProducts || [],
             showArrowDesktop: blogData.showArrowDesktop || false,
             isVertical: blogData.isVertical || false,
             banner: bannerFiles,
             thumbnail: thumbnailFiles,
-            shortDescription: blogData.description || '',
-            summary: blogData.description || '',
-            contact: '',
-            relatedProduct:
-              blogData.relatedProducts?.map((product) => product.toString()) ||
-              []
+            shortDescription: blogData.shortDescription || '',
+            summary: blogData.summary || '',
+            contact: blogData.contact || ''
           });
         } catch (error) {
           console.error('Error loading blog data:', error);

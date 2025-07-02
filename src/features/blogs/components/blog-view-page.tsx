@@ -8,7 +8,7 @@ type BlogViewPageProps = {
 
 export default async function BlogViewPage({ blogId }: BlogViewPageProps) {
   let blog: IBlog | null = null;
-  let pageTitle = 'Tạo bài viết mới';
+  let pageTitle = 'Create Blog';
 
   if (blogId !== 'new') {
     try {
@@ -27,12 +27,12 @@ export default async function BlogViewPage({ blogId }: BlogViewPageProps) {
       }
 
       blog = await response.json();
-      pageTitle = 'Chỉnh sửa bài viết';
+      pageTitle = 'Edit Blog';
     } catch (error) {
       console.error('Error fetching blog:', error);
       notFound();
     }
   }
 
-  return <BlogForm pageTitle={pageTitle} initialData={blog} blogId={blogId} />;
+  return <BlogForm pageTitle={pageTitle} blogId={blogId} />;
 }

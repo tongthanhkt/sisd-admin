@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import { generateSlug } from '@/lib/utils';
 import Blog from '@/models/Blog';
 import mongoose from 'mongoose';
+import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
@@ -48,7 +49,10 @@ export async function PUT(
     }
 
     const body = await request.json();
-    console.log('Update body:', body);
+    if (!body.slug || body.slug === null || body.slug === '') {
+      body.slug = generateSlug(body.title);
+    }
+    console.log('🚀 ~ body:', body);
 
     const blog = await Blog.findByIdAndUpdate(blogId, body, {
       new: true,

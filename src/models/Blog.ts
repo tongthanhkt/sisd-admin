@@ -1,20 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-// Function to generate slug from title
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/đ/g, 'd')
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/--+/g, '-') // Replace multiple - with single -
-    .trim()
-    .replace(/^-+/, '') // Trim - from start
-    .replace(/-+$/, ''); // Trim - from end
-}
-
 interface IArticleSectionImage {
   src: string;
   alt?: string;
@@ -108,13 +93,7 @@ const blogSchema = new Schema(
     slug: {
       type: String,
       unique: true,
-      sparse: true,
-      set: function (this: IBlog) {
-        if (this.title) {
-          return generateSlug(this.title);
-        }
-        return null;
-      }
+      sparse: true
     },
     categories: [String],
     date: String,

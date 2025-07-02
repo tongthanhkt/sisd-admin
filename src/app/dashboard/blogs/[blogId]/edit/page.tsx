@@ -21,27 +21,9 @@ type PageProps = {
 export default function Page({ params }: PageProps) {
   return (
     <PageContainer>
-      <div className='flex flex-1 flex-col space-y-4 px-1'>
-        <div className='flex items-start justify-between'>
-          <Heading
-            title='Chỉnh sửa bài viết'
-            description='Cập nhật thông tin bài viết'
-          />
-          <Link
-            href='/dashboard/blogs'
-            className={cn(
-              buttonVariants({ variant: 'outline' }),
-              'text-xs md:text-sm'
-            )}
-          >
-            <IconArrowLeft className='mr-2 h-4 w-4' /> Quay lại
-          </Link>
-        </div>
-        <Separator />
-        <Suspense fallback={<FormCardSkeleton />}>
-          <BlogViewPage blogId={params.blogId} />
-        </Suspense>
-      </div>
+      <Suspense fallback={<FormCardSkeleton />}>
+        <BlogViewPage blogId={params.blogId} />
+      </Suspense>
     </PageContainer>
   );
 }

@@ -4,7 +4,7 @@ import { api } from '../api';
 
 // Blog types
 
-export interface UpdateBlogRequest extends IMutateBlog {
+export interface IBlogDetail extends IMutateBlog {
   id: string;
 }
 
@@ -18,7 +18,7 @@ export const blogsApi = api.injectEndpoints({
     }),
 
     // Get single blog by ID
-    getBlog: builder.query<IBlog, string>({
+    getBlog: builder.query<IBlogDetail, string>({
       query: (id) => `blogs/${id}`,
       providesTags: ['Blog']
     }),
@@ -34,7 +34,7 @@ export const blogsApi = api.injectEndpoints({
     }),
 
     // Update blog
-    updateBlog: builder.mutation<IBlog, UpdateBlogRequest>({
+    updateBlog: builder.mutation<IBlog, IBlogDetail>({
       query: ({ id, ...blog }) => ({
         url: `blogs/${id}`,
         method: 'PUT',

@@ -45,7 +45,6 @@ export interface IMutateBlog {
   slug: string;
   categories: string[];
   date: string;
-  image: string;
   articleSections: ArticleSection[];
   relatedProducts: string[];
   relatedPosts: string[];

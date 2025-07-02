@@ -17,7 +17,7 @@ export function RelatedProducts() {
     setValue,
     formState: { errors }
   } = methods;
-  const relatedProducts = watch('relatedProduct');
+  const relatedProducts = watch('relatedProducts');
 
   const { data: productData } = useGetProductsQuery();
   const products = productData?.products || [];
@@ -37,7 +37,7 @@ export function RelatedProducts() {
       value={relatedProducts}
       onChange={(ids) =>
         setValue(
-          'relatedProduct',
+          'relatedProducts',
           ids?.map((id) => id)
         )
       }
@@ -48,8 +48,8 @@ export function RelatedProducts() {
       itemCategory={(item) =>
         item.category ? PRODUCT_LABELS[item.category] : ''
       }
-      fieldName='relatedProduct'
-      helperText={errors.relatedProduct?.message}
+      fieldName='relatedProducts'
+      helperText={errors.relatedProducts?.message}
     />
   );
 }
