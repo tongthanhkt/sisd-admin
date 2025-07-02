@@ -21,8 +21,10 @@ export default function BlogListingPage() {
     searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
   );
   const search = searchParams.get('search') || '';
+  const categoriesParam = searchParams.get('categories') || '';
+  const categories = categoriesParam ? categoriesParam.split(',') : [];
 
-  // Use RTK Query hook with pagination params
+  // Use RTK Query hook with pagination and filter params
   const {
     data: blogData,
     isLoading,
@@ -30,7 +32,8 @@ export default function BlogListingPage() {
   } = useGetBlogsQuery({
     page,
     perPage: pageLimit,
-    search
+    search,
+    categories
   });
   const blogs = blogData?.blogs || [];
   const totalItems = blogData?.total_blogs || 0;

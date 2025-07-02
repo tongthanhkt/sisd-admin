@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
     );
     const search = searchParams.get('search') || '';
-    const category = searchParams.get('category');
+    const categories = searchParams.get('categories');
 
     const query: any = {};
 
@@ -31,8 +31,8 @@ export async function GET(request: Request) {
       ];
     }
 
-    if (category) {
-      query.category = category;
+    if (categories) {
+      query.categories = { $in: categories.split(',') };
     }
 
     const skip = (page - 1) * limit;

@@ -40,7 +40,7 @@ export function BlogTable({
         typeof updaterOrValue === 'function'
           ? updaterOrValue(pagination)
           : updaterOrValue;
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(window.location.search);
       params.set('page', String(value.pageIndex + 1));
       params.set('perPage', String(value.pageSize));
       router.push(`?${params.toString()}`);

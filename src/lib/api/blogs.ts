@@ -14,10 +14,15 @@ export const blogsApi = api.injectEndpoints({
     // Get all blogs
     getBlogs: builder.query<
       IBlogPagination,
-      { page: number; perPage: number; search: string }
+      { page: number; perPage: number; search: string; categories?: string[] }
     >({
-      query: ({ page, perPage, search }) =>
-        `blogs?page=${page}&perPage=${perPage}&search=${search}`,
+      query: ({ page, perPage, search, categories }) => {
+        let url = `blogs?page=${page}&perPage=${perPage}&search=${search}`;
+        if (categories && categories.length > 0) {
+          url += `&categories=${categories.join(',')}`;
+        }
+        return url;
+      },
       providesTags: ['Blog']
     }),
 

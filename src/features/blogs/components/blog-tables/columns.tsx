@@ -7,6 +7,12 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Text } from 'lucide-react';
 import { CellAction } from './cell-action';
+import {
+  BLOG_CATEGORIES_LABELS,
+  BLOG_CATEGORIES_OPTIONS
+} from '@/constants/blog';
+import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 const categories = [
   { label: 'Tin tức', value: 'news' },
@@ -46,25 +52,29 @@ export const columns: ColumnDef<IBlog>[] = [
     enableColumnFilter: true
   },
   {
-    id: 'category',
-    accessorKey: 'category',
+    id: 'categories',
+    accessorKey: 'categories',
     header: ({ column }: { column: Column<IBlog, unknown> }) => (
       <DataTableColumnHeader column={column} title='Danh mục' />
     ),
     cell: ({ cell }) => {
-      const category = cell.getValue<string>();
+      const category = cell.getValue<string[]>();
       return (
-        <Badge variant='outline' className='capitalize'>
-          {category || 'Không có danh mục'}
-        </Badge>
+        <div className='flex flex-wrap gap-2'>
+          {category?.map((c) => (
+            <Badge variant='outline' className='capitalize' key={c}>
+              {BLOG_CATEGORIES_LABELS[c]}
+            </Badge>
+          ))}
+        </div>
       );
     },
-    enableColumnFilter: true,
     meta: {
-      label: 'categories',
+      label: 'Categories',
       variant: 'multiSelect',
-      options: categories
-    }
+      options: BLOG_CATEGORIES_OPTIONS
+    },
+    enableColumnFilter: true
   },
   {
     id: 'createdAt',
