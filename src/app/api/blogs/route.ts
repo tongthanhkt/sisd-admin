@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import Blog from '@/models/Blog';
 import { connectToDatabase } from '@/lib/mongodb';
 import { generateSlug } from '@/lib/utils';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 
 export async function GET(request: Request) {
   try {
@@ -9,8 +13,12 @@ export async function GET(request: Request) {
     console.log('Connected to database');
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('perPage') || '10');
+    const page = parseInt(
+      searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+    );
+    const limit = parseInt(
+      searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+    );
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category');
 

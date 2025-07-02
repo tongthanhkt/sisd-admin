@@ -1,14 +1,22 @@
 import { NextResponse } from 'next/server';
 import MortalProduct from '@/models/MortalProduct';
 import { connectToDatabase } from '@/lib/mongodb';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('perPage') || '10');
+    const page = parseInt(
+      searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+    );
+    const limit = parseInt(
+      searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+    );
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category');
 

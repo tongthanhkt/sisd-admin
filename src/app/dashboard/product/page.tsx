@@ -14,13 +14,7 @@ export const metadata = {
   title: 'Dashboard: Products'
 };
 
-interface PageProps {
-  searchParams: {
-    [key: string]: string | string[] | undefined;
-  };
-}
-
-export default function Page({ searchParams }: PageProps) {
+export default function Page() {
   return (
     <PageContainer scrollable={false}>
       <div className='flex flex-1 flex-col space-y-4'>
@@ -41,7 +35,7 @@ export default function Page({ searchParams }: PageProps) {
           fallback={<DataTableSkeleton columnCount={5} filterCount={2} />}
         >
           <NuqsAdapter>
-            <ProductListingPage searchParams={searchParams} />
+            <ProductListingPage />
           </NuqsAdapter>
         </Suspense>
       </div>

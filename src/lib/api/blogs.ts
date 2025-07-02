@@ -12,10 +12,12 @@ export interface IBlogDetail extends IMutateBlog {
 export const blogsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all blogs
-    getBlogs: builder.query<IBlogPagination, void>({
-      query: () => 'blogs',
-      providesTags: ['Blog']
-    }),
+    getBlogs: builder.query<IBlogPagination, { page: number; perPage: number }>(
+      {
+        query: ({ page, perPage }) => `blogs?page=${page}&perPage=${perPage}`,
+        providesTags: ['Blog']
+      }
+    ),
 
     // Get single blog by ID
     getBlog: builder.query<IBlogDetail, string>({

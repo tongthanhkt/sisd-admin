@@ -6,16 +6,32 @@ import { useGetBlogsQuery } from '@/lib/api/blogs';
 import { AlertCircle } from 'lucide-react';
 import { BlogTable } from './blog-tables';
 import { columns } from './blog-tables/columns';
+import { useSearchParams } from 'next/navigation';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 
-type BlogListingPage = {};
+export default function BlogListingPage() {
+  const searchParams = useSearchParams();
+  const page = parseInt(
+    searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+  );
+  const pageLimit = parseInt(
+    searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+  );
 
-export default function BlogListingPage({}: BlogListingPage) {
-  const page = 1;
-  const pageLimit = 10;
-
-  // Use RTK Query hook
-  const { data: blogData, isLoading, error } = useGetBlogsQuery();
+  // Use RTK Query hook with pagination params
+  const {
+    data: blogData,
+    isLoading,
+    error
+  } = useGetBlogsQuery({
+    page,
+    perPage: pageLimit
+  });
   const blogs = blogData?.blogs || [];
+  const totalItems = blogData?.total_blogs || 0;
 
   if (isLoading) {
     return (
@@ -37,18 +53,10 @@ export default function BlogListingPage({}: BlogListingPage) {
     );
   }
 
-  // Filter blogs based on search params
-  let filteredBlogs = blogs || [];
-
-  // Pagination
-  const startIndex = (page - 1) * pageLimit;
-  const endIndex = startIndex + pageLimit;
-  const paginatedBlogs = filteredBlogs?.slice(startIndex, endIndex);
-
   return (
     <BlogTable
-      data={paginatedBlogs}
-      totalItems={filteredBlogs?.length || 0}
+      data={blogs}
+      totalItems={totalItems}
       columns={columns}
       page={page}
       perPage={pageLimit}

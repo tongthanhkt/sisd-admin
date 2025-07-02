@@ -1,30 +1,38 @@
 'use client';
 
-import { useGetProductsQuery, Product } from '@/lib/api/products';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
+import { Product, useGetProductsQuery } from '@/lib/api/products';
+import { ColumnDef } from '@tanstack/react-table';
+import { AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { ProductTable } from './product-tables';
 import { columns } from './product-tables/columns';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import { ColumnDef } from '@tanstack/react-table';
 
-type ProductListingPageProps = {
-  searchParams: {
-    [key: string]: string | string[] | undefined;
-  };
-};
-
-export default function ProductListingPage({
-  searchParams
-}: ProductListingPageProps) {
-  const page = Number(searchParams?.page || '1');
-  const pageLimit = 20;
-  const search = searchParams?.name as string;
-  const categories = searchParams?.category as string;
+export default function ProductListingPage() {
+  const searchParams = useSearchParams();
+  const page = parseInt(
+    searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+  );
+  const pageLimit = parseInt(
+    searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+  );
 
   // Use RTK Query hook
-  const { data: productData, isLoading, error } = useGetProductsQuery();
+  const {
+    data: productData,
+    isLoading,
+    error
+  } = useGetProductsQuery({
+    page,
+    perPage: pageLimit
+  });
   const products = productData?.products || [];
+  const totalItems = productData?.total_products || 0;
 
   if (isLoading) {
     return (
@@ -48,24 +56,10 @@ export default function ProductListingPage({
     );
   }
 
-  // Filter products based on search params
-  let filteredProducts = products || [];
-
-  if (categories) {
-    filteredProducts = filteredProducts.filter(
-      (product: Product) => product.category === categories
-    );
-  }
-
-  // Pagination
-  const startIndex = (page - 1) * pageLimit;
-  const endIndex = startIndex + pageLimit;
-  const paginatedProducts = filteredProducts?.slice(startIndex, endIndex);
-
   return (
     <ProductTable
-      data={paginatedProducts}
-      totalItems={filteredProducts?.length || 0}
+      data={products}
+      totalItems={totalItems}
       columns={columns as ColumnDef<Product>[]}
       page={page}
       perPage={pageLimit}
