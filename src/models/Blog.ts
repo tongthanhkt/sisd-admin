@@ -28,11 +28,12 @@ interface IArticleSectionContent {
 
 interface IArticleSectionSubHeadline {
   title: string;
+  subTitle: string;
   contents: IArticleSectionContent[];
-  images?: IArticleSectionImage[];
 }
 
 interface IArticleSection {
+  id?: string;
   headline?: string;
   headline2?: string;
   contents: IArticleSectionContent[];
@@ -41,26 +42,33 @@ interface IArticleSection {
 }
 
 export interface IBlog extends Document {
-  isOustanding: boolean;
-  href: string;
-  imageSrc: string;
-  imageAlt: string;
-  category: string;
-  categoryColor: string;
   title: string;
-  description: string;
+  descriptions: string[];
+  shortDescription: string;
   slug: string;
   categories: string[];
   date: string;
   image: string;
-  content: string | string[];
-  relatedPosts: { title: string; category: string; slug: string }[];
   articleSections: IArticleSection[];
-  relatedProducts: any[];
+  relatedProducts: string[];
+  relatedPosts: string[];
+  showArrowDesktop: boolean;
+  isVertical: boolean;
+  thumbnail: string;
+  banner: string;
+  isOustanding: boolean;
+  href: string;
+  summary: string;
+  contact: string;
+  // Legacy fields for backward compatibility
+  imageSrc?: string;
+  imageAlt?: string;
+  category?: string;
+  categoryColor?: string;
+  description?: string;
+  content?: string | string[];
   width?: number;
   height?: number;
-  showArrowDesktop?: boolean;
-  isVertical?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   id: string;
@@ -79,11 +87,12 @@ const articleSectionContentSchema = new Schema({
 
 const articleSectionSubHeadlineSchema = new Schema({
   title: String,
-  contents: [articleSectionContentSchema],
-  images: [articleSectionImageSchema]
+  subTitle: String,
+  contents: [articleSectionContentSchema]
 });
 
 const articleSectionSchema = new Schema({
+  id: String,
   headline: String,
   headline2: String,
   contents: [articleSectionContentSchema],
@@ -93,14 +102,9 @@ const articleSectionSchema = new Schema({
 
 const blogSchema = new Schema(
   {
-    isOustanding: { type: Boolean, default: false },
-    href: String,
-    imageSrc: String,
-    imageAlt: String,
-    category: String,
-    categoryColor: String,
     title: { type: String, required: true },
-    description: String,
+    descriptions: [String],
+    shortDescription: String,
     slug: {
       type: String,
       unique: true,
@@ -115,20 +119,26 @@ const blogSchema = new Schema(
     categories: [String],
     date: String,
     image: String,
-    content: { type: [String], required: false },
-    relatedPosts: [
-      {
-        title: String,
-        category: String,
-        slug: String
-      }
-    ],
     articleSections: [articleSectionSchema],
-    relatedProducts: [Schema.Types.Mixed],
+    relatedProducts: [String],
+    relatedPosts: [String],
+    showArrowDesktop: { type: Boolean, default: false },
+    isVertical: { type: Boolean, default: false },
+    thumbnail: String,
+    banner: String,
+    isOustanding: { type: Boolean, default: false },
+    href: String,
+    summary: String,
+    contact: String,
+    // Legacy fields for backward compatibility
+    imageSrc: String,
+    imageAlt: String,
+    category: String,
+    categoryColor: String,
+    description: String,
+    content: { type: [String], required: false },
     width: Number,
-    height: Number,
-    showArrowDesktop: Boolean,
-    isVertical: Boolean
+    height: Number
   },
   {
     timestamps: true,

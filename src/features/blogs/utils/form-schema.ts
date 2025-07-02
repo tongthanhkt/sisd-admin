@@ -12,14 +12,17 @@ const articleSectionImageSchema = z
             f !== null &&
             'file' in f &&
             f.file instanceof File) ||
-          (typeof f === 'string' && (f.startsWith('http') || f.startsWith('/')))
+          (typeof f === 'string' &&
+            (f.startsWith('http') || f.startsWith('/'))) ||
+          f === null ||
+          f === undefined
       ),
     { message: 'All images must be files or valid URLs' }
   );
 
 const articleSectionContentSchema = z.object({
   content: z.string(),
-  images: articleSectionImageSchema
+  images: articleSectionImageSchema.optional().default([])
 });
 
 const articleSectionSubHeadlineSchema = z.object({
@@ -45,7 +48,14 @@ export const blogFormSchema = z.object({
   imageAlt: z.string(),
   category: z.string(),
   title: z.string().min(1, 'Title is required'),
-  descriptions: z.array(z.string()).min(1, 'Description is required'),
+  descriptions: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        value: z.string().min(1, 'Description is required')
+      })
+    )
+    .min(1, 'At least one description is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
   slug: z.string().min(1, 'Slug is required'),
   categories: z.array(z.string()).min(1, 'Categories is required'),

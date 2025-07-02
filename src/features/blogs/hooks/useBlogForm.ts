@@ -6,9 +6,26 @@ import { IMutateBlog } from '@/types';
 import { uploadFile } from '@/lib/upload';
 import { isFile, isUrl } from '@/lib/utils';
 import { toast } from 'sonner';
+import {
+  useCreateBlogMutation,
+  useUpdateBlogMutation,
+  useGetBlogQuery
+} from '@/lib/api/blogs';
+import { IBlog } from '@/models/Blog';
+import { useEffect, useState } from 'react';
 
 export const useBlogForm = (blogId?: string) => {
   const router = useRouter();
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
+
+  // RTK Query hooks
+  const { data: blogData } = useGetBlogQuery(blogId || '', {
+    skip: !blogId || blogId === 'new'
+  });
+
+  const [createBlog] = useCreateBlogMutation();
+  const [updateBlog] = useUpdateBlogMutation();
+
   const form = useForm<BlogFormValues>({
     resolver: zodResolver(blogFormSchema),
     mode: 'onChange',
@@ -38,6 +55,12 @@ export const useBlogForm = (blogId?: string) => {
       relatedProduct: []
     }
   });
+  const {
+    formState: { errors },
+    watch
+  } = form;
+  const values = watch();
+  console.log('🚀 ~ useBlogForm ~ values:', values, errors);
 
   const prepareDataSubmit = async (
     data: BlogFormValues
@@ -181,9 +204,13 @@ export const useBlogForm = (blogId?: string) => {
       })
     );
 
+    const formatDescriptions = data.descriptions.map(
+      (description) => description.value
+    );
+
     return {
       title: data.title,
-      descriptions: data.descriptions,
+      descriptions: formatDescriptions,
       shortDescription: data.shortDescription,
       slug: data.slug,
       categories: data.categories,
@@ -203,37 +230,119 @@ export const useBlogForm = (blogId?: string) => {
     };
   };
 
+  // Convert API image URLs to displayable values (no fetch)
+  const convertImagesFromAPI = async (blogData: IBlog) => {
+    setIsLoadingImages(true);
+    try {
+      const imageFiles: string[] = [];
+      const thumbnailFiles: string[] = [];
+      const bannerFiles: string[] = [];
+
+      // Handle main image
+      if (blogData.image) {
+        imageFiles.push(blogData.image);
+      }
+
+      // Handle thumbnail (assuming it's stored in imageSrc or similar field)
+      if (blogData.imageSrc) {
+        thumbnailFiles.push(blogData.imageSrc);
+      }
+
+      // Handle banner (you might need to adjust this based on your actual data structure)
+      if (blogData.image) {
+        bannerFiles.push(blogData.image);
+      }
+
+      return { imageFiles, thumbnailFiles, bannerFiles };
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadBlogData = async () => {
+      if (blogData) {
+        try {
+          const { imageFiles, thumbnailFiles, bannerFiles } =
+            await convertImagesFromAPI(blogData);
+
+          form.reset({
+            title: blogData.title || '',
+            image: imageFiles,
+            content: Array.isArray(blogData.content)
+              ? blogData.content.join('\n')
+              : blogData.content || '',
+            descriptions: blogData.description
+              ? [{ value: blogData.description }]
+              : [],
+            href: blogData.href || '',
+            date: new Date(blogData.date || Date.now()),
+            isOustanding: blogData.isOustanding || false,
+            imageSrc: blogData.imageSrc || '',
+            imageAlt: blogData.imageAlt || '',
+            category: blogData.category || '',
+            slug: blogData.slug || '',
+            categories: blogData.categories || [],
+            relatedPosts: blogData.relatedPosts || [],
+            articleSections: blogData.articleSections || [],
+            relatedProducts: blogData.relatedProducts || [],
+            showArrowDesktop: blogData.showArrowDesktop || false,
+            isVertical: blogData.isVertical || false,
+            banner: bannerFiles,
+            thumbnail: thumbnailFiles,
+            shortDescription: blogData.description || '',
+            summary: blogData.description || '',
+            contact: '',
+            relatedProduct:
+              blogData.relatedProducts?.map((product) => product.toString()) ||
+              []
+          });
+        } catch (error) {
+          console.error('Error loading blog data:', error);
+          toast.error('Error loading blog images');
+        }
+      }
+    };
+
+    loadBlogData();
+  }, [blogData]);
+
   const onSubmit = async (data: BlogFormValues) => {
     try {
       const preparedData = await prepareDataSubmit(data);
 
-      if (blogId) {
-        await fetch(`/api/blogs/${blogId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(preparedData)
-        });
-        toast.success('Blog updated successfully');
+      let response;
+      if (blogId && blogId !== 'new') {
+        // Update existing blog
+        response = await updateBlog({ id: blogId, ...preparedData });
       } else {
-        await fetch('/api/blogs', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(preparedData)
-        });
-        toast.success('Blog created successfully');
+        // Create new blog
+        response = await createBlog(preparedData);
       }
 
+      if ('error' in response && response.error) {
+        const errorMessage =
+          'data' in response.error && response.error.data
+            ? (response.error.data as any)?.message
+            : 'error' in response.error
+              ? response.error.error
+              : 'Something went wrong';
+        toast.error(errorMessage);
+        return;
+      }
+
+      toast.success(
+        blogId && blogId !== 'new'
+          ? 'Blog updated successfully'
+          : 'Blog created successfully'
+      );
+      form.reset();
       router.push('/dashboard/blogs');
-      router.refresh();
     } catch (error) {
-      console.error('Error submitting blog:', error);
+      console.error('🚀 ~ onSubmit error:', error);
       toast.error('An error occurred while saving the blog');
     }
   };
 
-  return { form, onSubmit };
+  return { form, onSubmit, isLoadingImages };
 };
