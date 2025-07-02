@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import { generateSlug } from '@/lib/utils';
 import Blog from '@/models/Blog';
 import mongoose from 'mongoose';
+import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
@@ -9,7 +10,6 @@ export async function GET(
 ) {
   try {
     const { blogId } = await context.params;
-    console.log('GET /api/blogs/[blogId] - ID:', blogId);
     await connectToDatabase();
 
     if (!mongoose.Types.ObjectId.isValid(blogId)) {
@@ -17,10 +17,8 @@ export async function GET(
     }
 
     const blog = await Blog.findById(blogId);
-    console.log('Found blog:', blog);
 
     if (!blog) {
-      console.log('Blog not found');
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
@@ -40,7 +38,6 @@ export async function PUT(
 ) {
   try {
     const { blogId } = await context.params;
-    console.log('PUT /api/blogs/[blogId] - ID:', blogId);
     await connectToDatabase();
 
     if (!mongoose.Types.ObjectId.isValid(blogId)) {
@@ -48,7 +45,9 @@ export async function PUT(
     }
 
     const body = await request.json();
-    console.log('Update body:', body);
+    if (!body.slug || body.slug === null || body.slug === '') {
+      body.slug = generateSlug(body.title);
+    }
 
     const blog = await Blog.findByIdAndUpdate(blogId, body, {
       new: true,
@@ -56,7 +55,6 @@ export async function PUT(
     });
 
     if (!blog) {
-      console.log('Blog not found for update');
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 

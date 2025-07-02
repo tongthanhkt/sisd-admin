@@ -28,7 +28,7 @@ export const BlogDescriptions = () => {
           </FormItem>
         )}
       />
-      <Description fieldName='description' title='Description' />
+      <Description fieldName='descriptions' title='Description' />
     </div>
   );
 };

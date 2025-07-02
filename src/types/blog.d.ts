@@ -1,4 +1,5 @@
 import { IBlog } from '@/models/Blog';
+import { IImage } from './media';
 
 export interface IBlogPagination {
   blogs: IBlog[];
@@ -17,35 +18,34 @@ export interface IBlogFormValues {
   slug: string;
 }
 
-interface IArticleSectionContent {
+type ArticleSectionContent = Partial<{
   content: string;
   images: IImage[];
-}
+}>;
 
-interface IArticleSectionSubHeadline {
+type ArticleSectionSubHeadline = Partial<{
   title: string;
   subTitle: string;
-  contents: IArticleSectionContent[];
-}
+  contents: ArticleSectionContent[];
+}>;
 
-interface IArticleSection {
-  id?: string;
-  headline?: string;
-  headline2?: string;
-  contents: IArticleSectionContent[];
+export type ArticleSection = Partial<{
+  id: string;
+  headline: string;
+  headline2: string;
+  contents: ArticleSectionContent[];
   images: IImage[];
-  subHeadline?: IArticleSectionSubHeadline[];
-}
+  subHeadline: ArticleSectionSubHeadline[];
+}>;
 
 export interface IMutateBlog {
   title: string;
-  description: string;
+  descriptions: string[];
   shortDescription: string;
   slug: string;
   categories: string[];
   date: string;
-  image: string;
-  articleSections: IArticleSection[];
+  articleSections: ArticleSection[];
   relatedProducts: string[];
   relatedPosts: string[];
   showArrowDesktop: boolean;

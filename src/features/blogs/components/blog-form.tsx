@@ -14,6 +14,7 @@ import { RelatedBlogs } from './RelatedBlogs';
 import { RelatedProducts } from './RelatedProducts';
 import { TitleBlog } from './TitleBlog';
 import { ArticleSection } from './ArticleSection';
+import Spinner, { SpinnerOverlay } from '@/components/ui/spinner';
 
 interface BlogFormProps {
   blogId?: string;
@@ -22,7 +23,7 @@ interface BlogFormProps {
 }
 
 export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
-  const { form, onSubmit } = useBlogForm(blogId);
+  const { form, onSubmit, isLoading } = useBlogForm(blogId);
 
   return (
     <Card className='mx-auto w-full'>
@@ -47,6 +48,7 @@ export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
           </form>
         </Form>
       </CardContent>
+      {isLoading && <SpinnerOverlay />}
     </Card>
   );
 }

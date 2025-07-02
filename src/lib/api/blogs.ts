@@ -1,20 +1,10 @@
 import { IBlog } from '@/models/Blog';
-import { IBlogPagination } from '@/types';
+import { IBlogPagination, IMutateBlog } from '@/types';
 import { api } from '../api';
 
 // Blog types
 
-export interface CreateBlogRequest {
-  title: string;
-  content: string;
-  excerpt?: string;
-  featuredImage?: string;
-  author?: string;
-  tags?: string[];
-  publishedAt?: string;
-}
-
-export interface UpdateBlogRequest extends Partial<CreateBlogRequest> {
+export interface IBlogDetail extends IMutateBlog {
   id: string;
 }
 
@@ -22,19 +12,28 @@ export interface UpdateBlogRequest extends Partial<CreateBlogRequest> {
 export const blogsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all blogs
-    getBlogs: builder.query<IBlogPagination, void>({
-      query: () => 'blogs',
+    getBlogs: builder.query<
+      IBlogPagination,
+      { page: number; perPage: number; search: string; categories?: string[] }
+    >({
+      query: ({ page, perPage, search, categories }) => {
+        let url = `blogs?page=${page}&perPage=${perPage}&search=${search}`;
+        if (categories && categories.length > 0) {
+          url += `&categories=${categories.join(',')}`;
+        }
+        return url;
+      },
       providesTags: ['Blog']
     }),
 
     // Get single blog by ID
-    getBlog: builder.query<IBlog, string>({
+    getBlog: builder.query<IBlogDetail, string>({
       query: (id) => `blogs/${id}`,
       providesTags: ['Blog']
     }),
 
     // Create new blog
-    createBlog: builder.mutation<IBlog, CreateBlogRequest>({
+    createBlog: builder.mutation<IBlog, IMutateBlog>({
       query: (blog) => ({
         url: 'blogs',
         method: 'POST',
@@ -44,7 +43,7 @@ export const blogsApi = api.injectEndpoints({
     }),
 
     // Update blog
-    updateBlog: builder.mutation<IBlog, UpdateBlogRequest>({
+    updateBlog: builder.mutation<IBlog, IBlogDetail>({
       query: ({ id, ...blog }) => ({
         url: `blogs/${id}`,
         method: 'PUT',

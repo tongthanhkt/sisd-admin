@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import Blog from '@/models/Blog';
 import { connectToDatabase } from '@/lib/mongodb';
+import { generateSlug } from '@/lib/utils';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 
 export async function GET(request: Request) {
   try {
@@ -8,10 +13,14 @@ export async function GET(request: Request) {
     console.log('Connected to database');
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('perPage') || '10');
+    const page = parseInt(
+      searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+    );
+    const limit = parseInt(
+      searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+    );
     const search = searchParams.get('search') || '';
-    const category = searchParams.get('category');
+    const categories = searchParams.get('categories');
 
     const query: any = {};
 
@@ -22,8 +31,8 @@ export async function GET(request: Request) {
       ];
     }
 
-    if (category) {
-      query.category = category;
+    if (categories) {
+      query.categories = { $in: categories.split(',') };
     }
 
     const skip = (page - 1) * limit;
@@ -62,6 +71,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Received body:', body);
 
+    if (body.title && !body.slug) {
+      body.slug = generateSlug(body.title);
+    }
+
     const blog = await Blog.create(body);
     console.log('Created blog:', blog);
 
@@ -69,7 +82,9 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating blog:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      {
+        error: error instanceof Error ? error.message : 'Internal Server Error'
+      },
       { status: 500 }
     );
   }

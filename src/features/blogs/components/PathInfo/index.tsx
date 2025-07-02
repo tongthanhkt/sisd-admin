@@ -38,12 +38,7 @@ export const PathInfo = () => {
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <Input
-                label='Slug'
-                required
-                placeholder='Enter slug'
-                {...field}
-              />
+              <Input label='Slug' placeholder='Enter slug' {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

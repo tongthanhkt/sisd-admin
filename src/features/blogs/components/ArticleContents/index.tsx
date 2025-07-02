@@ -1,8 +1,16 @@
+import NoData from '@/components/NoData';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { FormField, FormLabel } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { BlogFormValues } from '@/features/blogs/utils/form-schema';
+import { cn } from '@/lib/utils';
 import { IUploadMultipleImageItem } from '@/types';
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import {
@@ -12,29 +20,21 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import { useMemo } from 'react';
 import {
+  FieldArrayPath,
   FieldPath,
-  Path,
   useFieldArray,
   useFormContext,
   UseFormSetValue,
   UseFormWatch
 } from 'react-hook-form';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent
-} from '@/components/ui/accordion';
-import { useMemo } from 'react';
-import { cn } from '@/lib/utils';
-import NoData from '@/components/NoData';
 
 export const ArticleContent = ({
   name,
   contentClassName
 }: {
-  name: Path<BlogFormValues>;
+  name: FieldArrayPath<BlogFormValues>;
   contentClassName?: string;
 }) => {
   const { control, setValue, watch } = useFormContext<BlogFormValues>();
@@ -109,7 +109,7 @@ function SortableItem({
 }: {
   id: string;
   index: number;
-  name: Path<BlogFormValues>;
+  name: FieldArrayPath<BlogFormValues>;
   remove: (index: number) => void;
   setValue: UseFormSetValue<BlogFormValues>;
   watch: UseFormWatch<BlogFormValues>;

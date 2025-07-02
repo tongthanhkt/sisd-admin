@@ -54,8 +54,12 @@ export interface UpdateProductRequest extends Partial<IMutateProduct> {
 export const productsApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // Get all products
-    getProducts: builder.query<ProductsResponse, void>({
-      query: () => 'products',
+    getProducts: builder.query<
+      ProductsResponse,
+      { page: number; perPage: number; search: string; category: string }
+    >({
+      query: ({ page, perPage, search, category }) =>
+        `products?page=${page}&perPage=${perPage}&search=${search}&category=${category}`,
       providesTags: (result) =>
         result
           ? [

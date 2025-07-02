@@ -34,6 +34,11 @@ export const productCategories = [
   { id: PRODUCT_CATEGORIES.SPC, name: PRODUCT_LABELS[PRODUCT_CATEGORIES.SPC] }
 ];
 
+export const CATEGORY_PRODUCT_OPTIONS = productCategories.map((category) => ({
+  label: category.name,
+  value: category.id
+}));
+
 export const products: Product[] = [
   {
     id: 'dpc-100',

@@ -12,6 +12,7 @@ import {
   arrayMove
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useUploadFileMixed } from '@/hooks/use-upload-file';
 import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
@@ -47,6 +48,29 @@ interface UploadMultipleImageProps
   required?: boolean;
 }
 
+// Custom hook to manage preview URL for File or string
+function usePreviewUrl(fileOrUrl: File | string) {
+  const [preview, setPreview] = useState<string>('');
+
+  useEffect(() => {
+    if (fileOrUrl instanceof File) {
+      const url = URL.createObjectURL(fileOrUrl);
+      setPreview(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else if (typeof fileOrUrl === 'string') {
+      setPreview(fileOrUrl);
+      return undefined;
+    } else {
+      setPreview('');
+      return undefined;
+    }
+  }, [fileOrUrl]);
+
+  return preview;
+}
+
 function SortableImageItem({
   item,
   idx,
@@ -54,7 +78,6 @@ function SortableImageItem({
   handleRemoveImage,
   handleCaptionChange,
   withCaption,
-  getPreviewUrl,
   cardClassName
 }: {
   item: IUploadMultipleImageItem;
@@ -63,7 +86,7 @@ function SortableImageItem({
   handleRemoveImage: (idx: number) => void;
   handleCaptionChange: (idx: number, caption: string) => void;
   withCaption: boolean;
-  getPreviewUrl: (item: File | string) => string;
+  getPreviewUrl?: (item: File | string) => string; // not used anymore
   cardClassName?: string;
 }) {
   const {
@@ -79,6 +102,10 @@ function SortableImageItem({
     transition,
     opacity: isDragging ? 0.5 : 1
   };
+
+  // Use the custom hook for preview URL
+  const previewUrl = usePreviewUrl(item.file);
+
   return (
     <div
       ref={setNodeRef}
@@ -115,7 +142,7 @@ function SortableImageItem({
       </div>
       {/* Ảnh */}
       <Image
-        src={getPreviewUrl(item.file)}
+        src={previewUrl}
         alt={isFile(item.file) ? (item.file as File).name : `Image ${idx + 1}`}
         fill
         className='object-cover'
@@ -305,7 +332,6 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
                     handleRemoveImage={handleRemoveImage}
                     handleCaptionChange={handleCaptionChange}
                     withCaption={withCaption}
-                    getPreviewUrl={getPreviewUrl}
                     cardClassName={cardClassName}
                   />
                 ))}
@@ -320,7 +346,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
                   handleRemoveImage={() => {}}
                   handleCaptionChange={() => {}}
                   withCaption={withCaption}
-                  getPreviewUrl={getPreviewUrl}
+                  cardClassName={cardClassName}
                 />
               ) : null}
             </DragOverlay>
