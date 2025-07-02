@@ -45,6 +45,12 @@ export interface RelatedSectionsProps<T extends { id: string }> {
   ) => React.ReactNode;
   helperText?: string;
   fieldName: keyof BlogFormValues;
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
 }
 
 export function RelatedSections<T extends { id: string }>({
@@ -61,7 +67,13 @@ export function RelatedSections<T extends { id: string }>({
   renderTableColumns,
   renderTableRow,
   helperText,
-  fieldName
+  fieldName,
+  currentPage,
+  itemsPerPage,
+  totalItems,
+  onPageChange,
+  search,
+  onSearchChange
 }: RelatedSectionsProps<T>) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(value);
@@ -195,6 +207,12 @@ export function RelatedSections<T extends { id: string }>({
         itemCategory={itemCategory}
         renderTableColumns={renderTableColumns}
         renderTableRow={renderTableRow}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        totalItems={totalItems}
+        onPageChange={onPageChange}
+        search={search}
+        onSearchChange={onSearchChange}
       />
     </div>
   );

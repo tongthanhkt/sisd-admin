@@ -24,6 +24,12 @@ export interface RelatedSectionModalProps<T> {
     onToggle: () => void,
     disabled: boolean
   ) => React.ReactNode;
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
 }
 
 export function RelatedSectionModal<T>({
@@ -37,23 +43,27 @@ export function RelatedSectionModal<T>({
   itemImage,
   itemCategory,
   renderTableColumns,
-  renderTableRow
+  renderTableRow,
+  currentPage,
+  itemsPerPage,
+  totalItems,
+  onPageChange,
+  search,
+  onSearchChange
 }: RelatedSectionModalProps<T>) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  console.log(
+    '🚀 ~  currentPage, itemsPerPage, totalItems:',
+    currentPage,
+    itemsPerPage,
+    totalItems
+  );
   const [selected, setSelected] = useState<string[]>(selectedIds);
 
-  // Filter and paginate items
+  // Filter items by search (parent should paginate, not here)
   const filteredItems = allItems.filter((item) => {
     const label = itemLabel(item).toLowerCase();
-    return label.includes(searchTerm.toLowerCase());
+    return label.includes(search.toLowerCase());
   });
-  const totalItems = filteredItems.length;
-  const paginatedItems = filteredItems.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const remainingSelectable = maxSelected - (selectedIds?.length || 0);
 
@@ -88,8 +98,8 @@ export function RelatedSectionModal<T>({
           <div className='relative flex-1'>
             <Input
               placeholder='Type item name...'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
               className='pl-10'
             />
           </div>
@@ -131,7 +141,7 @@ export function RelatedSectionModal<T>({
               className='block max-h-[calc(100vh-500px)] min-h-[calc(100vh-500px)] divide-y divide-gray-200 overflow-y-auto'
               style={{ display: 'block' }}
             >
-              {paginatedItems.map((item: any) =>
+              {filteredItems.map((item: any) =>
                 renderTableRow ? (
                   renderTableRow(
                     item,
@@ -192,7 +202,7 @@ export function RelatedSectionModal<T>({
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -205,7 +215,7 @@ export function RelatedSectionModal<T>({
                   key={page}
                   variant={currentPage === page ? 'default' : 'outline'}
                   size='sm'
-                  onClick={() => setCurrentPage(page)}
+                  onClick={() => onPageChange(page)}
                   className='h-8 w-8 p-0'
                 >
                   {page}
@@ -215,8 +225,11 @@ export function RelatedSectionModal<T>({
                 variant='outline'
                 size='sm'
                 onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, Math.ceil(totalItems / itemsPerPage))
+                  onPageChange(
+                    Math.min(
+                      currentPage + 1,
+                      Math.ceil(totalItems / itemsPerPage)
+                    )
                   )
                 }
                 disabled={currentPage === Math.ceil(totalItems / itemsPerPage)}
