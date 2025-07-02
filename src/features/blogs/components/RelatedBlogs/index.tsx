@@ -5,6 +5,11 @@ import { IBlog } from '@/models/Blog';
 import { useFormContext } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
 import { RelatedItem, RelatedSections } from '../RelatedSections';
+import { useSearchParams } from 'next/navigation';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 
 export function RelatedBlogs() {
   const methods = useFormContext<BlogFormValues>();
@@ -14,7 +19,19 @@ export function RelatedBlogs() {
     formState: { errors }
   } = methods;
   const relatedBlogs = watch('relatedPosts');
-  const { data: blogData } = useGetBlogsQuery();
+  const searchParams = useSearchParams();
+  const page = parseInt(
+    searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+  );
+  const pageLimit = parseInt(
+    searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+  );
+  const search = searchParams.get('search') || '';
+  const { data: blogData } = useGetBlogsQuery({
+    page,
+    perPage: pageLimit,
+    search
+  });
   const blogs = blogData?.blogs || [];
 
   const validBlogs: RelatedItem[] = blogs

@@ -1,7 +1,12 @@
 'use client';
 
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 import { PRODUCT_LABELS } from '@/constants/products';
 import { useGetProductsQuery } from '@/lib/api/products';
+import { useSearchParams } from 'next/navigation';
 import { useFormContext } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
 import { RelatedSections } from '../RelatedSections';
@@ -18,8 +23,21 @@ export function RelatedProducts() {
     formState: { errors }
   } = methods;
   const relatedProducts = watch('relatedProducts');
+  const searchParams = useSearchParams();
+  const page = parseInt(
+    searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
+  );
+  const pageLimit = parseInt(
+    searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
+  );
+  const search = searchParams.get('search') || '';
 
-  const { data: productData } = useGetProductsQuery();
+  const { data: productData } = useGetProductsQuery({
+    page,
+    perPage: pageLimit,
+    search,
+    category: ''
+  });
   const products = productData?.products || [];
 
   const validProducts = products
