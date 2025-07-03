@@ -46,6 +46,7 @@ export const BlogImages = () => {
             maxFiles={1}
             maxSize={4 * 1024 * 1024}
             label='Thumbnail'
+            required
           />
         )}
       />

@@ -22,6 +22,7 @@ export async function GET(request: Request) {
     );
     const search = searchParams.get('search') || '';
     const categories = searchParams.get('categories');
+    const isOustanding = searchParams.get('isOustanding');
 
     const query: any = {};
 
@@ -34,6 +35,15 @@ export async function GET(request: Request) {
 
     if (categories) {
       query.categories = { $in: categories.split(',') };
+    }
+
+    if (isOustanding) {
+      query.isOustanding = isOustanding;
+    }
+
+    const ids = searchParams.get('ids');
+    if (ids) {
+      query._id = { $in: ids.split(',') };
     }
 
     const skip = (page - 1) * limit;

@@ -19,6 +19,7 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   maxSize?: DropzoneProps['maxSize'];
   maxFiles?: DropzoneProps['maxFiles'];
   label?: string;
+  required?: boolean;
 }
 
 export function UploadImage(props: FileUploaderProps) {
@@ -30,7 +31,8 @@ export function UploadImage(props: FileUploaderProps) {
     maxSize = 1024 * 1024 * 2,
     maxFiles = 1,
     className,
-    label = 'Thumbnail'
+    label = 'Thumbnail',
+    required = false
   } = props;
 
   const [files, setFiles] = useControllableState({
@@ -69,7 +71,7 @@ export function UploadImage(props: FileUploaderProps) {
   return (
     <div className='flex flex-col gap-2'>
       <FormLabel>
-        {label} <span className='text-destructive'>*</span>
+        {label} {required && <span className='text-destructive'>*</span>}
       </FormLabel>
       <div className='relative flex flex-col gap-6 overflow-hidden'>
         <Dropzone

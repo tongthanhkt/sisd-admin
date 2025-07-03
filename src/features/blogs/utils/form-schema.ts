@@ -86,7 +86,6 @@ export const blogFormSchema = z.object({
     ),
   banner: z
     .array(z.any())
-    .min(1, { message: 'Banner is required' })
     .refine(
       (arr) =>
         typeof window === 'undefined' ||

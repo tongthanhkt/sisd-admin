@@ -34,6 +34,11 @@ export async function GET(request: Request) {
       query.category = { $in: category.split(',') };
     }
 
+    const ids = searchParams.get('ids');
+    if (ids) {
+      query._id = { $in: ids.split(',') };
+    }
+
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([

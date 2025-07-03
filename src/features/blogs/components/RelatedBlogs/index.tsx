@@ -97,6 +97,7 @@ export function RelatedBlogs() {
       onPageChange={setCurrentPage}
       search={inputValue}
       onSearchChange={handleSearchChange}
+      maxSelected={4}
     />
   );
 }

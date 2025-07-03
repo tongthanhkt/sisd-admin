@@ -54,6 +54,7 @@ export const ProductImages = ({
             }}
             maxFiles={1}
             maxSize={4 * 1024 * 1024}
+            required
           />
         )}
       />
