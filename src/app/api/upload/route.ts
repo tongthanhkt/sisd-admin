@@ -3,11 +3,12 @@ import { Storage } from '@google-cloud/storage';
 import path from 'path';
 import sharp from 'sharp';
 import { optimize as optimizeSvg } from 'svgo';
+import { withCORS } from '@/lib/cors';
 
 // Khởi tạo Google Cloud Storage
 const storage = new Storage({
   keyFilename: path.join(process.cwd(), 'sisd-key.json'),
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID
 });
 
 const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || '';
@@ -32,13 +33,15 @@ export async function POST(request: Request) {
     if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
       optimizedBuffer = await sharp(buffer).jpeg({ quality: 80 }).toBuffer();
     } else if (mimeType === 'image/png') {
-      optimizedBuffer = await sharp(buffer).png({ compressionLevel: 9 }).toBuffer();
+      optimizedBuffer = await sharp(buffer)
+        .png({ compressionLevel: 9 })
+        .toBuffer();
     } else if (mimeType === 'image/webp') {
       optimizedBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer();
     } else if (mimeType === 'image/svg+xml') {
       const optimizedSvg = optimizeSvg(buffer.toString(), {
         multipass: true,
-        plugins: ['preset-default'],
+        plugins: ['preset-default']
       });
       optimizedBuffer = Buffer.from(optimizedSvg.data);
     } else {
@@ -52,20 +55,29 @@ export async function POST(request: Request) {
 
     await blob.save(optimizedBuffer, {
       metadata: {
-        contentType: mimeType,
-      },
+        contentType: mimeType
+      }
     });
 
     await blob.makePublic();
 
     const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       url: publicUrl,
-      fileName,
+      fileName
     });
+    return withCORS(res);
   } catch (error) {
     console.error('Error uploading file:', error);
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+    const res = NextResponse.json(
+      { error: 'Failed to upload file' },
+      { status: 500 }
+    );
+    return withCORS(res);
   }
+}
+
+export function OPTIONS() {
+  return withCORS(NextResponse.json({}));
 }

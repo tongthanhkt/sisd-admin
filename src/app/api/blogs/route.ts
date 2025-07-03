@@ -6,6 +6,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
+import { withCORS } from '@/lib/cors';
 
 export async function GET(request: Request) {
   try {
@@ -48,17 +49,18 @@ export async function GET(request: Request) {
     console.log('Total documents:', total);
     console.log('Blogs:', blogs);
 
-    return NextResponse.json({
-      blogs,
-      total_blogs: total,
-      current_page: page,
-      total_pages: Math.ceil(total / limit)
-    });
+    return withCORS(
+      NextResponse.json({
+        blogs,
+        total_blogs: total,
+        current_page: page,
+        total_pages: Math.ceil(total / limit)
+      })
+    );
   } catch (error) {
     console.error('Error fetching blogs:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
 }
@@ -78,14 +80,21 @@ export async function POST(request: Request) {
     const blog = await Blog.create(body);
     console.log('Created blog:', blog);
 
-    return NextResponse.json(blog, { status: 201 });
+    return withCORS(NextResponse.json(blog, { status: 201 }));
   } catch (error) {
     console.error('Error creating blog:', error);
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Internal Server Error'
-      },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json(
+        {
+          error:
+            error instanceof Error ? error.message : 'Internal Server Error'
+        },
+        { status: 500 }
+      )
     );
   }
+}
+
+export function OPTIONS() {
+  return withCORS(NextResponse.json({}));
 }

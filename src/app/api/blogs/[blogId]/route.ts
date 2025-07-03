@@ -3,6 +3,7 @@ import { generateSlug } from '@/lib/utils';
 import Blog from '@/models/Blog';
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
+import { withCORS } from '@/lib/cors';
 
 export async function GET(
   request: Request,
@@ -22,12 +23,11 @@ export async function GET(
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
-    return NextResponse.json(blog);
+    return withCORS(NextResponse.json(blog));
   } catch (error) {
     console.error('Error fetching blog:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
 }
@@ -58,12 +58,11 @@ export async function PUT(
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
-    return NextResponse.json(blog);
+    return withCORS(NextResponse.json(blog));
   } catch (error) {
     console.error('Error updating blog:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
 }
@@ -88,12 +87,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Blog deleted successfully' });
+    return withCORS(
+      NextResponse.json({ message: 'Blog deleted successfully' })
+    );
   } catch (error) {
     console.error('Error deleting blog:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
+}
+
+export function OPTIONS() {
+  return withCORS(NextResponse.json({}));
 }

@@ -5,6 +5,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
+import { withCORS } from '@/lib/cors';
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
     }
 
     if (category) {
-      query.category = category;
+      query.category = { $in: category.split(',') };
     }
 
     const skip = (page - 1) * limit;
@@ -40,17 +41,18 @@ export async function GET(request: Request) {
       MortalProduct.countDocuments(query)
     ]);
 
-    return NextResponse.json({
-      products,
-      total_products: total,
-      current_page: page,
-      total_pages: Math.ceil(total / limit)
-    });
+    return withCORS(
+      NextResponse.json({
+        products,
+        total_products: total,
+        current_page: page,
+        total_pages: Math.ceil(total / limit)
+      })
+    );
   } catch (error) {
     console.error('Error fetching products:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
 }
@@ -63,12 +65,15 @@ export async function POST(request: Request) {
 
     const product = await MortalProduct.create(body);
 
-    return NextResponse.json(product, { status: 201 });
+    return withCORS(NextResponse.json(product, { status: 201 }));
   } catch (error) {
     console.error('Error creating product:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
+}
+
+export function OPTIONS() {
+  return withCORS(NextResponse.json({}));
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import MortalProduct from '@/models/MortalProduct';
 import { connectToDatabase } from '@/lib/mongodb';
+import { withCORS } from '@/lib/cors';
 
 export async function GET(
   request: Request,
@@ -17,15 +18,16 @@ export async function GET(
 
     if (!product) {
       console.log('Product not found');
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      );
     }
 
-    return NextResponse.json(product.toObject());
+    return withCORS(NextResponse.json(product.toObject()));
   } catch (error) {
     console.error('Error fetching product:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
 }
@@ -53,15 +55,16 @@ export async function PUT(
 
     if (!product) {
       console.log('Product not found for update');
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      );
     }
 
-    return NextResponse.json(product);
+    return withCORS(NextResponse.json(product));
   } catch (error) {
     console.error('Error updating product:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
 }
@@ -78,15 +81,22 @@ export async function DELETE(
 
     if (!product) {
       console.log('Product not found for deletion');
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return withCORS(
+        NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      );
     }
 
-    return NextResponse.json({ message: 'Product deleted successfully' });
+    return withCORS(
+      NextResponse.json({ message: 'Product deleted successfully' })
+    );
   } catch (error) {
     console.error('Error deleting product:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
+}
+
+export function OPTIONS() {
+  return withCORS(NextResponse.json({}));
 }
