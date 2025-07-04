@@ -45,7 +45,8 @@ export async function PUT(
     }
 
     const body = await request.json();
-    if (!body.slug || body.slug === null || body.slug === '') {
+
+    if (body.title) {
       body.slug = generateSlug(body.title);
     }
 

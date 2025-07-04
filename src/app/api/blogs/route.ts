@@ -83,7 +83,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Received body:', body);
 
-    if (body.title && !body.slug) {
+    if (body.title) {
       body.slug = generateSlug(body.title);
     }
 

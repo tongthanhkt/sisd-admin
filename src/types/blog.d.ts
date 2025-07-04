@@ -42,7 +42,6 @@ export interface IMutateBlog {
   title: string;
   descriptions: string[];
   shortDescription: string;
-  slug: string;
   categories: string[];
   date: string;
   articleSections: ArticleSection[];
@@ -53,7 +52,6 @@ export interface IMutateBlog {
   thumbnail: string;
   banner: string;
   isOustanding: boolean;
-  href: string;
   summary: string;
   contact: string;
 }

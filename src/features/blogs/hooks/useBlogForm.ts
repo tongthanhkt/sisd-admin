@@ -31,10 +31,8 @@ export const useBlogForm = (blogId?: string) => {
     defaultValues: {
       title: '',
       descriptions: [],
-      href: '',
       date: new Date(),
       isOustanding: false,
-      slug: '',
       categories: [],
       relatedPosts: [],
       articleSections: [],
@@ -191,7 +189,6 @@ export const useBlogForm = (blogId?: string) => {
       title: data.title,
       descriptions: formatDescriptions,
       shortDescription: data.shortDescription,
-      slug: data.slug,
       categories: data.categories,
       date: data.date.toISOString(),
       articleSections: processedArticleSections,
@@ -202,7 +199,6 @@ export const useBlogForm = (blogId?: string) => {
       thumbnail: thumbnailUrl,
       banner: bannerUrl,
       isOustanding: data.isOustanding,
-      href: data.href,
       summary: data.summary || '',
       contact: data.contact || ''
     };
@@ -254,10 +250,8 @@ export const useBlogForm = (blogId?: string) => {
                 value: d,
                 id: Math.random().toString(36).substring(2, 15)
               })) || [],
-            href: blogData.href || '',
             date: blogData.date ? new Date(blogData.date) : new Date(),
             isOustanding: blogData.isOustanding || false,
-            slug: blogData.slug || '',
             categories: blogData.categories || [],
             relatedPosts: blogData.relatedPosts || [],
             articleSections: mappedArticleSections,

@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 export const productFormSchema = z.object({
   code: z.string().min(1, { message: 'Product code is required' }),
-  href: z.string().optional(),
   name: z
     .string()
     .min(1, { message: 'Product name is required' })

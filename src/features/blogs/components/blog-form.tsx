@@ -9,7 +9,6 @@ import { BlogAdditionalInfo } from './BlogAdditionalInfo';
 import { BlogDescriptions } from './BlogDescriptions';
 import { BlogImages } from './BlogImages';
 import { BlogSummary } from './BlogSummary';
-import { PathInfo } from './PathInfo';
 import { RelatedBlogs } from './RelatedBlogs';
 import { RelatedProducts } from './RelatedProducts';
 import { TitleBlog } from './TitleBlog';
@@ -38,11 +37,13 @@ export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
             <TitleBlog />
             <BlogImages />
             <BlogDescriptions />
-            <PathInfo />
             <BlogAdditionalInfo />
             <ArticleSection />
-            <RelatedProducts />
-            <RelatedBlogs />
+            <RelatedBlogs fieldName='relatedPosts' label='Related Blogs' />
+            <RelatedBlogs
+              fieldName='relatedProducts'
+              label='Related Products'
+            />
             <BlogSummary />
             <Button type='submit'>{blogId ? 'Update' : 'Create'}</Button>
           </form>

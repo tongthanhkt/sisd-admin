@@ -10,7 +10,6 @@ export interface Product {
   image?: string;
   shortDescription?: string;
   category?: string;
-  href?: string;
   description?: string;
   images?: {
     main?: string;

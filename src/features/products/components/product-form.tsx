@@ -45,33 +45,30 @@ export default function ProductForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field, fieldState: { error } }) => (
-                <FormItem className='w-full'>
-                  <FormControl>
-                    <Input
-                      placeholder='Enter product name'
-                      {...field}
-                      error={!!error}
-                      helperText={error?.message}
-                      label='Product Name'
-                      required
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <ProductImages isLoadingImages={isLoadingImages} />
-
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+            <div className='flex gap-4'>
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem className='w-full'>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter product name'
+                        {...field}
+                        error={!!error}
+                        helperText={error?.message}
+                        label='Product Name'
+                        required
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name='code'
                 render={({ field, fieldState: { error } }) => (
-                  <FormItem>
+                  <FormItem className='w-1/4'>
                     <FormControl>
                       <Input
                         placeholder='Enter product code'
@@ -85,25 +82,9 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='href'
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        placeholder='Enter href'
-                        className='resize-none'
-                        {...field}
-                        label='Href'
-                        error={!!error}
-                        helperText={error?.message}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
             </div>
+
+            <ProductImages isLoadingImages={isLoadingImages} />
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField

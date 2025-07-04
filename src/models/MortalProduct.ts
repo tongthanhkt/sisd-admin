@@ -6,7 +6,6 @@ export interface IMortalProduct extends Document {
   image?: string;
   shortDescription?: string;
   category?: string;
-  href?: string;
   description?: string;
   images?: {
     main?: string;
@@ -40,7 +39,6 @@ const MortalProductSchema: Schema = new Schema(
     image: { type: String, required: false },
     shortDescription: { type: String, required: false },
     category: { type: String, required: false },
-    href: { type: String, required: false },
     description: { type: String, required: false },
     images: {
       main: { type: String, required: false },

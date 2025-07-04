@@ -47,7 +47,6 @@ const articleSectionSchema = z.object({
 
 export const blogFormSchema = z.object({
   isOustanding: z.boolean().default(false),
-  href: z.string().min(1, 'Href is required'),
   title: z.string().min(1, 'Title is required'),
   descriptions: z
     .array(
@@ -58,7 +57,6 @@ export const blogFormSchema = z.object({
     )
     .min(1, 'At least one description is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
-  slug: z.string(),
   categories: z.array(z.string()).min(1, 'Categories is required'),
   date: z.date(),
   articleSections: z

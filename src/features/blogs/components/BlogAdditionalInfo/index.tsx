@@ -60,38 +60,6 @@ export const BlogAdditionalInfo = () => {
             />
           )}
         />
-        <FormField
-          control={control}
-          name='showArrowDesktop'
-          render={({ field }) => (
-            <FormItem className='mt-5 flex items-center gap-2'>
-              <FormLabel>Show Arrow Desktop</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name='isVertical'
-          render={({ field }) => (
-            <FormItem className='mt-5 flex items-center gap-2'>
-              <FormLabel>Display Vertically</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
     </div>
   );

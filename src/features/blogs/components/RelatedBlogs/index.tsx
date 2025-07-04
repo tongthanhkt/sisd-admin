@@ -15,14 +15,20 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { BLOG_CATEGORIES_LABELS } from '@/constants/blog';
 import { Badge } from '@/components/ui/badge';
 
-export function RelatedBlogs() {
+export function RelatedBlogs({
+  fieldName,
+  label
+}: {
+  fieldName: keyof BlogFormValues;
+  label: string;
+}) {
   const methods = useFormContext<BlogFormValues>();
   const {
     watch,
     setValue,
     formState: { errors }
   } = methods;
-  const relatedBlogs = watch('relatedPosts');
+  const relatedBlogs = (watch(fieldName) as string[]) || [];
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -84,13 +90,13 @@ export function RelatedBlogs() {
     <RelatedSections
       items={validBlogs}
       value={relatedBlogs}
-      onChange={(ids) => setValue('relatedPosts', ids)}
-      label='Related Blogs'
-      addButtonText='Add blog'
+      onChange={(ids) => setValue(fieldName, ids)}
+      label={label}
+      addButtonText={`Add ${label}`}
       itemLabel={(item) => item.name || ''}
       itemImage={(item) => item.image || ''}
-      fieldName='relatedPosts'
-      helperText={errors.relatedPosts?.message}
+      fieldName={fieldName}
+      helperText={errors[fieldName]?.message}
       currentPage={currentPage}
       itemsPerPage={itemsPerPage}
       totalItems={totalItems}

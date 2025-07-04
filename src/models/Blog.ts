@@ -42,7 +42,6 @@ export interface IBlog extends Document {
   thumbnail: string;
   banner: string;
   isOustanding: boolean;
-  href: string;
   summary: string;
   contact: string;
   // Legacy fields for backward compatibility
@@ -106,7 +105,6 @@ const blogSchema = new Schema(
     thumbnail: String,
     banner: String,
     isOustanding: { type: Boolean, default: false },
-    href: String,
     summary: String,
     contact: String,
     // Legacy fields for backward compatibility
