@@ -22,13 +22,9 @@ export default function Providers({
     <>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
         <ReduxProvider>
-          <ClerkProvider
-            appearance={{
-              baseTheme: mounted && resolvedTheme === 'dark' ? dark : undefined
-            }}
-          >
-            {children}
-          </ClerkProvider>
+
+          {children}
+
         </ReduxProvider>
       </ActiveThemeProvider>
     </>
