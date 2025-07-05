@@ -1,31 +1,31 @@
+import NoData from '@/components/NoData';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import { useMemo } from 'react';
+import {
+  FieldArrayPath,
   FieldPath,
-  Path,
   useFieldArray,
   useFormContext,
   useWatch
 } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
-import { PlusIcon, Trash2Icon, GripVerticalIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { ArticleContent } from '../ArticleContents';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent
-} from '@/components/ui/accordion';
-import { useMemo } from 'react';
-import NoData from '@/components/NoData';
 
 function SortableSubHeading({
   id,
@@ -37,7 +37,7 @@ function SortableSubHeading({
 }: {
   id: string;
   index: number;
-  name: Path<BlogFormValues>;
+  name: FieldArrayPath<BlogFormValues>;
   remove: (index: number) => void;
   control: any;
   fields: any[];
@@ -114,7 +114,7 @@ function SortableSubHeading({
             render={({ field }) => <Input {...field} label='Sub Title' />}
           />
           <ArticleContent
-            name={`${name}.${index}.contents` as Path<BlogFormValues>}
+            name={`${name}.${index}.contents` as FieldArrayPath<BlogFormValues>}
             contentClassName='mx-6'
           />
         </div>
@@ -123,59 +123,68 @@ function SortableSubHeading({
   );
 }
 
-export const BlogSubHeading = ({ name }: { name: Path<BlogFormValues> }) => {
+export const BlogSubHeading = ({
+  name
+}: {
+  name: FieldArrayPath<BlogFormValues>;
+}) => {
   const { control } = useFormContext<BlogFormValues>();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name
   });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = fields.findIndex((item) => item.id === active.id);
+      const newIndex = fields.findIndex((item) => item.id === over?.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        move(oldIndex, newIndex);
+      }
+    }
+  };
   return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Sub Heading</FormLabel>
-          <DndContext collisionDetection={closestCenter}>
-            <SortableContext
-              items={fields.map((f) => f.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <Accordion type='multiple' className='flex flex-col gap-2'>
-                {fields?.length > 0 ? (
-                  fields.map((field, index) => (
-                    <SortableSubHeading
-                      key={field.id}
-                      id={field.id}
-                      index={index}
-                      name={name}
-                      remove={remove}
-                      control={control}
-                      fields={fields}
-                    />
-                  ))
-                ) : (
-                  <NoData />
-                )}
-              </Accordion>
-            </SortableContext>
-          </DndContext>
-          <Button
-            variant='outline'
-            onClick={() =>
-              append({
-                title: '',
-                subTitle: '',
-                contents: []
-              })
-            }
-            type='button'
-            className='ml-auto w-fit'
-          >
-            <PlusIcon className='size-4' /> Add sub heading
-          </Button>
-        </FormItem>
-      )}
-    />
+    <FormItem>
+      <FormLabel>Sub Heading</FormLabel>
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={fields.map((f) => f.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <Accordion type='multiple' className='flex flex-col gap-2'>
+            {fields?.length > 0 ? (
+              fields.map((field, index) => (
+                <SortableSubHeading
+                  key={field.id}
+                  id={field.id}
+                  index={index}
+                  name={name}
+                  remove={remove}
+                  control={control}
+                  fields={fields}
+                />
+              ))
+            ) : (
+              <NoData />
+            )}
+          </Accordion>
+        </SortableContext>
+      </DndContext>
+      <Button
+        variant='outline'
+        onClick={() =>
+          append({
+            title: '',
+            subTitle: '',
+            contents: []
+          })
+        }
+        type='button'
+        className='ml-auto w-fit'
+      >
+        <PlusIcon className='size-4' /> Add sub heading
+      </Button>
+    </FormItem>
   );
 };
