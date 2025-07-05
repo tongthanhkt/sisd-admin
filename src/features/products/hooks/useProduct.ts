@@ -56,7 +56,8 @@ export const useProduct = ({ productId }: { productId: string }) => {
   const [updateProduct] = useUpdateProductMutation();
 
   const {
-    formState: { errors }
+    formState: { errors },
+    watch
   } = form;
 
   const prepareDataSubmit = async (
@@ -177,9 +178,15 @@ export const useProduct = ({ productId }: { productId: string }) => {
                 value: advantage,
                 id: Math.random().toString(36).substring(2, 15)
               })) || [],
-            technicalSpecifications: productData.technicalSpecifications || {
-              standard: '',
-              specifications: []
+            technicalSpecifications: {
+              standard: productData.technicalSpecifications?.standard || '',
+              specifications:
+                productData.technicalSpecifications?.specifications?.map(
+                  (spec) => ({
+                    ...spec,
+                    id: Math.random().toString(36).substring(2, 15)
+                  })
+                ) || []
             },
             transportationAndStorage:
               productData.transportationAndStorage?.map((transportation) => ({

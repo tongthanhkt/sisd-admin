@@ -62,7 +62,10 @@ export const productFormSchema = z.object({
       .array(
         z.object({
           category: z.string().min(1, { message: 'Category is required' }),
-          performance: z.string().min(1, { message: 'Performance is required' })
+          performance: z
+            .string()
+            .min(1, { message: 'Performance is required' }),
+          id: z.string()
         })
       )
       .min(1, { message: 'At least one specification is required' })
