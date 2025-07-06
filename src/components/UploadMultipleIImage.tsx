@@ -185,7 +185,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
   } = props;
 
   const files = valueProp ?? [];
-  const setFiles = onValueChange ?? (() => {});
+  const setFiles = onValueChange ?? (() => { });
 
   // Helper to get the files array for dropzone
   const filesForDropzone = (files ?? []).map((f) => f.file);
@@ -199,8 +199,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
         const old = (files ?? []).find((f) =>
           isFile(f.file) && isFile(file)
             ? (f.file as File).name === (file as File).name &&
-              (f.file as File).size === (file as File).size &&
-              (f.file as File).lastModified === (file as File).lastModified
+            (f.file as File).size === (file as File).size &&
+            (f.file as File).lastModified === (file as File).lastModified
             : f.file === file
         );
         return {
@@ -215,13 +215,13 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     maxSize,
     onUpload: onUpload
       ? (arr) =>
-          onUpload(
-            arr.map((file, idx) => ({
-              file,
-              caption: (files ?? [])[idx]?.caption || '',
-              id: (files ?? [])[idx]?.id || generateId()
-            }))
-          )
+        onUpload(
+          arr.map((file, idx) => ({
+            file,
+            caption: (files ?? [])[idx]?.caption || '',
+            id: (files ?? [])[idx]?.id || generateId()
+          }))
+        )
       : undefined,
     mode: 'multiple'
   });
@@ -285,7 +285,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
             onDragEnd={handleDragEndImage}
             onDragStart={(event) => setActiveId(event.active.id as string)}
             onDragCancel={() => setActiveId(null)}
-            onDragOver={() => {}}
+            onDragOver={() => { }}
           >
             <SortableContext
               items={files.map((item, idx) => item.id || idx)}
@@ -343,8 +343,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
                   item={activeItem}
                   idx={-1}
                   disabled={true}
-                  handleRemoveImage={() => {}}
-                  handleCaptionChange={() => {}}
+                  handleRemoveImage={() => { }}
+                  handleCaptionChange={() => { }}
                   withCaption={withCaption}
                   cardClassName={cardClassName}
                 />

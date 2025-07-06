@@ -49,20 +49,20 @@ export const SortableListField = ({
     return (arr || []).map((item) =>
       typeof item === 'string'
         ? {
-            id:
-              typeof crypto !== 'undefined' && crypto.randomUUID
-                ? crypto.randomUUID()
-                : `${Date.now()}-${Math.random()}`,
-            value: item
-          }
+          id:
+            typeof crypto !== 'undefined' && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random()}`,
+          value: item
+        }
         : {
-            ...item,
-            id:
-              item.id ||
-              (typeof crypto !== 'undefined' && crypto.randomUUID
-                ? crypto.randomUUID()
-                : `${Date.now()}-${Math.random()}`)
-          }
+          ...item,
+          id:
+            item.id ||
+            (typeof crypto !== 'undefined' && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random()}`)
+        }
     );
   }
 

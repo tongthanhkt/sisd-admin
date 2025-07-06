@@ -13,6 +13,7 @@ import {
 } from '@/constants/blog';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'; // ✅
 
 const categories = [
   { label: 'Tin tức', value: 'news' },
@@ -26,16 +27,17 @@ export const columns: ColumnDef<IBlog>[] = [
     accessorKey: 'image',
     header: 'Image',
     cell: ({ row }) => {
+      const imageSrc =
+        row.original.imageSrc || row.original.thumbnail || '/placeholder.png';
+
       return (
-        <div className='relative aspect-square w-20'>
-          <img
-            src={
-              row.original.imageSrc ||
-              row.original.thumbnail ||
-              '/placeholder.png'
-            }
+        <div className="relative aspect-square w-20 overflow-hidden rounded-lg">
+          <Image
+            src={imageSrc}
             alt={row.original.title || 'Blog image'}
-            className='h-full w-full rounded-lg object-cover'
+            fill
+
+            className="object-cover"
           />
         </div>
       );

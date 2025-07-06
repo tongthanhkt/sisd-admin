@@ -9,9 +9,12 @@ import {
 import { withCORS } from '@/lib/cors';
 
 export async function GET(request: Request) {
+  const startAll = Date.now();
   try {
+    const startConnect = Date.now();
     await connectToDatabase();
-    console.log('Connected to database');
+    const endConnect = Date.now();
+    console.log('Connected to database in', endConnect - startConnect, 'ms');
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(
@@ -51,13 +54,18 @@ export async function GET(request: Request) {
     console.log('Skip:', skip);
     console.log('Limit:', limit);
 
-    const [blogs, total] = await Promise.all([
-      Blog.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }),
-      Blog.countDocuments(query)
-    ]);
+    const startQuery = Date.now();
+    const blogsPromise = Blog.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
+    const countPromise = Blog.countDocuments(query);
+    const [blogs, total] = await Promise.all([blogsPromise, countPromise]);
+    const endQuery = Date.now();
+    console.log('DB query+count in', endQuery - startQuery, 'ms');
 
     console.log('Total documents:', total);
     console.log('Blogs:', blogs);
+
+    const endAll = Date.now();
+    console.log('Total GET /api/blogs time:', endAll - startAll, 'ms');
 
     return withCORS(
       NextResponse.json({

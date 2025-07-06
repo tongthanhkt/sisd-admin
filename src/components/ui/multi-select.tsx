@@ -97,10 +97,10 @@ export function MultiSelect({
                     >
                       {opt.icon && <span>{opt.icon}</span>}
                       <span className='truncate'>{opt.label}</span>
-                      <button
-                        type='button'
-                        className='hover:bg-muted ml-1 rounded p-0.5'
+                      <span
+                        role='button'
                         tabIndex={-1}
+                        className='hover:bg-muted ml-1 rounded p-0.5 cursor-pointer'
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveTag(opt.value);
@@ -108,7 +108,7 @@ export function MultiSelect({
                         aria-label={`Remove ${opt.label}`}
                       >
                         <XIcon className='size-3.5' />
-                      </button>
+                      </span>
                     </Badge>
                   ))
               )}

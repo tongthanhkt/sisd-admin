@@ -124,8 +124,20 @@ const blogSchema = new Schema(
   }
 );
 
-// Ensure indexes
+// Ensure indexes for better query performance
 blogSchema.index({ slug: 1 }, { unique: true, sparse: true });
+blogSchema.index({ title: 1 }); // For title searches
+blogSchema.index({ categories: 1 }); // For category filtering
+blogSchema.index({ date: -1 }); // For date sorting
+blogSchema.index({ isOustanding: 1 }); // For outstanding blog filtering
+blogSchema.index({ createdAt: -1 }); // For creation date sorting
+blogSchema.index({ updatedAt: -1 }); // For update date sorting
+blogSchema.index({ relatedProducts: 1 }); // For related products queries
+blogSchema.index({ relatedPosts: 1 }); // For related posts queries
+
+// Compound indexes for common query patterns
+blogSchema.index({ categories: 1, date: -1 }); // Category + date sorting
+blogSchema.index({ isOustanding: 1, date: -1 }); // Outstanding + date sorting
 
 export default mongoose.models.Blog ||
   mongoose.model<IBlog>('Blog', blogSchema);

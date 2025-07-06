@@ -28,7 +28,7 @@ export function UploadImage(props: FileUploaderProps) {
     onValueChange,
     onUpload,
     accept = { 'image/*': [] },
-    maxSize = 1024 * 1024 * 2,
+    maxSize = 1024 * 1024 * 5,
     maxFiles = 1,
     className,
     label = 'Thumbnail',
@@ -99,7 +99,7 @@ export function UploadImage(props: FileUploaderProps) {
                 ref={fileInputRef}
                 style={{ display: 'none' }}
               />
-              {files && files.length > 0 ? (
+              {files && files.length > 0 && getPreviewUrl(files[0]) ? (
                 <div className='relative flex h-full w-full items-center justify-center'>
                   <Image
                     src={getPreviewUrl(files[0])}

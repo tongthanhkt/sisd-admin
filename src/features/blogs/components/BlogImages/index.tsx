@@ -14,6 +14,25 @@ export const BlogImages = () => {
     <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
       <FormField
         control={control}
+        name='thumbnail'
+        render={({ field }) => (
+          <UploadImage
+            {...field}
+            className='h-60'
+            onValueChange={async (files) => {
+              if (files) {
+                field.onChange(files);
+              }
+            }}
+            maxFiles={1}
+            maxSize={5 * 1024 * 1024}
+            label='Thumbnail'
+            required
+          />
+        )}
+      />
+      <FormField
+        control={control}
         name='banner'
         render={({ field }) => (
           <UploadImage
@@ -31,25 +50,7 @@ export const BlogImages = () => {
         )}
       />
 
-      <FormField
-        control={control}
-        name='thumbnail'
-        render={({ field }) => (
-          <UploadImage
-            {...field}
-            className='h-60'
-            onValueChange={async (files) => {
-              if (files) {
-                field.onChange(files);
-              }
-            }}
-            maxFiles={1}
-            maxSize={4 * 1024 * 1024}
-            label='Thumbnail'
-            required
-          />
-        )}
-      />
+
     </div>
   );
 };
