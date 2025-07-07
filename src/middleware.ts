@@ -4,15 +4,14 @@ import { NextRequest, NextResponse } from 'next/server';
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 
 export default async function middleware(req: NextRequest) {
-  // Custom auth cho dashboard UI và API
   if (
     req.nextUrl.pathname.startsWith('/dashboard') ||
     req.nextUrl.pathname.startsWith('/api')
   ) {
-    // Bỏ qua các route auth
     if (
       req.nextUrl.pathname.startsWith('/api/auth/login') ||
-      req.nextUrl.pathname.startsWith('/api/auth/logout')
+      req.nextUrl.pathname.startsWith('/api/auth/logout') ||
+      req.method === 'GET'
     ) {
       return NextResponse.next();
     }
