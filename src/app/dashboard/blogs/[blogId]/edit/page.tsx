@@ -7,11 +7,7 @@ export const metadata = {
   title: 'Dashboard: Edit Blog'
 };
 
-type PageProps = {
-  params: { blogId: string };
-};
-
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: any) {
   return (
     <PageContainer>
       <Suspense fallback={<FormCardSkeleton />}>

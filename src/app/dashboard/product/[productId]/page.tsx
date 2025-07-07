@@ -7,11 +7,7 @@ export const metadata = {
   title: 'Dashboard : Product View'
 };
 
-type PageProps = {
-  params: { productId: string };
-};
-
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: any) {
   return (
     <PageContainer scrollable>
       <div className='flex-1 space-y-4'>

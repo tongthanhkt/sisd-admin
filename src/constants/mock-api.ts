@@ -158,7 +158,6 @@ export const fakeProducts = {
         created_at: faker.date
           .between({ from: '2022-01-01', to: '2023-12-31' })
           .toISOString(),
-        price: parseFloat(faker.commerce.price({ min: 5, max: 500, dec: 2 })),
         photo_url: `https://api.slingacademy.com/public/sample-products/1.png`,
         category: faker.helpers.arrayElement(categories),
         updated_at: faker.date.recent().toISOString()
@@ -167,7 +166,7 @@ export const fakeProducts = {
 
     // Generate remaining records
     for (let i = 1; i <= 20; i++) {
-      sampleProducts.push(generateRandomProductData(i));
+      sampleProducts.push(generateRandomProductData(i.toString()));
     }
 
     this.records = products;

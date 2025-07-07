@@ -7,11 +7,7 @@ export const metadata = {
   title: 'Dashboard: Blog View'
 };
 
-type PageProps = {
-  params: { blogId: string };
-};
-
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: any) {
   return (
     <PageContainer scrollable>
       <div className='flex-1 space-y-4'>

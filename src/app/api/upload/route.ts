@@ -6,7 +6,7 @@ import { withCORS } from '@/lib/cors';
 import { optimize as optimizeSvg } from 'svgo';
 // Khởi tạo Google Cloud Storage
 const storage = new Storage({
-  keyFilename: JSON.parse(process.env.GOOGLE_CLOUD_KEY_JSON || '{}'),
+  keyFilename: path.join(process.cwd(), 'sisd-key.json'),
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID
 });
 
@@ -37,34 +37,29 @@ export async function POST(request: Request) {
         .jpeg({ quality: 75, mozjpeg: true })
         .toBuffer();
       console.log('🧪 Compressed JPEG size:', optimizedBuffer.length, 'bytes');
-
     } else if (mimeType === 'image/png') {
       optimizedBuffer = await sharp(buffer)
         .png({ compressionLevel: 9, palette: true })
         .toBuffer();
       console.log('🧪 Compressed PNG size:', optimizedBuffer.length, 'bytes');
-
     } else if (mimeType === 'image/webp') {
-      optimizedBuffer = await sharp(buffer)
-        .webp({ quality: 75 })
-        .toBuffer();
+      optimizedBuffer = await sharp(buffer).webp({ quality: 75 }).toBuffer();
       console.log('🧪 Compressed WebP size:', optimizedBuffer.length, 'bytes');
-
     } else if (mimeType === 'image/svg+xml') {
       try {
         const optimizedResult = optimizeSvg(buffer.toString(), {
           multipass: true,
           plugins: [
             'preset-default',
-            'removeDimensions',     // Loại bỏ width/height nhưng giữ viewBox
-            'cleanupAttrs',         // Làm sạch attribute
+            'removeDimensions', // Loại bỏ width/height nhưng giữ viewBox
+            'cleanupAttrs', // Làm sạch attribute
             'removeComments',
             'removeMetadata',
             'removeTitle',
             'removeDesc',
             'removeUselessDefs',
-            'convertStyleToAttrs',  // Gộp style vào attributes
-          ],
+            'convertStyleToAttrs' // Gộp style vào attributes
+          ]
         });
 
         optimizedBuffer = Buffer.from(optimizedResult.data);
@@ -84,7 +79,7 @@ export async function POST(request: Request) {
 
     await blob.save(optimizedBuffer, {
       metadata: {
-        contentType: mimeType,
+        contentType: mimeType
       }
     });
 
@@ -99,11 +94,10 @@ export async function POST(request: Request) {
       fileName,
       originalSize: buffer.length,
       compressedSize: optimizedBuffer.length,
-      type: mimeType,
+      type: mimeType
     });
 
     return withCORS(res);
-
   } catch (error) {
     console.error('❌ Error uploading file:', error);
     const res = NextResponse.json(
