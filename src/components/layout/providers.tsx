@@ -1,6 +1,4 @@
 'use client';
-import { ClerkProvider } from '@clerk/nextjs';
-import { dark } from '@clerk/themes';
 import { useTheme } from 'next-themes';
 import React, { useEffect, useState } from 'react';
 import { ActiveThemeProvider } from '../active-theme';
@@ -21,11 +19,7 @@ export default function Providers({
   return (
     <>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
-        <ReduxProvider>
-
-          {children}
-
-        </ReduxProvider>
+        <ReduxProvider>{children}</ReduxProvider>
       </ActiveThemeProvider>
     </>
   );

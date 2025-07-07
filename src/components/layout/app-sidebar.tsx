@@ -32,6 +32,7 @@ import {
 import { navItems } from '@/constants/data';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
+import { SignOutButton } from '@clerk/nextjs';
 import {
   IconBell,
   IconChevronRight,
@@ -41,7 +42,6 @@ import {
   IconPhotoUp,
   IconUserCircle
 } from '@tabler/icons-react';
-import { SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
@@ -152,7 +152,6 @@ export default function AppSidebar() {
                   size='lg'
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
-
                   <IconChevronsDown className='ml-auto size-4' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -163,9 +162,7 @@ export default function AppSidebar() {
                 sideOffset={4}
               >
                 <DropdownMenuLabel className='p-0 font-normal'>
-                  <div className='px-1 py-1.5'>
-
-                  </div>
+                  <div className='px-1 py-1.5'></div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
@@ -188,7 +185,7 @@ export default function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <IconLogout className='mr-2 h-4 w-4' />
-                  <SignOutButton redirectUrl='/auth/sign-in' />
+                  <SignOutButton redirectUrl='/auth/login' />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
