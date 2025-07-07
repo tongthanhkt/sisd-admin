@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 
-console.log('Middleware ACCESS_TOKEN_SECRET:', ACCESS_TOKEN_SECRET);
-
 export default async function middleware(req: NextRequest) {
   // Custom auth cho dashboard UI và API
   if (
@@ -23,17 +21,11 @@ export default async function middleware(req: NextRequest) {
     if (!token) {
       token = req.cookies.get('accessToken')?.value;
     }
-    console.log('🚀 ~ middleware ~ token:', token);
     if (!token) {
       return NextResponse.redirect(new URL('/auth/login', req.url));
     }
-    console.log('errorrrrrr');
     try {
-      const decoded = await jwtVerify(
-        token,
-        new TextEncoder().encode(ACCESS_TOKEN_SECRET)
-      );
-      console.log('🚀 ~ middleware ~ decoded:', decoded);
+      await jwtVerify(token, new TextEncoder().encode(ACCESS_TOKEN_SECRET));
     } catch {
       return NextResponse.redirect(new URL('/auth/login', req.url));
     }

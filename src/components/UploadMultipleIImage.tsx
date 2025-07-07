@@ -50,22 +50,24 @@ interface UploadMultipleImageProps
 
 // Custom hook to manage preview URL for File or string
 function usePreviewUrl(fileOrUrl: File | string) {
-  const [preview, setPreview] = useState<string>('');
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
+    let objectUrl: string | undefined;
     if (fileOrUrl instanceof File) {
-      const url = URL.createObjectURL(fileOrUrl);
-      setPreview(url);
-      return () => {
-        URL.revokeObjectURL(url);
-      };
+      objectUrl = URL.createObjectURL(fileOrUrl);
+      setPreview(objectUrl);
     } else if (typeof fileOrUrl === 'string') {
       setPreview(fileOrUrl);
-      return undefined;
     } else {
-      setPreview('');
-      return undefined;
+      setPreview(null);
     }
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
   }, [fileOrUrl]);
 
   return preview;
@@ -141,13 +143,17 @@ function SortableImageItem({
         </button>
       </div>
       {/* Ảnh */}
-      <Image
-        src={previewUrl}
-        alt={isFile(item.file) ? (item.file as File).name : `Image ${idx + 1}`}
-        fill
-        className='object-cover'
-        style={{ maxHeight: '100%', maxWidth: '100%' }}
-      />
+      {previewUrl ? (
+        <Image
+          src={previewUrl}
+          alt={
+            isFile(item.file) ? (item.file as File).name : `Image ${idx + 1}`
+          }
+          fill
+          className='object-cover'
+          style={{ maxHeight: '100%', maxWidth: '100%' }}
+        />
+      ) : null}
       {/* Caption input */}
       {withCaption && (
         <input
@@ -185,7 +191,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
   } = props;
 
   const files = valueProp ?? [];
-  const setFiles = onValueChange ?? (() => { });
+  const setFiles = onValueChange ?? (() => {});
 
   // Helper to get the files array for dropzone
   const filesForDropzone = (files ?? []).map((f) => f.file);
@@ -199,8 +205,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
         const old = (files ?? []).find((f) =>
           isFile(f.file) && isFile(file)
             ? (f.file as File).name === (file as File).name &&
-            (f.file as File).size === (file as File).size &&
-            (f.file as File).lastModified === (file as File).lastModified
+              (f.file as File).size === (file as File).size &&
+              (f.file as File).lastModified === (file as File).lastModified
             : f.file === file
         );
         return {
@@ -215,13 +221,13 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
     maxSize,
     onUpload: onUpload
       ? (arr) =>
-        onUpload(
-          arr.map((file, idx) => ({
-            file,
-            caption: (files ?? [])[idx]?.caption || '',
-            id: (files ?? [])[idx]?.id || generateId()
-          }))
-        )
+          onUpload(
+            arr.map((file, idx) => ({
+              file,
+              caption: (files ?? [])[idx]?.caption || '',
+              id: (files ?? [])[idx]?.id || generateId()
+            }))
+          )
       : undefined,
     mode: 'multiple'
   });
@@ -285,7 +291,7 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
             onDragEnd={handleDragEndImage}
             onDragStart={(event) => setActiveId(event.active.id as string)}
             onDragCancel={() => setActiveId(null)}
-            onDragOver={() => { }}
+            onDragOver={() => {}}
           >
             <SortableContext
               items={files.map((item, idx) => item.id || idx)}
@@ -343,8 +349,8 @@ export const UploadMultipleIImage = (props: UploadMultipleImageProps) => {
                   item={activeItem}
                   idx={-1}
                   disabled={true}
-                  handleRemoveImage={() => { }}
-                  handleCaptionChange={() => { }}
+                  handleRemoveImage={() => {}}
+                  handleCaptionChange={() => {}}
                   withCaption={withCaption}
                   cardClassName={cardClassName}
                 />
