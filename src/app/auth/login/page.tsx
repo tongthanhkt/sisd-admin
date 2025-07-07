@@ -1,8 +1,4 @@
-export default function LoginPage({
-  searchParams
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+export default function LoginPage({ searchParams }: any) {
   const error = searchParams?.error;
   return (
     <div className='flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900'>
