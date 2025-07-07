@@ -36,6 +36,7 @@ export default async function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning={true}>
       <head>
+        <link rel="icon" href="/favicon.ico" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

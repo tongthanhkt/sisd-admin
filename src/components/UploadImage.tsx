@@ -28,7 +28,7 @@ export function UploadImage(props: FileUploaderProps) {
     onValueChange,
     onUpload,
     accept = { 'image/*': [] },
-    maxSize = 1024 * 1024 * 5,
+    maxSize = 1024 * 1024 * 1,
     maxFiles = 1,
     className,
     label = 'Thumbnail',

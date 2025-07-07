@@ -50,19 +50,15 @@ export async function GET(request: Request) {
     }
 
     const skip = (page - 1) * limit;
-    console.log('Query:', query);
-    console.log('Skip:', skip);
-    console.log('Limit:', limit);
 
     const startQuery = Date.now();
-    const blogsPromise = Blog.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
+    const blogsPromise = Blog.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).select("title thumbnail categories createdAt");
     const countPromise = Blog.countDocuments(query);
     const [blogs, total] = await Promise.all([blogsPromise, countPromise]);
     const endQuery = Date.now();
     console.log('DB query+count in', endQuery - startQuery, 'ms');
 
-    console.log('Total documents:', total);
-    console.log('Blogs:', blogs);
+
 
     const endAll = Date.now();
     console.log('Total GET /api/blogs time:', endAll - startAll, 'ms');

@@ -15,7 +15,7 @@ export function FileUploader({
   onFilesChange,
   className,
   maxFiles = 1,
-  maxSize = 5 * 1024 * 1024, // 5MB
+  maxSize = 1 * 1024 * 1024, // 5MB
   multiple = false,
   isUploading = false
 }: FileUploaderProps) {

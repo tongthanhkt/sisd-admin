@@ -2,17 +2,15 @@ import { NextResponse } from 'next/server';
 import { Storage } from '@google-cloud/storage';
 import path from 'path';
 import sharp from 'sharp';
-import { optimize as optimizeSvg } from 'svgo';
 import { withCORS } from '@/lib/cors';
-
+import { optimize as optimizeSvg } from 'svgo';
 // Khởi tạo Google Cloud Storage
 const storage = new Storage({
-  keyFilename: path.join(process.cwd(), 'sisd-key.json'),
+  keyFilename: JSON.parse(process.env.GOOGLE_CLOUD_KEY_JSON || '{}'),
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID
 });
 
 const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || '';
-
 
 export async function POST(request: Request) {
   try {
@@ -25,8 +23,8 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = `${Date.now()}-${file.name}`;
-    const mimeType = file.type;
+    let fileName = `${Date.now()}-${file.name}`;
+    let mimeType = file.type; // dùng let để có thể thay đổi
 
     console.log('📥 File received:', fileName);
     console.log('📸 MIME type:', mimeType);
@@ -34,48 +32,59 @@ export async function POST(request: Request) {
 
     let optimizedBuffer: Buffer;
 
-    // 🔧 Nén tùy theo loại ảnh
     if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
       optimizedBuffer = await sharp(buffer)
         .jpeg({ quality: 75, mozjpeg: true })
-
         .toBuffer();
       console.log('🧪 Compressed JPEG size:', optimizedBuffer.length, 'bytes');
 
     } else if (mimeType === 'image/png') {
       optimizedBuffer = await sharp(buffer)
         .png({ compressionLevel: 9, palette: true })
-
         .toBuffer();
       console.log('🧪 Compressed PNG size:', optimizedBuffer.length, 'bytes');
 
     } else if (mimeType === 'image/webp') {
       optimizedBuffer = await sharp(buffer)
         .webp({ quality: 75 })
-
         .toBuffer();
       console.log('🧪 Compressed WebP size:', optimizedBuffer.length, 'bytes');
 
     } else if (mimeType === 'image/svg+xml') {
-      const optimizedSvg = optimizeSvg(buffer.toString(), {
-        multipass: true,
-        plugins: ['preset-default']
-      });
-      optimizedBuffer = Buffer.from(optimizedSvg.data);
-      console.log('🧪 Optimized SVG size:', optimizedBuffer.length, 'bytes');
+      try {
+        const optimizedResult = optimizeSvg(buffer.toString(), {
+          multipass: true,
+          plugins: [
+            'preset-default',
+            'removeDimensions',     // Loại bỏ width/height nhưng giữ viewBox
+            'cleanupAttrs',         // Làm sạch attribute
+            'removeComments',
+            'removeMetadata',
+            'removeTitle',
+            'removeDesc',
+            'removeUselessDefs',
+            'convertStyleToAttrs',  // Gộp style vào attributes
+          ],
+        });
 
+        optimizedBuffer = Buffer.from(optimizedResult.data);
+        console.log('🧪 Optimized SVG size:', optimizedBuffer.length, 'bytes');
+      } catch (err) {
+        console.warn('❌ SVG optimization failed, using original:', err);
+        optimizedBuffer = buffer;
+      }
     } else {
       console.log('⚠️ Unsupported or non-image file. Skipping optimization.');
       optimizedBuffer = buffer;
     }
 
-    // 📤 Upload lên GCS
+    // Upload file lên GCS với mimeType mới (nếu có đổi)
     const bucket = storage.bucket(bucketName);
     const blob = bucket.file(fileName);
 
     await blob.save(optimizedBuffer, {
       metadata: {
-        contentType: mimeType
+        contentType: mimeType,
       }
     });
 
@@ -90,7 +99,7 @@ export async function POST(request: Request) {
       fileName,
       originalSize: buffer.length,
       compressedSize: optimizedBuffer.length,
-      type: mimeType
+      type: mimeType,
     });
 
     return withCORS(res);
@@ -104,7 +113,6 @@ export async function POST(request: Request) {
     return withCORS(res);
   }
 }
-
 
 export function OPTIONS() {
   return withCORS(NextResponse.json({}));

@@ -45,7 +45,7 @@ export function useUploadFileMixed({
   value,
   onValueChange,
   maxFiles = 1,
-  maxSize = 1024 * 1024 * 5, // 2MB default
+  maxSize = 1024 * 1024 * 1, // 2MB default
   onUpload,
   mode = 'single'
 }: UseUploadFileMixedOptions = {}): UseUploadFileMixedReturn {
@@ -171,7 +171,7 @@ export function useUploadFile({
   value,
   onValueChange,
   maxFiles = 1,
-  maxSize = 1024 * 1024 * 5, // 2MB default
+  maxSize = 1024 * 1024 * 1, // 2MB default
   onUpload,
   mode = 'single'
 }: UseUploadFileOptions = {}): UseUploadFileReturn {
