@@ -4,8 +4,8 @@ import Admin from '../../models/Admin';
 import clientPromise from './mongodb';
 
 const DEFAULT_ADMIN = {
-  username: 'admin',
-  password: 'Abc1234@'
+  username: process.env.DEFAULT_ADMIN_USERNAME || '',
+  password: process.env.DEFAULT_ADMIN_PASSWORD || ''
 };
 
 export async function ensureDefaultAdmin() {
