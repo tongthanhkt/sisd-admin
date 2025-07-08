@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
   // Kiểm tra content-type
   if (req.headers.get('content-type')?.includes('application/json')) {
     const body = await req.json();
+    console.log('🔐 body:', body);
     username = body.username || '';
     password = body.password || '';
     isJson = true;
