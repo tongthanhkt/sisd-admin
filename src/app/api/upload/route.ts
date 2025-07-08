@@ -4,13 +4,19 @@ import path from 'path';
 import sharp from 'sharp';
 import { withCORS } from '@/lib/cors';
 import { optimize as optimizeSvg } from 'svgo';
+
+const raw = process.env.GOOGLE_CLOUD_KEY_JSON;
+if (!raw) {
+  throw new Error('Missing GOOGLE_CLOUD_KEY_JSON env variable');
+}
 // Khởi tạo Google Cloud Storage
+const key = JSON.parse(raw);
+// Fix private_key newlines
+key.private_key = key.private_key.replace(/\\n/g, '\n');
+console.log('🔐 PRIVATE KEY PREVIEW:', key.private_key.slice(0, 50));
 const storage = new Storage({
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  credentials: {
-    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  },
+  credentials: key,
+  projectId: key.project_id,
 });
 
 const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || '';
