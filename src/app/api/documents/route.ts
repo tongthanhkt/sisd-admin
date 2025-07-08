@@ -6,6 +6,7 @@ import {
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
 import { withCORS } from '@/lib/cors';
+import { withAuth } from '@/lib/auth-middleware';
 
 export async function GET(request: Request) {
   try {
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export const POST = withAuth(async (request: Request) => {
   try {
     await connectToDatabase();
 
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
       NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
   }
-}
+});
 
 export function OPTIONS() {
   return withCORS(NextResponse.json({}));

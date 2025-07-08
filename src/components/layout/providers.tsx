@@ -3,6 +3,7 @@ import { useTheme } from 'next-themes';
 import React, { useEffect, useState } from 'react';
 import { ActiveThemeProvider } from '../active-theme';
 import { ReduxProvider } from '../providers/redux-provider';
+import AuthInterceptorProvider from '../providers/auth-interceptor-provider';
 
 export default function Providers({
   activeThemeValue,
@@ -19,7 +20,9 @@ export default function Providers({
   return (
     <>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          <AuthInterceptorProvider>{children}</AuthInterceptorProvider>
+        </ReduxProvider>
       </ActiveThemeProvider>
     </>
   );

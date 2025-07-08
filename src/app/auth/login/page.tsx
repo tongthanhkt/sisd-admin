@@ -2,25 +2,47 @@
 
 import { SpinnerOverlay } from '@/components/ui/spinner';
 import { useLoginMutation } from '@/lib/api/auth';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
   const [login, { isLoading, error }] = useLoginMutation();
+
+  // Debug: Check if we already have a token
+  React.useEffect(() => {
+    // Check if we have cookies
+    console.log('🔍 Login page mounted, checking cookies...');
+    console.log('📋 Document cookies:', document.cookie);
+  }, []);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('🔐 Login attempt for user:', username);
+
     try {
       const res = await login({ username, password });
+      console.log('🔍 Login response:', res);
+
       if (res.error) {
+        console.log('❌ Login error:', res.error);
         toast.error('Invalid username or password');
         return;
       }
-      window.location.href = '/dashboard';
+
+      if (res.data) {
+        console.log('✅ Login successful:', res.data);
+        toast.success('Login successful! Redirecting...');
+
+        // Wait a bit for cookies to be set
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1000);
+      }
     } catch (err) {
+      console.log('🚨 Login exception:', err);
       toast.error('Invalid email or password');
     }
   };

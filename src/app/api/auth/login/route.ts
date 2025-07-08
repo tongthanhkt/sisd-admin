@@ -6,7 +6,8 @@ import { ensureDefaultAdmin } from '../../../../lib/mongodb/admin';
 import RefreshToken from '../../../../models/RefreshToken';
 import mongoose from 'mongoose';
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
+const ACCESS_TOKEN_SECRET =
+  process.env.ACCESS_TOKEN_SECRET || 'sisdAdminAccessToken';
 const REFRESH_TOKEN_SECRET =
   process.env.REFRESH_TOKEN_SECRET || 'refresh_secret';
 const ACCESS_TOKEN_EXPIRES_IN = '7d';
@@ -66,6 +67,17 @@ export async function POST(req: NextRequest) {
     { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
   );
 
+  console.log('🔐 Login Success - Generated tokens for user:', admin.username);
+  console.log('📅 Token expires in:', ACCESS_TOKEN_EXPIRES_IN);
+  console.log(
+    '🔑 Using secret:',
+    ACCESS_TOKEN_SECRET?.substring(0, 10) + '...'
+  );
+  console.log(
+    '🎫 Access token preview:',
+    accessToken?.substring(0, 50) + '...'
+  );
+
   // Tạo refresh token
   const refreshToken = jwt.sign({ adminId: admin._id }, REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN
@@ -79,7 +91,35 @@ export async function POST(req: NextRequest) {
     expiredAt
   });
 
-  // Set cookie và redirect dashboard
+  if (isJson) {
+    // For JSON requests, return JSON with cookies
+    const response = NextResponse.json({
+      success: true,
+      message: 'Login successful'
+    });
+
+    console.log('🍪 Setting cookies for JSON response');
+
+    response.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
+
+    console.log('✅ Cookies set successfully');
+    return response;
+  }
+
+  // For form requests, redirect with cookies
   const baseUrl = req.nextUrl.origin;
   const response = NextResponse.redirect(`${baseUrl}/dashboard`, 302);
   response.cookies.set('refreshToken', refreshToken, {
@@ -95,8 +135,5 @@ export async function POST(req: NextRequest) {
     maxAge: 60 * 60 * 24 * 7 // 7 days
   });
 
-  if (isJson) {
-    return NextResponse.json({ accessToken });
-  }
   return response;
 }

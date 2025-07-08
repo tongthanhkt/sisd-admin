@@ -3,7 +3,7 @@ import { api } from '../api';
 const authService = api.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<
-      { token: string },
+      { success: boolean; message: string },
       { username: string; password: string }
     >({
       query: (credentials) => ({
