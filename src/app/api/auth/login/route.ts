@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 const REFRESH_TOKEN_SECRET =
   process.env.REFRESH_TOKEN_SECRET || 'refresh_secret';
-const ACCESS_TOKEN_EXPIRES_IN = '15m';
+const ACCESS_TOKEN_EXPIRES_IN = '7d';
 const REFRESH_TOKEN_EXPIRES_IN = '7d';
 
 console.log('API login ACCESS_TOKEN_SECRET:', ACCESS_TOKEN_SECRET);
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   });
 
   // Lưu refresh token vào DB
-  const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 ngày
+  const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   await RefreshToken.create({
     admin: admin._id,
     token: refreshToken,
@@ -85,16 +85,14 @@ export async function POST(req: NextRequest) {
   response.cookies.set('refreshToken', refreshToken, {
     httpOnly: true,
     secure: false,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 // 7 ngày
+    sameSite: 'strict',
+    maxAge: 60 * 60 * 24 * 7 // 7 days
   });
   response.cookies.set('accessToken', accessToken, {
-    httpOnly: false,
+    httpOnly: true,
     secure: false,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 // 7 ngày
+    sameSite: 'strict',
+    maxAge: 60 * 60 * 24 * 7 // 7 days
   });
 
   if (isJson) {

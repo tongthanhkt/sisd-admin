@@ -1,14 +1,15 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import { useLogoutMutation } from '@/lib/api/auth';
 import { LogOutIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function UserNav() {
   const router = useRouter();
+  const [logout] = useLogoutMutation();
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    localStorage.removeItem('accessToken');
+    await logout();
     router.push('/auth/login');
   };
 
