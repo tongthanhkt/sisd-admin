@@ -6,8 +6,11 @@ import { withCORS } from '@/lib/cors';
 import { optimize as optimizeSvg } from 'svgo';
 // Khởi tạo Google Cloud Storage
 const storage = new Storage({
-  keyFilename: path.join(process.cwd(), 'sisd-key.json'),
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+  credentials: {
+    client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  },
 });
 
 const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || '';
