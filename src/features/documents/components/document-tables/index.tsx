@@ -1,17 +1,17 @@
 'use client';
 
+import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/ui/table/data-table';
+import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
 import { useDataTable } from '@/hooks/use-data-table';
+import { Document } from '@/types';
 import { ColumnDef, PaginationState, Updater } from '@tanstack/react-table';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
-import { IBlog } from '@/models/Blog';
-import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
-import { Input } from '@/components/ui/input';
 
 interface DocumentTableProps {
-  data: IBlog[];
-  columns: ColumnDef<IBlog>[];
+  data: Document[];
+  columns: ColumnDef<Document>[];
   totalItems: number;
   page: number;
   perPage: number;

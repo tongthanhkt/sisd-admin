@@ -6,23 +6,19 @@ export const documentFormSchema = z.object({
   category: z.string().min(1, 'Category is required'),
 
   file: z
-    .array(z.any())
-    .min(1, { message: 'Thumbnail is required' })
-    .refine(
-      (arr) =>
-        typeof window === 'undefined' ||
-        arr.every(
-          (f) =>
-            f instanceof File ||
-            (typeof f === 'object' &&
-              f !== null &&
-              'file' in f &&
-              f.file instanceof File) ||
-            (typeof f === 'string' &&
-              (f.startsWith('http') || f.startsWith('/')))
-        ),
-      { message: 'All files must be files or valid URLs' }
+    .array(
+      z.union([
+        z.instanceof(File),
+        z.object({
+          name: z.string(),
+          size: z.number(),
+          type: z.string(),
+          url: z.string().optional(),
+          preview: z.string().optional()
+        })
+      ])
     )
+    .min(1, { message: 'Thumbnail is required' })
 });
 
 export type DocumentFormValues = z.infer<typeof documentFormSchema>;

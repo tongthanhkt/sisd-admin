@@ -8,39 +8,30 @@ import { AppSelect } from '@/components';
 import { FileUploader } from '@/components/file-uploader';
 import { Input } from '@/components/ui/input';
 import { DOCUMENT_OPTIONS } from '@/constants/document';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { documentFormSchema, DocumentFormValues } from '../utils/form-schema';
+import { useDocument } from '../hooks/useDocument';
+import { DocumentFormValues } from '../utils/form-schema';
 
 interface BlogFormProps {
-  blogId?: string;
+  documentId?: string;
   initialData?: Partial<DocumentFormValues>;
   pageTitle?: string;
 }
 
-export function DocumentForm({ pageTitle, blogId }: BlogFormProps) {
-  const methods = useForm({
-    resolver: zodResolver(documentFormSchema),
-    defaultValues: {
-      category: DOCUMENT_OPTIONS[0].value,
-      filename: '',
-      file: undefined
-    }
-  });
-  const { control, handleSubmit } = methods;
+export function DocumentForm({ pageTitle, documentId }: BlogFormProps) {
+  const { methods, onSubmit } = useDocument({ documentId });
+  const { control } = methods;
+
   return (
     <Card className='mx-auto w-full'>
       <CardHeader>
         <CardTitle className='text-left text-2xl font-bold'>
-          {pageTitle || (blogId ? 'Edit Blog Document' : 'Create New Document')}
+          {pageTitle ||
+            (documentId ? 'Edit Blog Document' : 'Create New Document')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...methods}>
-          <form
-            onSubmit={handleSubmit((data) => console.log(data))}
-            className='space-y-8'
-          >
+          <form onSubmit={onSubmit} className='space-y-8'>
             <div className='grid grid-cols-1 items-start gap-4 md:grid-cols-2'>
               <FormField
                 control={control}
@@ -83,15 +74,15 @@ export function DocumentForm({ pageTitle, blogId }: BlogFormProps) {
                   accept={{ 'application/pdf': ['.pdf'] }}
                   maxSize={1024 * 1024 * 10}
                   maxFiles={1}
-                  onUpload={async (files) => {
+                  onValueChange={async (files) => {
                     field.onChange(files);
                   }}
-                  value={field.value}
+                  value={field.value as File[]}
                 />
               )}
             />
 
-            <Button type='submit'>{blogId ? 'Update' : 'Create'}</Button>
+            <Button type='submit'>{documentId ? 'Update' : 'Create'}</Button>
           </form>
         </Form>
       </CardContent>

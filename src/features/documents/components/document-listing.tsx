@@ -2,7 +2,7 @@
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGetBlogsQuery } from '@/lib/api/blogs';
+import { useGetDocumentsQuery } from '@/lib/api/documents';
 import { AlertCircle } from 'lucide-react';
 import { DocumentTable } from './document-tables';
 import { columns } from './document-tables/columns';
@@ -11,8 +11,9 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
+import { ColumnDef } from '@tanstack/react-table';
 
-export default function BlogListingPage() {
+export default function DocumentListingPage() {
   const searchParams = useSearchParams();
   const page = parseInt(
     searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
@@ -21,22 +22,21 @@ export default function BlogListingPage() {
     searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
   );
   const search = searchParams.get('search') || '';
-  const categoriesParam = searchParams.get('categories') || '';
-  const categories = categoriesParam ? categoriesParam.split(',') : [];
+  const category = searchParams.get('category') || '';
 
   // Use RTK Query hook with pagination and filter params
   const {
-    data: blogData,
+    data: documentData,
     isLoading,
     error
-  } = useGetBlogsQuery({
+  } = useGetDocumentsQuery({
     page,
     perPage: pageLimit,
     search,
-    categories
+    category
   });
-  const blogs = blogData?.blogs || [];
-  const totalItems = blogData?.total_blogs || 0;
+  const documents = documentData?.documents || [];
+  const totalItems = documentData?.total_documents || 0;
 
   if (isLoading) {
     return (
@@ -52,7 +52,7 @@ export default function BlogListingPage() {
       <Alert variant='destructive'>
         <AlertCircle className='h-4 w-4' />
         <AlertDescription>
-          Failed to load blogs. Please try again later.
+          Failed to load documents. Please try again later.
         </AlertDescription>
       </Alert>
     );
@@ -60,7 +60,7 @@ export default function BlogListingPage() {
 
   return (
     <DocumentTable
-      data={blogs}
+      data={documents}
       totalItems={totalItems}
       columns={columns}
       page={page}

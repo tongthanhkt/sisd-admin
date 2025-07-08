@@ -1,61 +1,56 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
-import { BLOG_CATEGORIES_LABELS } from '@/constants/blog';
 import { DOCUMENT_OPTIONS } from '@/constants/document';
-import { IBlog } from '@/models/Blog';
 import { Column, ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import Image from 'next/image'; // ✅
 import { CellAction } from './cell-action';
+import { Document } from '@/types';
 
-export const columns: ColumnDef<IBlog>[] = [
+export const columns: ColumnDef<Document>[] = [
   {
     id: 'file',
     accessorKey: 'file',
     header: 'File',
     cell: ({ row }) => {
-      const imageSrc =
-        row.original.imageSrc || row.original.thumbnail || '/placeholder.png';
-
       return (
-        <div className='relative aspect-square w-20 overflow-hidden rounded-lg'>
+        <div className='m-auto h-full'>
           <Image
-            src={imageSrc}
-            alt={row.original.title || 'Blog image'}
-            fill
-            className='object-cover'
+            src={'/images/documents/file.svg'}
+            alt={'Document image'}
+            width={48}
+            height={60}
+            className='object-contain'
           />
         </div>
       );
     }
   },
   {
-    id: 'title',
-    accessorKey: 'title',
-    header: ({ column }: { column: Column<IBlog, unknown> }) => (
-      <DataTableColumnHeader column={column} title='Tiêu đề' />
+    id: 'filename',
+    accessorKey: 'filename',
+    header: ({ column }: { column: Column<Document, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Document name' />
     ),
-    cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
+    cell: ({ cell }) => <div className='w-full'>{cell.getValue<string>()}</div>,
 
     enableColumnFilter: true
   },
   {
-    id: 'categories',
-    accessorKey: 'categories',
-    header: ({ column }: { column: Column<IBlog, unknown> }) => (
-      <DataTableColumnHeader column={column} title='Danh mục' />
+    id: 'category',
+    accessorKey: 'category',
+    header: ({ column }: { column: Column<Document, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Category' />
     ),
     cell: ({ cell }) => {
-      const category = cell.getValue<string[]>();
       return (
-        <div className='flex flex-wrap gap-2'>
-          {category?.map((c) => (
-            <Badge variant='outline' className='capitalize' key={c}>
-              {BLOG_CATEGORIES_LABELS[c]}
-            </Badge>
-          ))}
+        <div>
+          {
+            DOCUMENT_OPTIONS.find(
+              (option) => option.value === cell.getValue<string>()
+            )?.label
+          }
         </div>
       );
     },
@@ -69,8 +64,8 @@ export const columns: ColumnDef<IBlog>[] = [
   {
     id: 'createdAt',
     accessorKey: 'createdAt',
-    header: ({ column }: { column: Column<IBlog, unknown> }) => (
-      <DataTableColumnHeader column={column} title='Ngày tạo' />
+    header: ({ column }: { column: Column<Document, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Created at' />
     ),
     cell: ({ cell }) => {
       const date = cell.getValue<string>();
