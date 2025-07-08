@@ -269,12 +269,18 @@ interface FileCardProps {
 }
 
 function FileCard({ file, progress, onRemove }: FileCardProps) {
+  const previewImg =
+    file.type === 'application/pdf'
+      ? '/images/documents/file.svg'
+      : isFileWithPreview(file)
+        ? file.preview
+        : '';
   return (
     <div className='relative flex items-center space-x-4'>
       <div className='flex flex-1 space-x-4'>
         {isFileWithPreview(file) ? (
           <Image
-            src={file.preview}
+            src={previewImg}
             alt={file.name}
             width={48}
             height={48}
