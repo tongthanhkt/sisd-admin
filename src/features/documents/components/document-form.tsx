@@ -2,28 +2,15 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 
+import { AppSelect } from '@/components';
+import { FileUploader } from '@/components/file-uploader';
+import { Input } from '@/components/ui/input';
+import { DOCUMENT_OPTIONS } from '@/constants/document';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { documentFormSchema, DocumentFormValues } from '../utils/form-schema';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { DOCUMENT_OPTIONS } from '@/constants/document';
-import { FileUploader } from '@/components/file-uploader';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AppSelect } from '@/components';
 
 interface BlogFormProps {
   blogId?: string;

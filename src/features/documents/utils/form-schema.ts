@@ -3,7 +3,7 @@ import * as z from 'zod';
 export const documentFormSchema = z.object({
   filename: z.string().min(1, 'Title is required'),
 
-  categories: z.string().min(1, 'Categories is required'),
+  category: z.string().min(1, 'Category is required'),
 
   file: z
     .array(z.any())
