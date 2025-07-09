@@ -1,34 +1,90 @@
-import { jwtVerify } from 'jose';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyJWT } from '@/lib/jwt-edge';
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const method = request.method;
 
-export default async function middleware(req: NextRequest) {
-  if (
-    req.nextUrl.pathname.startsWith('/dashboard') ||
-    req.nextUrl.pathname.startsWith('/api')
-  ) {
-    if (
-      req.nextUrl.pathname.startsWith('/api/auth/login') ||
-      req.nextUrl.pathname.startsWith('/api/auth/logout') ||
-      req.method === 'GET'
-    ) {
-      return NextResponse.next();
-    }
-    const authHeader = req.headers.get('authorization');
-    let token = authHeader?.replace('Bearer ', '');
-    if (!token) {
-      token = req.cookies.get('accessToken')?.value;
-    }
-    if (!token) {
-      return NextResponse.redirect(new URL('/auth/login', req.url));
-    }
+  // Define public paths that don't require authentication
+  const isPublicPath = path === '/auth/login';
+
+  // Allow all API requests to pass through (auth will be handled by individual routes)
+  const isApiRequest = path.startsWith('/api');
+
+  // Get the token from the cookies
+  const token = request.cookies.get('accessToken')?.value || '';
+
+  // Only log for important paths
+  if (!path.startsWith('/_next') && !path.includes('.')) {
+    console.log('🔍 Server Middleware:', {
+      path,
+      method,
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+      isPublicPath,
+      isApiRequest
+    });
+  }
+
+  // If this is an API request, let it pass through
+  if (isApiRequest) {
+    return NextResponse.next();
+  }
+
+  // If the path is public and user is authenticated, redirect to dashboard
+  if (isPublicPath && token) {
     try {
-      await jwtVerify(token, new TextEncoder().encode(ACCESS_TOKEN_SECRET));
-    } catch {
-      return NextResponse.redirect(new URL('/auth/login', req.url));
+      const secret = process.env.ACCESS_TOKEN_SECRET || '';
+      await verifyJWT(token, secret);
+      return NextResponse.redirect(new URL('/dashboard/overview', request.url));
+    } catch (error) {
+      // Token invalid, allow access to login page
+      const response = NextResponse.next();
+      response.cookies.delete('accessToken');
+      response.cookies.delete('refreshToken');
+      return response;
     }
   }
+
+  // If the path is not public and user is not authenticated, redirect to login
+  if (!isPublicPath && !token) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+
+  // If there's a token, verify it for protected routes
+  if (token && !isPublicPath) {
+    try {
+      console.log('🎫 Verifying token:', token?.substring(0, 50) + '...');
+
+      const decoded = await verifyJWT(
+        token,
+        process.env.ACCESS_TOKEN_SECRET || ''
+      );
+
+      console.log('✅ Token valid - user:', (decoded as any)?.username);
+      return NextResponse.next();
+    } catch (error) {
+      console.log('❌ Token verification failed:', (error as Error).message);
+      console.log(
+        '🔑 Secret used:',
+        (process.env.ACCESS_TOKEN_SECRET || 'sisdAdminAccessToken')?.substring(
+          0,
+          15
+        ) + '...'
+      );
+
+      // Clear invalid token and redirect to login
+      const response = NextResponse.redirect(
+        new URL('/auth/login', request.url)
+      );
+      response.cookies.delete('accessToken');
+      response.cookies.delete('refreshToken');
+      return response;
+    }
+  }
+
+  // For public paths without token, allow access
   return NextResponse.next();
 }
 

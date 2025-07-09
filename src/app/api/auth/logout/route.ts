@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
     await RefreshToken.deleteOne({ token: refreshToken });
   }
 
-  // Xóa cookie refreshToken
   const response = NextResponse.json({ message: 'Logged out' });
   response.cookies.set('refreshToken', '', {
     httpOnly: true,
@@ -21,6 +20,13 @@ export async function POST(req: NextRequest) {
     sameSite: 'strict',
     path: '/',
     maxAge: 0
+  });
+
+  response.cookies.set('accessToken', '', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+    maxAge: 0 // Expire immediately
   });
   return response;
 }
