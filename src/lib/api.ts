@@ -10,23 +10,22 @@ export const api = createApi({
     prepareHeaders: (headers, { getState }) => {
       headers.set('content-type', 'application/json');
       return headers;
+    },
+    responseHandler: async (response) => {
+      // Handle 401 errors globally
+      if (response.status === 401) {
+        handleAuthError({ status: 401 });
+        throw new Error('Authentication failed');
+      }
+
+      // For successful responses, parse as JSON if possible
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      }
+
+      return response.text();
     }
-    // Remove custom responseHandler for now, let RTK Query handle it
-    // responseHandler: async (response) => {
-    //   // Handle 401 errors globally
-    //   if (response.status === 401) {
-    //     handleAuthError({ status: 401 });
-    //     throw new Error('Authentication failed');
-    //   }
-    //
-    //   // For successful responses, parse as JSON if possible
-    //   const contentType = response.headers.get('content-type');
-    //   if (contentType && contentType.includes('application/json')) {
-    //     return response.json();
-    //   }
-    //
-    //   return response.text();
-    // }
   }),
   tagTypes: ['Product', 'Blog', 'User', 'Document'],
   endpoints: () => ({})
