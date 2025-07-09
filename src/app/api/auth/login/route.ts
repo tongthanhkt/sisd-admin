@@ -6,10 +6,8 @@ import { ensureDefaultAdmin } from '../../../../lib/mongodb/admin';
 import RefreshToken from '../../../../models/RefreshToken';
 import mongoose from 'mongoose';
 
-const ACCESS_TOKEN_SECRET =
-  process.env.ACCESS_TOKEN_SECRET || 'sisdAdminAccessToken';
-const REFRESH_TOKEN_SECRET =
-  process.env.REFRESH_TOKEN_SECRET || 'refresh_secret';
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || '';
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || '';
 const ACCESS_TOKEN_EXPIRES_IN = '7d';
 const REFRESH_TOKEN_EXPIRES_IN = '7d';
 

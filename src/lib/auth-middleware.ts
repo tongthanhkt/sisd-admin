@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-const ACCESS_TOKEN_SECRET =
-  process.env.ACCESS_TOKEN_SECRET || 'sisdAdminAccessToken';
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || '';
 
 export function withAuth(
   handler: (req: NextRequest, context?: any) => Promise<NextResponse>

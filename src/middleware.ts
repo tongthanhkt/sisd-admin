@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   // If the path is public and user is authenticated, redirect to dashboard
   if (isPublicPath && token) {
     try {
-      const secret = process.env.ACCESS_TOKEN_SECRET || 'sisdAdminAccessToken';
+      const secret = process.env.ACCESS_TOKEN_SECRET || '';
       await verifyJWT(token, secret);
       return NextResponse.redirect(new URL('/dashboard/overview', request.url));
     } catch (error) {
@@ -55,19 +55,13 @@ export async function middleware(request: NextRequest) {
   // If there's a token, verify it for protected routes
   if (token && !isPublicPath) {
     try {
-      // Temporarily hardcode the secret to test
-      const secret = 'sisdAdminAccessToken';
-      console.log(
-        '🔍 ENV ACCESS_TOKEN_SECRET:',
-        process.env.ACCESS_TOKEN_SECRET
-      );
-      console.log(
-        '🔑 Middleware using secret:',
-        secret?.substring(0, 15) + '...'
-      );
       console.log('🎫 Verifying token:', token?.substring(0, 50) + '...');
 
-      const decoded = await verifyJWT(token, secret);
+      const decoded = await verifyJWT(
+        token,
+        process.env.ACCESS_TOKEN_SECRET || ''
+      );
+
       console.log('✅ Token valid - user:', (decoded as any)?.username);
       return NextResponse.next();
     } catch (error) {
