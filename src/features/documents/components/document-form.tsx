@@ -72,7 +72,7 @@ export function DocumentForm({ pageTitle, documentId }: BlogFormProps) {
               render={({ field }) => (
                 <FileUploader
                   accept={{ 'application/pdf': ['.pdf'] }}
-                  maxSize={1024 * 1024 * 10}
+                  maxSize={1024 * 1024 * 150}
                   maxFiles={1}
                   onValueChange={async (files) => {
                     field.onChange(files);

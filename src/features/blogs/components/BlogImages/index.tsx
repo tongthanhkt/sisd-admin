@@ -25,7 +25,7 @@ export const BlogImages = () => {
               }
             }}
             maxFiles={1}
-            maxSize={1 * 1024 * 1024}
+            maxSize={2 * 1024 * 1024}
             label='Thumbnail'
             required
           />
@@ -44,7 +44,7 @@ export const BlogImages = () => {
               }
             }}
             maxFiles={1}
-            maxSize={1 * 1024 * 1024}
+            maxSize={2 * 1024 * 1024}
             label='Banner'
           />
         )}
