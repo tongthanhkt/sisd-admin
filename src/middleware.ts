@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
     try {
       const secret = process.env.ACCESS_TOKEN_SECRET || '';
       await verifyJWT(token, secret);
-      return NextResponse.redirect(new URL('/dashboard/overview', request.url));
+      return NextResponse.redirect(new URL('/dashboard/product', request.url));
     } catch (error) {
       // Token invalid, allow access to login page
       const response = NextResponse.next();
