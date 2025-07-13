@@ -4,24 +4,49 @@ import { SpinnerOverlay } from '@/components/ui/spinner';
 import { useLoginMutation } from '@/lib/api/auth';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { extractJWTPayload } from '@/lib/jwt-edge';
 
 export default function LoginPage() {
   const [login, { isLoading, error }] = useLoginMutation();
 
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const setCookie = (name: string, value: string, days: number) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const res = await login({ username, password });
+      const res = await login({ email, password });
 
       if (res.error) {
-        toast.error('Invalid username or password');
+        toast.error('Invalid email or password');
         return;
       }
 
       if (res.data) {
+        // Lưu tokens vào cookies
+        setCookie('accessToken', res.data.accessToken, 7); // 7 days
+        setCookie('refreshToken', res.data.refreshToken, 7); // 7 days
+
+        // Lấy userId (sub) và role từ accessToken
+        try {
+          const payload = extractJWTPayload(res.data.accessToken);
+          if (payload.sub) {
+            setCookie('userId', payload.sub, 7); // 7 days
+          }
+          if (payload.role || payload.rule) {
+            setCookie('userRole', payload.role || payload.rule, 7); // 7 days
+          }
+        } catch (e) {
+          console.warn('Could not extract userId/role from accessToken');
+        }
+
         toast.success('Login successful! Redirecting...');
 
         // Wait a bit for cookies to be set
@@ -56,23 +81,23 @@ export default function LoginPage() {
           )}
           <div>
             <label
-              htmlFor='username'
+              htmlFor='email'
               className='block text-sm leading-6 font-medium text-gray-900 dark:text-gray-200'
             >
-              Username
+              Email
             </label>
             <div className='mt-2'>
               <input
-                id='username'
-                name='username'
-                type='text'
-                autoComplete='username'
+                id='email'
+                name='email'
+                type='email'
+                autoComplete='email'
                 required
                 autoFocus
                 className='block w-full rounded-md border-0 bg-gray-100 px-3 py-2.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600 focus:ring-inset sm:text-sm sm:leading-6 dark:bg-gray-700 dark:text-white dark:ring-gray-600 dark:focus:ring-blue-500'
-                placeholder='admin'
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder='test2@example.com'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>

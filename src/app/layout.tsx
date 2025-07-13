@@ -9,6 +9,7 @@ import NextTopLoader from 'nextjs-toploader';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
 import './theme.css';
+import ClientProvidersWrapper from '@/components/layout/ClientProvidersWrapper';
 
 const META_THEME_COLORS = {
   light: '#ffffff',
@@ -66,10 +67,10 @@ export default async function RootLayout({
             disableTransitionOnChange
             enableColorScheme
           >
-            <Providers activeThemeValue={activeThemeValue as string}>
+            <ClientProvidersWrapper activeThemeValue={activeThemeValue as string}>
               <Toaster />
               {children}
-            </Providers>
+            </ClientProvidersWrapper>
           </ThemeProvider>
         </NuqsAdapter>
       </body>

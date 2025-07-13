@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyJWT } from '@/lib/jwt-edge';
+import { extractJWTPayload } from '@/lib/jwt-edge';
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -12,8 +12,11 @@ export async function middleware(request: NextRequest) {
   // Allow all API requests to pass through (auth will be handled by individual routes)
   const isApiRequest = path.startsWith('/api');
 
-  // Get the token from the cookies
-  const token = request.cookies.get('accessToken')?.value || '';
+  // Get the token from cookies or Authorization header
+  const tokenFromCookie = request.cookies.get('accessToken')?.value || '';
+  const authHeader = request.headers.get('authorization');
+  const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : '';
+  const token = tokenFromCookie || tokenFromHeader;
 
   // Only log for important paths
   if (!path.startsWith('/_next') && !path.includes('.')) {
@@ -35,14 +38,16 @@ export async function middleware(request: NextRequest) {
   // If the path is public and user is authenticated, redirect to dashboard
   if (isPublicPath && token) {
     try {
-      const secret = process.env.ACCESS_TOKEN_SECRET || '';
-      await verifyJWT(token, secret);
+      const payload = extractJWTPayload(token);
+      console.log('✅ Token valid - user:', payload?.userId || payload?.email, 'role:', payload?.role || payload?.rule);
       return NextResponse.redirect(new URL('/dashboard/product', request.url));
     } catch (error) {
       // Token invalid, allow access to login page
       const response = NextResponse.next();
       response.cookies.delete('accessToken');
       response.cookies.delete('refreshToken');
+      response.cookies.delete('userId');
+      response.cookies.delete('userRole');
       return response;
     }
   }
@@ -57,22 +62,12 @@ export async function middleware(request: NextRequest) {
     try {
       console.log('🎫 Verifying token:', token?.substring(0, 50) + '...');
 
-      const decoded = await verifyJWT(
-        token,
-        process.env.ACCESS_TOKEN_SECRET || ''
-      );
+      const payload = extractJWTPayload(token);
 
-      console.log('✅ Token valid - user:', (decoded as any)?.username);
+      console.log('✅ Token valid - user:', payload?.userId || payload?.email, 'role:', payload?.role || payload?.rule);
       return NextResponse.next();
     } catch (error) {
       console.log('❌ Token verification failed:', (error as Error).message);
-      console.log(
-        '🔑 Secret used:',
-        (process.env.ACCESS_TOKEN_SECRET || 'sisdAdminAccessToken')?.substring(
-          0,
-          15
-        ) + '...'
-      );
 
       // Clear invalid token and redirect to login
       const response = NextResponse.redirect(
@@ -80,6 +75,8 @@ export async function middleware(request: NextRequest) {
       );
       response.cookies.delete('accessToken');
       response.cookies.delete('refreshToken');
+      response.cookies.delete('userId');
+      response.cookies.delete('userRole');
       return response;
     }
   }

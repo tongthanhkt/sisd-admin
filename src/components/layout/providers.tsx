@@ -4,6 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { ActiveThemeProvider } from '../active-theme';
 import { ReduxProvider } from '../providers/redux-provider';
 import AuthInterceptorProvider from '../providers/auth-interceptor-provider';
+import AutoRefreshProvider from '../providers/auto-refresh-provider';
+import NotificationListener from '../NotificationListener';
+import { NotificationProvider } from '@/context/NotificationContext';
+import NotificationBell from '../NotificationBell';
+import NotificationDropdown from '../NotificationDropdown';
 
 export default function Providers({
   activeThemeValue,
@@ -15,15 +20,21 @@ export default function Providers({
   // we need the resolvedTheme value to set the baseTheme for clerk based on the dark or light theme
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   useEffect(() => setMounted(true), []);
 
   return (
-    <>
+    <NotificationProvider>
       <ActiveThemeProvider initialTheme={activeThemeValue}>
         <ReduxProvider>
-          <AuthInterceptorProvider>{children}</AuthInterceptorProvider>
+          <AuthInterceptorProvider>
+            <AutoRefreshProvider>
+              {children}
+            </AutoRefreshProvider>
+          </AuthInterceptorProvider>
         </ReduxProvider>
       </ActiveThemeProvider>
-    </>
+
+    </NotificationProvider>
   );
 }

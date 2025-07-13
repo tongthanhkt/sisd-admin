@@ -1,8 +1,9 @@
 // File upload hooks
 export { useUploadFile } from './use-upload-file';
 
-// Other hooks
-export { useControllableState } from './use-controllable-state';
+// Navigation hooks
 export { useBreadcrumbs } from './use-breadcrumbs';
-export { useCallbackRef } from './use-callback-ref';
-export { useModal } from './use-modal';
+
+// User hooks
+export { useUser } from './use-user';
+export { useAutoRefresh } from './use-auto-refresh';

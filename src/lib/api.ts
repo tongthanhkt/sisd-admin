@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { handleAuthError } from './auth-interceptor';
+import { getCookie, shouldRefreshToken } from './token-utils';
 
 // Define base API configuration
 export const api = createApi({
@@ -7,8 +8,27 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: '/api',
     credentials: 'include', // Include cookies in requests
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: async (headers, { getState, endpoint }) => {
       headers.set('content-type', 'application/json');
+
+      // Don't include credentials for external API calls
+      if (endpoint === 'login' || endpoint === 'refreshToken') {
+        headers.delete('cookie');
+        return headers;
+      }
+
+      // Add Authorization header for internal API calls
+      const accessToken = getCookie('accessToken');
+      if (accessToken) {
+        // Check if token is about to expire and should be refreshed
+        if (shouldRefreshToken(accessToken, 30)) {
+          console.log('🔄 Token is about to expire, triggering refresh...');
+          // Note: The actual refresh will be handled by the auth interceptor
+        }
+
+        headers.set('Authorization', `Bearer ${accessToken}`);
+      }
+
       return headers;
     },
     responseHandler: async (response) => {

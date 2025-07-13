@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { getCookie } from './token-utils';
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || '';
 
@@ -7,6 +8,7 @@ export function withAuth(
   handler: (req: NextRequest, context?: any) => Promise<NextResponse>
 ) {
   return async (req: NextRequest, context?: any) => {
+    console.log('🔄 withAuth ', getCookie('refreshToken'));
     // Allow certain methods without auth
     if (req.method === 'GET') {
       return handler(req, context);
