@@ -19,7 +19,7 @@ const authService = api.injectEndpoints({
     >({
       queryFn: async (credentials) => {
         try {
-          const response = await fetch('http://localhost:3001/auth/jwt/login', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/jwt/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ const authService = api.injectEndpoints({
     >({
       queryFn: async (credentials) => {
         try {
-          const response = await fetch('http://localhost:3001/auth/jwt/refresh', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/jwt/refresh`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

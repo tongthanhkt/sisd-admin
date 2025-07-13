@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useUser } from '@/hooks/use-user';
 import { useSocket } from '@/hooks/use-socket';
 
-const API_URL = 'http://localhost:3001/notifications';
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/notifications`;
 
 export type Notification = {
     id: number;

@@ -3,7 +3,7 @@ import { handleAuthError } from './auth-interceptor';
 import { getCookie, shouldRefreshToken } from './token-utils';
 
 // Đổi baseUrl sang backend mới
-const BACKEND_API_URL = 'http://localhost:3001'; // <-- Đổi thành URL backend thật của bạn
+const BACKEND_API_URL = `${process.env.NEXT_PUBLIC_API_URL}`; // <-- Đổi thành URL backend thật của bạn
 
 // Define base API configuration
 export const api = createApi({

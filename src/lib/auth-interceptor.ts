@@ -38,7 +38,7 @@ export const refreshAccessToken = async () => {
   try {
     console.log('🔄 Attempting to refresh access token...');
 
-    const response = await fetch('http://localhost:3001/auth/jwt/refresh', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/jwt/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

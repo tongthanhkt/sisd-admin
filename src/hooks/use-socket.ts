@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:3001'; // Đổi thành URL backend nếu cần
+const SOCKET_URL = `${process.env.NEXT_PUBLIC_API_URL}`; // Đổi thành URL backend nếu cần
 
 export function useSocket(userId: number | string | undefined, role: string | undefined, onNotification: (data: any) => void) {
     const socketRef = useRef<Socket | null>(null);
