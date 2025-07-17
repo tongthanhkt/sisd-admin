@@ -69,6 +69,14 @@ export const navItems: NavItem[] = [
     shortcut: ['d', 'd'],
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Contacts',
+    url: '/dashboard/contacts',
+    icon: 'user',
+    shortcut: ['c', 'c'],
+    isActive: false,
+    items: [] // No child items
   }
   // {
   //   title: 'Account',

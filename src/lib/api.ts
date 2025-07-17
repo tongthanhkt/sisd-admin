@@ -27,6 +27,6 @@ export const api = createApi({
       return response.text();
     }
   }),
-  tagTypes: ['Product', 'Blog', 'User', 'Document'],
+  tagTypes: ['Product', 'Blog', 'User', 'Document', 'Contact'],
   endpoints: () => ({})
 });
