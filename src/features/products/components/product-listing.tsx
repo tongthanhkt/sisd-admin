@@ -37,7 +37,8 @@ export default function ProductListingPage() {
   }, [sortParam]);
 
   const sortBy = sort[0]?.id || 'createdAt';
-  const sortOrder = sort[0]?.asc ? 'asc' : 'desc';
+  const sortOrder =
+    sort[0]?.desc !== undefined ? (sort[0]?.desc ? 'desc' : 'asc') : 'desc';
 
   // Use RTK Query hook
   const {

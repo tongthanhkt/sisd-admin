@@ -35,7 +35,8 @@ export default function ContactListing() {
   }, [sortParam]);
 
   const sortBy = sort[0]?.id || 'createdAt';
-  const sortOrder = sort[0]?.desc ? 'desc' : 'asc';
+  const sortOrder =
+    sort[0]?.desc !== undefined ? (sort[0]?.desc ? 'desc' : 'asc') : 'desc';
 
   const {
     data: contactData,

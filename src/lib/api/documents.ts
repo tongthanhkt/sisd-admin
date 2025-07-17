@@ -12,10 +12,17 @@ export const documentsApi = api.injectEndpoints({
     // Get all documents
     getDocuments: builder.query<
       DocumentsResponse,
-      { page: number; perPage: number; search: string; category: string }
+      {
+        page: number;
+        perPage: number;
+        search: string;
+        category: string;
+        sortBy: string;
+        sortOrder: string;
+      }
     >({
-      query: ({ page, perPage, search, category }) =>
-        `documents?page=${page}&perPage=${perPage}&search=${search}&category=${category}`,
+      query: ({ page, perPage, search, category, sortBy, sortOrder }) =>
+        `documents?page=${page}&perPage=${perPage}&search=${search}&category=${category}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
       providesTags: (result) =>
         result
           ? [

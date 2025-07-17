@@ -2,16 +2,16 @@
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGetDocumentsQuery } from '@/lib/api/documents';
-import { AlertCircle } from 'lucide-react';
-import { DocumentTable } from './document-tables';
-import { columns } from './document-tables/columns';
-import { useSearchParams } from 'next/navigation';
 import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
-import { ColumnDef } from '@tanstack/react-table';
+import { useGetDocumentsQuery } from '@/lib/api/documents';
+import { AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
+import { DocumentTable } from './document-tables';
+import { columns } from './document-tables/columns';
 
 export default function DocumentListingPage() {
   const searchParams = useSearchParams();
@@ -23,6 +23,20 @@ export default function DocumentListingPage() {
   );
   const search = searchParams.get('search') || '';
   const category = searchParams.get('category') || '';
+  const sortParam = searchParams.get('sort');
+  const sort = useMemo(() => {
+    try {
+      return sortParam
+        ? JSON.parse(sortParam)
+        : [{ id: 'createdAt', desc: true }];
+    } catch {
+      return [{ id: 'createdAt', desc: true }];
+    }
+  }, [sortParam]);
+
+  const sortBy = sort[0]?.id || 'createdAt';
+  const sortOrder =
+    sort[0]?.desc !== undefined ? (sort[0]?.desc ? 'desc' : 'asc') : 'desc';
 
   // Use RTK Query hook with pagination and filter params
   const {
@@ -33,7 +47,9 @@ export default function DocumentListingPage() {
     page,
     perPage: pageLimit,
     search,
-    category
+    category,
+    sortBy,
+    sortOrder
   });
   const documents = documentData?.documents || [];
   const totalItems = documentData?.total_documents || 0;
