@@ -10,6 +10,8 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('perPage') || '10');
     const search = searchParams.get('search') || '';
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
 
     const query: any = {};
     if (search) {
@@ -21,7 +23,10 @@ export async function GET(request: Request) {
     }
     const skip = (page - 1) * limit;
     const [contacts, total] = await Promise.all([
-      Contact.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }),
+      Contact.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ [sortBy]: sortOrder }),
       Contact.countDocuments(query)
     ]);
     return withCORS(

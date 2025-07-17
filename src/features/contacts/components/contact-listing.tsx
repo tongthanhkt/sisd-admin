@@ -11,6 +11,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
+import { useMemo } from 'react';
 
 export default function ContactListing() {
   const searchParams = useSearchParams();
@@ -22,6 +23,20 @@ export default function ContactListing() {
   );
   const search = searchParams.get('search') || '';
 
+  const sortParam = searchParams.get('sort');
+  const sort = useMemo(() => {
+    try {
+      return sortParam
+        ? JSON.parse(sortParam)
+        : [{ id: 'createdAt', desc: true }];
+    } catch {
+      return [{ id: 'createdAt', desc: true }];
+    }
+  }, [sortParam]);
+
+  const sortBy = sort[0]?.id || 'createdAt';
+  const sortOrder = sort[0]?.desc ? 'desc' : 'asc';
+
   const {
     data: contactData,
     isLoading,
@@ -29,7 +44,9 @@ export default function ContactListing() {
   } = useGetContactsQuery({
     page,
     perPage: pageLimit,
-    search
+    search,
+    sortBy,
+    sortOrder
   });
   const contacts = contactData?.contacts || [];
   const totalItems = contactData?.total_contacts || 0;
