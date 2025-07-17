@@ -11,6 +11,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE
 } from '@/constants/pagination';
+import { useMemo } from 'react';
 
 export default function BlogListingPage() {
   const searchParams = useSearchParams();
@@ -24,6 +25,21 @@ export default function BlogListingPage() {
   const categoriesParam = searchParams.get('categories') || '';
   const categories = categoriesParam ? categoriesParam.split(',') : [];
 
+  const sortParam = searchParams.get('sort');
+  const sort = useMemo(() => {
+    try {
+      return sortParam
+        ? JSON.parse(sortParam)
+        : [{ id: 'createdAt', desc: true }];
+    } catch {
+      return [{ id: 'createdAt', desc: true }];
+    }
+  }, [sortParam]);
+
+  const sortBy = sort[0]?.id || 'createdAt';
+  const sortOrder =
+    sort[0]?.desc !== undefined ? (sort[0]?.desc ? 'desc' : 'asc') : 'desc';
+
   // Use RTK Query hook with pagination and filter params
   const {
     data: blogData,
@@ -33,7 +49,9 @@ export default function BlogListingPage() {
     page,
     perPage: pageLimit,
     search,
-    categories
+    categories,
+    sortBy,
+    sortOrder
   });
   const blogs = blogData?.blogs || [];
   const totalItems = blogData?.total_blogs || 0;

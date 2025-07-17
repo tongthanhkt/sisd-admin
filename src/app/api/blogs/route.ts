@@ -26,6 +26,9 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
     const categories = searchParams.get('categories');
     const isOustanding = searchParams.get('isOustanding');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+    console.log('🚀 ~ GET ~ sortOrder:', sortOrder);
 
     const query: any = {};
 
@@ -52,13 +55,15 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     const startQuery = Date.now();
-    const blogsPromise = Blog.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).select("title thumbnail categories createdAt");
+    const blogsPromise = Blog.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .select('title thumbnail categories createdAt');
     const countPromise = Blog.countDocuments(query);
     const [blogs, total] = await Promise.all([blogsPromise, countPromise]);
     const endQuery = Date.now();
     console.log('DB query+count in', endQuery - startQuery, 'ms');
-
-
 
     const endAll = Date.now();
     console.log('Total GET /api/blogs time:', endAll - startAll, 'ms');

@@ -1,66 +1,44 @@
 import { NextResponse } from 'next/server';
-import MortalProduct from '@/models/MortalProduct';
 import { connectToDatabase } from '@/lib/mongodb';
-import {
-  PAGINATION_DEFAULT_PAGE,
-  PAGINATION_DEFAULT_PER_PAGE
-} from '@/constants/pagination';
 import { withCORS } from '@/lib/cors';
+import Contact from '@/models/Contact';
 
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
-
     const { searchParams } = new URL(request.url);
-    const page = parseInt(
-      searchParams.get('page') || PAGINATION_DEFAULT_PAGE.toString()
-    );
-    const limit = parseInt(
-      searchParams.get('perPage') || PAGINATION_DEFAULT_PER_PAGE.toString()
-    );
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('perPage') || '10');
     const search = searchParams.get('search') || '';
-    const category = searchParams.get('category');
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
 
     const query: any = {};
-
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } }
+        { fullname: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone_number: { $regex: search, $options: 'i' } }
       ];
     }
-
-    if (category) {
-      query.category = { $in: category.split(',') };
-    }
-
-    const ids = searchParams.get('ids');
-    if (ids) {
-      query._id = { $in: ids.split(',') };
-    }
-
     const skip = (page - 1) * limit;
-
-    const [products, total] = await Promise.all([
-      MortalProduct.find(query)
+    const [contacts, total] = await Promise.all([
+      Contact.find(query)
         .skip(skip)
         .limit(limit)
         .sort({ [sortBy]: sortOrder }),
-      MortalProduct.countDocuments(query)
+      Contact.countDocuments(query)
     ]);
-
     return withCORS(
       NextResponse.json({
-        products,
-        total_products: total,
+        contacts,
+        total_contacts: total,
         current_page: page,
         total_pages: Math.ceil(total / limit)
       })
     );
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Error fetching contacts:', error);
     return withCORS(
       NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
@@ -70,14 +48,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await connectToDatabase();
-
     const body = await request.json();
-
-    const product = await MortalProduct.create(body);
-
-    return withCORS(NextResponse.json(product, { status: 201 }));
+    const { fullname, phone_number, email } = body;
+    if (!fullname || !phone_number || !email) {
+      return withCORS(
+        NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      );
+    }
+    const contact = await Contact.create({ fullname, phone_number, email });
+    return withCORS(NextResponse.json(contact, { status: 201 }));
   } catch (error) {
-    console.error('Error creating product:', error);
+    console.error('Error creating contact:', error);
     return withCORS(
       NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     );
