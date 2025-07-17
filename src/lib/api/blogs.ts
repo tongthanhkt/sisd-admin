@@ -19,8 +19,8 @@ export const blogsApi = api.injectEndpoints({
         perPage: number;
         search: string;
         categories?: string[];
-        sortBy: string;
-        sortOrder: string;
+        sortBy?: string;
+        sortOrder?: string;
       }
     >({
       query: ({ page, perPage, search, categories, sortBy, sortOrder }) => {

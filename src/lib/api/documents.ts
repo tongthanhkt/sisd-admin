@@ -17,8 +17,8 @@ export const documentsApi = api.injectEndpoints({
         perPage: number;
         search: string;
         category: string;
-        sortBy: string;
-        sortOrder: string;
+        sortBy?: string;
+        sortOrder?: string;
       }
     >({
       query: ({ page, perPage, search, category, sortBy, sortOrder }) =>

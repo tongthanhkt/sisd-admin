@@ -28,7 +28,6 @@ export async function GET(request: Request) {
     const isOustanding = searchParams.get('isOustanding');
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
-    console.log('🚀 ~ GET ~ sortOrder:', sortOrder);
 
     const query: any = {};
 
