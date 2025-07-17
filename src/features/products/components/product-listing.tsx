@@ -12,6 +12,7 @@ import { AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ProductTable } from './product-tables';
 import { columns } from './product-tables/columns';
+import { useMemo } from 'react';
 
 export default function ProductListingPage() {
   const searchParams = useSearchParams();
@@ -24,6 +25,20 @@ export default function ProductListingPage() {
   const search = searchParams.get('search') || '';
   const category = searchParams.get('category') || '';
 
+  const sortParam = searchParams.get('sort');
+  const sort = useMemo(() => {
+    try {
+      return sortParam
+        ? JSON.parse(sortParam)
+        : [{ id: 'createdAt', desc: true }];
+    } catch {
+      return [{ id: 'createdAt', desc: true }];
+    }
+  }, [sortParam]);
+
+  const sortBy = sort[0]?.id || 'createdAt';
+  const sortOrder = sort[0]?.asc ? 'asc' : 'desc';
+
   // Use RTK Query hook
   const {
     data: productData,
@@ -33,7 +48,9 @@ export default function ProductListingPage() {
     page,
     perPage: pageLimit,
     search,
-    category
+    category,
+    sortBy,
+    sortOrder
   });
   const products = productData?.products || [];
   const totalItems = productData?.total_products || 0;

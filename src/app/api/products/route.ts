@@ -20,6 +20,8 @@ export async function GET(request: Request) {
     );
     const search = searchParams.get('search') || '';
     const category = searchParams.get('category');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
 
     const query: any = {};
 
@@ -42,7 +44,10 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([
-      MortalProduct.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }),
+      MortalProduct.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort({ [sortBy]: sortOrder }),
       MortalProduct.countDocuments(query)
     ]);
 
