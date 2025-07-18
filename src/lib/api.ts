@@ -2,11 +2,14 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { handleAuthError } from './auth-interceptor';
 import { getCookie, shouldRefreshToken } from './token-utils';
 
+// Đổi baseUrl sang backend mới
+const BACKEND_API_URL = 'http://localhost:3001'; // <-- Đổi thành URL backend thật của bạn
+
 // Define base API configuration
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api',
+    baseUrl: BACKEND_API_URL,
     credentials: 'include', // Include cookies in requests
     prepareHeaders: async (headers, { getState, endpoint }) => {
       headers.set('content-type', 'application/json');
@@ -47,6 +50,6 @@ export const api = createApi({
       return response.text();
     }
   }),
-  tagTypes: ['Product', 'Blog', 'User', 'Document'],
+  tagTypes: ['Product', 'Blog', 'User', 'Document', 'ActivityLog'],
   endpoints: () => ({})
 });

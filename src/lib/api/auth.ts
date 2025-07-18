@@ -67,7 +67,7 @@ const authService = api.injectEndpoints({
 
     logout: builder.mutation<void, void>({
       query: () => ({
-        url: '/auth/logout',
+        url: '/auth/jwt/logout',
         method: 'POST'
       })
     })

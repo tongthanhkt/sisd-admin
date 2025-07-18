@@ -29,6 +29,7 @@ export function CellAction({ data }: CellActionProps) {
   const onDelete = async () => {
     try {
       setLoading(true);
+      console.log("Data :", data)
       await deleteBlog(data.id);
       toast.success('Blog deleted successfully');
       router.refresh();
