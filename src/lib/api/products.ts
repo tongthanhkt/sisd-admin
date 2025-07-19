@@ -55,10 +55,17 @@ export const productsApi = api.injectEndpoints({
     // Get all products
     getProducts: builder.query<
       ProductsResponse,
-      { page: number; perPage: number; search: string; category: string }
+      {
+        page: number;
+        perPage: number;
+        search: string;
+        category: string;
+        sortBy?: string;
+        sortOrder?: string;
+      }
     >({
-      query: ({ page, perPage, search, category }) =>
-        `products?page=${page}&perPage=${perPage}&search=${search}&category=${category}`,
+      query: ({ page, perPage, search, category, sortBy, sortOrder }) =>
+        `products?page=${page}&perPage=${perPage}&search=${search}&category=${category}&sortBy=${sortBy}&sortOrder=${sortOrder}`,
       providesTags: (result) =>
         result
           ? [

@@ -50,6 +50,6 @@ export const api = createApi({
       return response.text();
     }
   }),
-  tagTypes: ['Product', 'Blog', 'User', 'Document', 'ActivityLog'],
+  tagTypes: ['Product', 'Blog', 'User', 'Document', 'Contact', 'ActivityLog'],
   endpoints: () => ({})
 });

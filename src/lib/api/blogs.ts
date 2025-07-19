@@ -14,25 +14,29 @@ export const blogsApi = api.injectEndpoints({
     // Get all blogs
     getBlogs: builder.query<
       IBlogPagination,
-      { page: number; perPage: number; search: string; categories?: string[] }
+      {
+        page: number;
+        perPage: number;
+        search: string;
+        categories?: string[];
+        sortBy?: string;
+        sortOrder?: string;
+      }
     >({
-      query: ({ page, perPage, search, categories }) => {
+      query: ({ page, perPage, search, categories, sortBy, sortOrder }) => {
         let url = `blogs?page=${page}&perPage=${perPage}&search=${search}`;
         if (categories && categories.length > 0) {
           url += `&categories=${categories.join(',')}`;
         }
+        if (sortBy) {
+          url += `&sortBy=${sortBy}`;
+        }
+        if (sortOrder) {
+          url += `&sortOrder=${sortOrder}`;
+        }
         return url;
       },
-      providesTags: ['Blog'],
-      keepUnusedDataFor: 300, // Keep data for 5 minutes
-      serializeQueryArgs: ({ queryArgs }) => {
-        const { page, perPage, search, categories } = queryArgs;
-        return `${page}-${perPage}-${search}-${categories?.join(',') || ''}`;
-      },
-      merge: (currentCache, newItems) => {
-        // Merge logic for pagination
-        return newItems;
-      }
+      providesTags: ['Blog']
     }),
 
     // Get single blog by ID
