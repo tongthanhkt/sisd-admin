@@ -84,13 +84,13 @@ export default function LoginPage() {
               htmlFor='email'
               className='block text-sm leading-6 font-medium text-gray-900 dark:text-gray-200'
             >
-              Email
+              Username
             </label>
             <div className='mt-2'>
               <input
                 id='email'
                 name='email'
-                type='email'
+
                 autoComplete='email'
                 required
                 autoFocus
