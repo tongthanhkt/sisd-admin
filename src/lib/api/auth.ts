@@ -1,5 +1,6 @@
 import { api } from '../api';
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { clearAuthCookies, clearAllAuthData } from '../token-utils';
 
 // Base query for external API calls
 const externalBaseQuery = fetchBaseQuery({
@@ -66,10 +67,27 @@ const authService = api.injectEndpoints({
     }),
 
     logout: builder.mutation<void, void>({
-      query: () => ({
-        url: '/auth/jwt/logout',
-        method: 'POST'
-      })
+      queryFn: async () => {
+        try {
+          // Gọi API logout để thông báo cho server
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/jwt/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          // Xóa tất cả dữ liệu authentication
+          clearAllAuthData();
+
+          return { data: undefined };
+        } catch (error) {
+          // Ngay cả khi API call thất bại, vẫn xóa tất cả dữ liệu authentication
+          clearAllAuthData();
+
+          return { error: { status: 'FETCH_ERROR', error: 'Logout failed but cookies cleared' } };
+        }
+      }
     })
   })
 });

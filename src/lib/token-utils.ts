@@ -68,4 +68,42 @@ export const clearAuthCookies = () => {
     removeCookie('refreshToken');
     removeCookie('userId');
     removeCookie('userRole');
+};
+
+export const clearAllAuthData = () => {
+    if (typeof document === 'undefined') return;
+
+    // Xóa tất cả cookies liên quan đến authentication
+    clearAuthCookies();
+
+    // Xóa thêm các cookies khác có thể được sử dụng
+    const cookiesToRemove = [
+        'accessToken',
+        'refreshToken',
+        'userId',
+        'userRole',
+        'session',
+        'auth',
+        'token',
+        'jwt',
+        'user',
+        'login',
+        'remember',
+        'persist'
+    ];
+
+    cookiesToRemove.forEach(cookieName => {
+        // Xóa với các path khác nhau
+        document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+        document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/dashboard;`;
+        document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/auth;`;
+    });
+
+    // Xóa localStorage và sessionStorage nếu có
+    try {
+        localStorage.clear();
+        sessionStorage.clear();
+    } catch (error) {
+        console.warn('Could not clear storage:', error);
+    }
 }; 

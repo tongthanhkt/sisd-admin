@@ -1,4 +1,4 @@
-import { getCookie, setCookie, removeCookie, clearAuthCookies } from './token-utils';
+import { getCookie, setCookie, removeCookie, clearAuthCookies, clearAllAuthData } from './token-utils';
 import { extractJWTPayload } from './jwt-edge';
 
 let isRefreshing = false;
@@ -78,8 +78,8 @@ export const refreshAccessToken = async () => {
   } catch (error) {
     console.error('❌ Refresh token error:', error);
 
-    // Clear all auth cookies on refresh failure
-    clearAuthCookies();
+    // Clear all auth data on refresh failure
+    clearAllAuthData();
 
     // Redirect to login
     window.location.href = '/auth/login';

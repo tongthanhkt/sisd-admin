@@ -44,10 +44,19 @@ export async function middleware(request: NextRequest) {
     } catch (error) {
       // Token invalid, allow access to login page
       const response = NextResponse.next();
+      // Xóa tất cả cookies liên quan đến authentication
       response.cookies.delete('accessToken');
       response.cookies.delete('refreshToken');
       response.cookies.delete('userId');
       response.cookies.delete('userRole');
+      response.cookies.delete('session');
+      response.cookies.delete('auth');
+      response.cookies.delete('token');
+      response.cookies.delete('jwt');
+      response.cookies.delete('user');
+      response.cookies.delete('login');
+      response.cookies.delete('remember');
+      response.cookies.delete('persist');
       return response;
     }
   }
@@ -73,10 +82,19 @@ export async function middleware(request: NextRequest) {
       const response = NextResponse.redirect(
         new URL('/auth/login', request.url)
       );
+      // Xóa tất cả cookies liên quan đến authentication
       response.cookies.delete('accessToken');
       response.cookies.delete('refreshToken');
       response.cookies.delete('userId');
       response.cookies.delete('userRole');
+      response.cookies.delete('session');
+      response.cookies.delete('auth');
+      response.cookies.delete('token');
+      response.cookies.delete('jwt');
+      response.cookies.delete('user');
+      response.cookies.delete('login');
+      response.cookies.delete('remember');
+      response.cookies.delete('persist');
       return response;
     }
   }

@@ -4,6 +4,8 @@ import { useLogoutMutation } from '@/lib/api/auth';
 import { useUser } from '@/hooks/use-user';
 import { LogOutIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { clearAuthCookies, clearAllAuthData } from '@/lib/token-utils';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,8 +23,26 @@ export function UserNav() {
   const { user, loading } = useUser();
 
   const handleLogout = async () => {
-    await logout();
-    router.push('/auth/login');
+    try {
+      // Gọi API logout
+      await logout();
+
+      // Xóa tất cả dữ liệu authentication
+      clearAllAuthData();
+
+      toast.success('Đăng xuất thành công!');
+
+      // Redirect về trang login
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+
+      // Ngay cả khi API call thất bại, vẫn xóa tất cả dữ liệu authentication
+      clearAllAuthData();
+
+      toast.error('Đăng xuất thất bại nhưng đã xóa thông tin đăng nhập');
+      router.push('/auth/login');
+    }
   };
 
   if (loading) {
