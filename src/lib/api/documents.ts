@@ -26,12 +26,12 @@ export const documentsApi = api.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.documents.map(({ _id }) => ({
-                type: 'Document' as const,
-                id: _id
-              })),
-              { type: 'Document', id: 'LIST' }
-            ]
+            ...result.documents.map(({ id }) => ({
+              type: 'Document' as const,
+              id: id
+            })),
+            { type: 'Document', id: 'LIST' }
+          ]
           : [{ type: 'Document', id: 'LIST' }]
     }),
 

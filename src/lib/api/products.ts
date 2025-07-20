@@ -4,7 +4,7 @@ import { IMortalProduct } from '@/models/MortalProduct';
 
 // Product types based on current MortalProduct schema
 export interface Product {
-  _id: string;
+  id: string;
   name?: string;
   code?: string;
   image?: string;
@@ -69,12 +69,12 @@ export const productsApi = api.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.products.map(({ _id }) => ({
-                type: 'Product' as const,
-                id: _id
-              })),
-              { type: 'Product', id: 'LIST' }
-            ]
+            ...result.products.map(({ id }) => ({
+              type: 'Product' as const,
+              id: id
+            })),
+            { type: 'Product', id: 'LIST' }
+          ]
           : [{ type: 'Product', id: 'LIST' }]
     }),
 

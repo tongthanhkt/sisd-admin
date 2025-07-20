@@ -65,9 +65,9 @@ export function RelatedProducts() {
   const totalItems = productData?.total_products || 0;
 
   const validProducts = products
-    .filter((item) => typeof item._id === 'string' && item._id.length > 0)
+    .filter((item) => typeof item.id === 'string' && item.id.length > 0)
     .map((item) => ({
-      id: (item._id as string) || '',
+      id: (item.id as string) || '',
       name: item.name || '',
       image: item.image || '',
       category: item.category ? PRODUCT_LABELS[item.category] : ''

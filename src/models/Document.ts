@@ -11,7 +11,7 @@ export interface IDocument extends Document {
   category: string;
   createdAt?: Date;
   updatedAt?: Date;
-  _id: string;
+  id: string;
 }
 
 const DocumentSchema: Schema = new Schema(

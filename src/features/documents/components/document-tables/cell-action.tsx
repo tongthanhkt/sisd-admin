@@ -29,7 +29,7 @@ export function CellAction({ data }: CellActionProps) {
   const onDelete = async () => {
     try {
       setLoading(true);
-      await deleteDocument(data._id);
+      await deleteDocument(data.id);
       toast.success('Document deleted successfully');
       router.refresh();
     } catch (error) {
@@ -58,7 +58,7 @@ export function CellAction({ data }: CellActionProps) {
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Hành động</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/documents/${data._id}/edit`)}
+            onClick={() => router.push(`/dashboard/documents/${data.id}/edit`)}
           >
             <IconEdit className='mr-2 h-4 w-4' />
             Chỉnh sửa

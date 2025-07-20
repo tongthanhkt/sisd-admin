@@ -5,7 +5,7 @@ import { Column, ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 
 export interface ContactRow {
-  _id: string;
+  id: string;
   fullname: string;
   phone_number: string;
   email: string;
