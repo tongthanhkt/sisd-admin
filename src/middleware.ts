@@ -1,8 +1,23 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { extractJWTPayload } from '@/lib/jwt-edge';
 
 export async function middleware(request: NextRequest) {
+  // Get client IP address from 'x-forwarded-for' header
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0];
+
+  // Clone the request headers and set the new 'x-real-ip' header
+  const requestHeaders = new Headers(request.headers);
+  if (ip) {
+    requestHeaders.set('x-real-ip', ip);
+  }
+
+  // The rest of your middleware logic can now use the new request object
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders
+    }
+  });
+
   const path = request.nextUrl.pathname;
   const method = request.method;
 
@@ -100,7 +115,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // For public paths without token, allow access
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
