@@ -2,65 +2,99 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+import { Form, FormField } from '@/components/ui/form';
 
-import { AppSelect } from '@/components';
-import { FileUploader } from '@/components/file-uploader';
+import { AppSelect, UploadImage } from '@/components';
+import { useFloorProduct } from '../hooks/useFloorProduct';
+import { FloorProductFormValues } from '../utils/form-schema';
 import { Input } from '@/components/ui/input';
-import { DOCUMENT_OPTIONS } from '@/constants/document';
-import { useDocument } from '../hooks/useDocument';
-import { DocumentFormValues } from '../utils/form-schema';
+import { Textarea } from '@/components/ui/textarea';
+import { useGetStoneCatalogsQuery } from '@/lib/api/catalog';
 
 interface BlogFormProps {
-  documentId?: string;
-  initialData?: Partial<DocumentFormValues>;
+  productId?: string;
+  initialData?: Partial<FloorProductFormValues>;
   pageTitle?: string;
 }
 
-export function DocumentForm({ pageTitle, documentId }: BlogFormProps) {
-  const { methods, onSubmit } = useDocument({ documentId });
+export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
+  const { methods, onSubmit } = useFloorProduct({ productId });
   const { control } = methods;
+
+  const { data: catalogs } = useGetStoneCatalogsQuery();
+  const catalogOptions =
+    catalogs?.map((catalog) => ({
+      label: catalog.code,
+      value: catalog.id
+    })) || [];
 
   return (
     <Card className='mx-auto w-full'>
       <CardHeader>
         <CardTitle className='text-left text-2xl font-bold'>
           {pageTitle ||
-            (documentId ? 'Edit Blog Document' : 'Create New Document')}
+            (productId ? 'Edit Floor Product' : 'Create New Floor Product')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...methods}>
           <form onSubmit={onSubmit} className='space-y-8'>
-            <div className='grid grid-cols-1 items-start gap-4 md:grid-cols-2'>
+            <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={control}
-                name='filename'
-                render={({ field, fieldState: { error } }) => (
-                  <FormItem className='w-full'>
-                    <FormControl>
-                      <Input
-                        placeholder='Enter document name'
-                        {...field}
-                        error={!!error}
-                        helperText={error?.message}
-                        label='Document Name'
-                        required
-                      />
-                    </FormControl>
-                  </FormItem>
+                name='image_url'
+                render={({ field }) => (
+                  <UploadImage
+                    {...field}
+                    className='h-60'
+                    onValueChange={async (files) => {
+                      if (files) {
+                        field.onChange(files);
+                      }
+                    }}
+                    maxFiles={1}
+                    maxSize={10 * 1024 * 1024}
+                    required
+                    label='Image'
+                  />
                 )}
+              />{' '}
+              <FormField
+                control={control}
+                name='color_image_url'
+                render={({ field }) => (
+                  <UploadImage
+                    {...field}
+                    className='h-60'
+                    onValueChange={async (files) => {
+                      if (files) {
+                        field.onChange(files);
+                      }
+                    }}
+                    maxFiles={1}
+                    maxSize={10 * 1024 * 1024}
+                    required
+                    label='Color Image'
+                  />
+                )}
+              />
+            </div>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={control}
+                name='color_name'
+                render={({ field }) => <Input {...field} label='Color Name' />}
               />
               <FormField
                 control={control}
-                name='category'
+                name='catalog_id'
                 render={({ field }) => (
                   <AppSelect
                     onChange={field.onChange}
                     value={field.value}
-                    label='Category'
-                    options={DOCUMENT_OPTIONS}
-                    placeholder='Select Category'
+                    label='Catalog'
+                    options={catalogOptions}
+                    placeholder='Select Catalog'
                     required
                   />
                 )}
@@ -68,21 +102,11 @@ export function DocumentForm({ pageTitle, documentId }: BlogFormProps) {
             </div>
             <FormField
               control={control}
-              name='file'
-              render={({ field }) => (
-                <FileUploader
-                  accept={{ 'application/pdf': ['.pdf'] }}
-                  maxSize={1024 * 1024 * 150}
-                  maxFiles={1}
-                  onValueChange={async (files) => {
-                    field.onChange(files);
-                  }}
-                  value={field.value as File[]}
-                />
-              )}
+              name='content'
+              render={({ field }) => <Textarea {...field} label='Content' />}
             />
 
-            <Button type='submit'>{documentId ? 'Update' : 'Create'}</Button>
+            <Button type='submit'>{productId ? 'Update' : 'Create'}</Button>
           </form>
         </Form>
       </CardContent>

@@ -1,23 +1,23 @@
 import { notFound } from 'next/navigation';
-import { DocumentForm } from './floor-product-form';
+import { FloorProductForm } from './floor-product-form';
 
 type DocumentViewPageProps = {
-  documentId: string;
+  productId: string;
 };
 
 export default async function DocumentViewPage({
-  documentId
+  productId
 }: DocumentViewPageProps) {
-  let pageTitle = 'Create Document';
+  let pageTitle = 'Create Floor Product';
 
-  if (documentId !== 'new') {
+  if (productId !== 'new') {
     try {
-      pageTitle = 'Edit Document';
+      pageTitle = 'Edit Floor Product';
     } catch (error) {
-      console.error('Error fetching blog:', error);
+      console.error('Error fetching product:', error);
       notFound();
     }
   }
 
-  return <DocumentForm pageTitle={pageTitle} documentId={documentId} />;
+  return <FloorProductForm pageTitle={pageTitle} productId={productId} />;
 }

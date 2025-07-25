@@ -1,24 +1,37 @@
 import * as z from 'zod';
 
-export const documentFormSchema = z.object({
-  filename: z.string().min(1, 'Title is required'),
-
-  category: z.string().min(1, 'Category is required'),
-
-  file: z
-    .array(
-      z.union([
-        z.instanceof(File),
-        z.object({
-          name: z.string(),
-          size: z.number(),
-          type: z.string(),
-          url: z.string().optional(),
-          preview: z.string().optional()
-        })
-      ])
-    )
+export const floorProductFormSchema = z.object({
+  image_url: z
+    .array(z.any())
     .min(1, { message: 'Thumbnail is required' })
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All image must be files or valid URLs' }
+    ),
+  color_image_url: z
+    .array(z.any())
+    .min(1, { message: 'Thumbnail is required' })
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All color image must be files or valid URLs' }
+    ),
+  color_name: z.string().min(1, 'Color name is required'),
+  content: z.string().min(1, 'Content is required'),
+  catalog_id: z.string().min(1, 'Catalog is required')
 });
 
-export type DocumentFormValues = z.infer<typeof documentFormSchema>;
+export type FloorProductFormValues = z.infer<typeof floorProductFormSchema>;
