@@ -49,7 +49,7 @@ export function Autocomplete({
 
   const handleSelect = (currentValue: string) => {
     const selectedOption = options.find(
-      (option) => option.value.toLowerCase() === currentValue.toLowerCase()
+      (option) => option.value === currentValue
     );
     if (selectedOption) {
       onChange(selectedOption.value);
@@ -69,6 +69,14 @@ export function Autocomplete({
     option.label.toLowerCase().includes(inputValue.toLowerCase())
   );
 
+  const hasResults = filteredOptions.length > 0;
+  const canCreate =
+    onCreate &&
+    inputValue &&
+    !options.some(
+      (option) => option.label.toLowerCase() === inputValue.toLowerCase()
+    );
+
   return (
     <div className='w-full space-y-2'>
       <FormLabel>
@@ -81,7 +89,9 @@ export function Autocomplete({
             variant='outline'
             role='combobox'
             aria-expanded={open}
-            className='w-full justify-between'
+            className={`w-full justify-between ${
+              !value && 'text-muted-foreground hover:text-muted-foreground'
+            }`}
           >
             {value
               ? options.find((option) => option.value === value)?.label
@@ -90,42 +100,47 @@ export function Autocomplete({
           </Button>
         </PopoverTrigger>
         <PopoverContent className='w-[var(--radix-popover-trigger-width)] p-0'>
-          <Command>
+          <Command shouldFilter={false}>
             <CommandInput
               placeholder={placeholder || 'Search...'}
               onValueChange={setInputValue}
             />
             <CommandList>
-              <CommandEmpty className='py-2 text-center'>
-                {onCreate && inputValue ? (
-                  <div
-                    onClick={handleCreate}
-                    className='hover:bg-accent hover:text-accent-foreground relative flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none'
+              {!hasResults && !canCreate && (
+                <CommandEmpty className='py-2 text-center'>
+                  No results found.
+                </CommandEmpty>
+              )}
+              {hasResults && (
+                <CommandGroup>
+                  {filteredOptions.map((option) => (
+                    <CommandItem
+                      key={option.value}
+                      value={option.value}
+                      onSelect={handleSelect}
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          value === option.value ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                      {option.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {canCreate && (
+                <CommandGroup>
+                  <CommandItem
+                    onSelect={handleCreate}
+                    className='cursor-pointer'
                   >
                     <PlusCircle className='mr-2 h-4 w-4' />
                     Create &quot;{inputValue}&quot;
-                  </div>
-                ) : (
-                  'No results found.'
-                )}
-              </CommandEmpty>
-              <CommandGroup>
-                {filteredOptions.map((option) => (
-                  <CommandItem
-                    key={option.value}
-                    value={option.value}
-                    onSelect={handleSelect}
-                  >
-                    <Check
-                      className={cn(
-                        'mr-2 h-4 w-4',
-                        value === option.value ? 'opacity-100' : 'opacity-0'
-                      )}
-                    />
-                    {option.label}
                   </CommandItem>
-                ))}
-              </CommandGroup>
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
