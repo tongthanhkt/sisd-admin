@@ -4,13 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField } from '@/components/ui/form';
 
-import { AppSelect, UploadImage } from '@/components';
+import { UploadImage } from '@/components';
 import { useFloorProduct } from '../hooks/useFloorProduct';
 import { FloorProductFormValues } from '../utils/form-schema';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useGetStoneCatalogsQuery } from '@/lib/api/catalog';
+import {
+  useCreateStoneCatalogMutation,
+  useGetStoneCatalogsQuery
+} from '@/lib/api/catalog';
 import { SpinnerOverlay } from '@/components/ui/spinner';
+import { Autocomplete } from '@/components/ui/autocomplete';
+import { toast } from 'sonner';
 
 interface BlogFormProps {
   productId?: string;
@@ -20,9 +25,11 @@ interface BlogFormProps {
 
 export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
   const { methods, onSubmit, isLoading } = useFloorProduct({ productId });
-  const { control } = methods;
+  const { control, setValue } = methods;
 
   const { data: catalogs } = useGetStoneCatalogsQuery();
+  const [createStoneCatalog] = useCreateStoneCatalogMutation();
+
   const catalogOptions =
     catalogs?.map((catalog) => ({
       label: catalog.code,
@@ -90,12 +97,24 @@ export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
                 control={control}
                 name='catalog_id'
                 render={({ field }) => (
-                  <AppSelect
-                    onChange={field.onChange}
-                    value={field.value}
-                    label='Catalog'
+                  <Autocomplete
                     options={catalogOptions}
-                    placeholder='Select Catalog'
+                    value={field.value}
+                    onChange={field.onChange}
+                    onCreate={async (value) => {
+                      try {
+                        const newCatalog = await createStoneCatalog({
+                          code: value
+                        }).unwrap();
+                        if (newCatalog) {
+                          setValue('catalog_id', newCatalog.id);
+                        }
+                      } catch (error) {
+                        toast.error('Failed to create catalog');
+                      }
+                    }}
+                    placeholder='Select or create a catalog'
+                    label='Catalog'
                     required
                   />
                 )}

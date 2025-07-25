@@ -40,6 +40,19 @@ const catalogsApi = api.injectEndpoints({
         body: product
       }),
       invalidatesTags: ['Catalog']
+    }),
+    createStoneCatalog: builder.mutation<
+      ICatalog,
+      {
+        code: string;
+      }
+    >({
+      query: (catalog) => ({
+        url: 'stone-catalogs',
+        method: 'POST',
+        body: catalog
+      }),
+      invalidatesTags: ['Catalog']
     })
   })
 });
@@ -49,5 +62,6 @@ export const {
   useCreateStoneProductMutation,
   useDeleteStoneProductMutation,
   useGetStoneProductQuery,
-  useUpdateStoneProductMutation
+  useUpdateStoneProductMutation,
+  useCreateStoneCatalogMutation
 } = catalogsApi;
