@@ -26,7 +26,7 @@ const Page = () => {
             href='/dashboard/floor-products/new'
             className={cn(buttonVariants(), 'text-xs md:text-sm')}
           >
-            <IconPlus className='mr-2 h-4 w-4' /> Add New
+            <IconPlus className='mr-2 h-4 w-4' /> Add New Product
           </Link>
         </div>
         <Separator />
