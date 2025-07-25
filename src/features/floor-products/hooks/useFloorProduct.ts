@@ -1,21 +1,21 @@
+import { useCreateStoneProductMutation } from '@/lib/api/catalog';
+import { uploadFile } from '@/lib/upload';
+import { isFile, isUrl } from '@/lib/utils';
 import { IDocument } from '@/models/Document';
+import { ICatalogProduct } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import * as z from 'zod';
 import { floorProductFormSchema } from '../utils/form-schema';
-import { ICatalogProduct } from '@/types';
-import { isFile, isUrl } from '@/lib/utils';
-import { uploadFile } from '@/lib/upload';
-import { useCreateStoneProductMutation } from '@/lib/api/catalog';
-import { toast } from 'sonner';
 
 export type FloorProductFormValues = z.infer<typeof floorProductFormSchema>;
 export type FieldName = keyof FloorProductFormValues;
 
 export const useFloorProduct = ({ productId }: { productId?: string }) => {
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const methods = useForm<FloorProductFormValues>({
     resolver: zodResolver(floorProductFormSchema),
@@ -51,13 +51,6 @@ export const useFloorProduct = ({ productId }: { productId?: string }) => {
     const { image_url, color_image_url, color_name, content, catalog_id } =
       values;
 
-    const imageIsFile = image_url?.[0] && isFile(image_url[0]);
-    const colorImageIsFile = color_image_url?.[0] && isFile(color_image_url[0]);
-
-    if (imageIsFile || colorImageIsFile) {
-      setIsLoadingFile(true);
-    }
-
     try {
       const imageUrlPromise = image_url?.[0]
         ? isFile(image_url[0])
@@ -80,19 +73,17 @@ export const useFloorProduct = ({ productId }: { productId?: string }) => {
         image_url: resolvedImageUrl || '',
         color_image_url: resolvedColorImageUrl || '',
         color_name,
-        content: content.replace(/([^\n]+)\\n([^\n]+)/g, '$1/n $2'),
+        content: content.replaceAll('\n', '/n '),
         catalog_id
       };
-    } finally {
-      if (imageIsFile || colorImageIsFile) {
-        setIsLoadingFile(false);
-      }
+    } catch (error) {
+      console.error('Error preparing data submit:', error);
+      throw error;
     }
   };
 
   // Convert API file URL to displayable values
   const convertFileFromAPI = async (documentData: IDocument) => {
-    setIsLoadingFile(true);
     try {
       const fileUrls = [];
 
@@ -107,8 +98,9 @@ export const useFloorProduct = ({ productId }: { productId?: string }) => {
       }
 
       return { fileUrls };
-    } finally {
-      setIsLoadingFile(false);
+    } catch (error) {
+      console.error('Error converting file from API:', error);
+      throw error;
     }
   };
 
@@ -134,8 +126,8 @@ export const useFloorProduct = ({ productId }: { productId?: string }) => {
   // }, [documentData]);
 
   const onSubmit = handleSubmit(async (values: FloorProductFormValues) => {
-    console.log('🚀 ~ useFloorProduct ~ values:', values);
     try {
+      setIsLoading(true);
       const data = await prepareDataSubmit(values);
       let response;
       if (productId && productId !== 'new') {
@@ -165,12 +157,14 @@ export const useFloorProduct = ({ productId }: { productId?: string }) => {
     } catch (error) {
       console.error('🚀 ~ onSubmit error:', error);
       toast.error('An error occurred while saving the document');
+    } finally {
+      setIsLoading(false);
     }
   });
 
   return {
     methods,
     onSubmit,
-    isLoadingFile
+    isLoading
   };
 };

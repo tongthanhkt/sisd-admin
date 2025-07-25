@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useDeleteDocumentMutation } from '@/lib/api/documents';
+import { useDeleteStoneProductMutation } from '@/lib/api/catalog';
 import { ICatalogProduct } from '@/types';
 import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
@@ -24,16 +24,16 @@ export function CellAction({ data }: CellActionProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [deleteDocument] = useDeleteDocumentMutation();
+  const [deleteStoneProduct] = useDeleteStoneProductMutation();
 
   const onDelete = async () => {
     try {
       setLoading(true);
-      await deleteDocument(data.id);
-      toast.success('Document deleted successfully');
+      await deleteStoneProduct(data.id);
+      toast.success('Product deleted successfully');
       router.refresh();
     } catch (error) {
-      console.error('Error deleting document:', error);
+      console.error('Error deleting product:', error);
     } finally {
       setLoading(false);
       setOpen(false);

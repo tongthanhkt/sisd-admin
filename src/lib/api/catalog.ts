@@ -18,9 +18,19 @@ const catalogsApi = api.injectEndpoints({
         body: product
       }),
       invalidatesTags: ['Catalog']
+    }),
+    deleteStoneProduct: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `stone-products/${id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: ['Catalog']
     })
   })
 });
 
-export const { useGetStoneCatalogsQuery, useCreateStoneProductMutation } =
-  catalogsApi;
+export const {
+  useGetStoneCatalogsQuery,
+  useCreateStoneProductMutation,
+  useDeleteStoneProductMutation
+} = catalogsApi;

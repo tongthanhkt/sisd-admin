@@ -10,6 +10,7 @@ import { FloorProductFormValues } from '../utils/form-schema';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetStoneCatalogsQuery } from '@/lib/api/catalog';
+import { SpinnerOverlay } from '@/components/ui/spinner';
 
 interface BlogFormProps {
   productId?: string;
@@ -18,7 +19,7 @@ interface BlogFormProps {
 }
 
 export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
-  const { methods, onSubmit } = useFloorProduct({ productId });
+  const { methods, onSubmit, isLoading } = useFloorProduct({ productId });
   const { control } = methods;
 
   const { data: catalogs } = useGetStoneCatalogsQuery();
@@ -110,7 +111,7 @@ export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
           </form>
         </Form>
       </CardContent>
-      {/* {isLoading && <SpinnerOverlay />} */}
+      {isLoading && <SpinnerOverlay />}
     </Card>
   );
 }
