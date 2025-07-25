@@ -25,6 +25,21 @@ const catalogsApi = api.injectEndpoints({
         method: 'DELETE'
       }),
       invalidatesTags: ['Catalog']
+    }),
+    getStoneProduct: builder.query<ICatalogProduct, string>({
+      query: (id) => `stone-products/${id}`,
+      providesTags: ['Catalog']
+    }),
+    updateStoneProduct: builder.mutation<
+      ICatalogProduct,
+      { id: string; product: Omit<ICatalogProduct, 'id' | 'createdAt'> }
+    >({
+      query: ({ id, product }) => ({
+        url: `stone-products/${id}`,
+        method: 'PUT',
+        body: product
+      }),
+      invalidatesTags: ['Catalog']
     })
   })
 });
@@ -32,5 +47,7 @@ const catalogsApi = api.injectEndpoints({
 export const {
   useGetStoneCatalogsQuery,
   useCreateStoneProductMutation,
-  useDeleteStoneProductMutation
+  useDeleteStoneProductMutation,
+  useGetStoneProductQuery,
+  useUpdateStoneProductMutation
 } = catalogsApi;
