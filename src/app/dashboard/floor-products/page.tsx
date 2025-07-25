@@ -3,6 +3,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CatalogListingPage from '@/features/floor-products/components/catalog-listing';
 import FloorProductListingPage from '@/features/floor-products/components/floor-product-listing';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,7 @@ export const metadata = {
   title: 'Dashboard: Floor Products'
 };
 
-const page = () => {
+const Page = () => {
   return (
     <PageContainer scrollable={false}>
       <div className='flex flex-1 flex-col space-y-4'>
@@ -29,17 +30,42 @@ const page = () => {
           </Link>
         </div>
         <Separator />
-        <Suspense
-          fallback={
-            <DataTableSkeleton columnCount={5} rowCount={8} filterCount={0} />
-          }
-        >
-          <CatalogListingPage />
-          <FloorProductListingPage />
-        </Suspense>
+
+        <Tabs defaultValue='products'>
+          <TabsList>
+            <TabsTrigger value='catalogs'>Catalogs</TabsTrigger>
+            <TabsTrigger value='products'>Products</TabsTrigger>
+          </TabsList>{' '}
+          <TabsContent value='catalogs'>
+            <Suspense
+              fallback={
+                <DataTableSkeleton
+                  columnCount={5}
+                  rowCount={8}
+                  filterCount={0}
+                />
+              }
+            >
+              <CatalogListingPage />
+            </Suspense>
+          </TabsContent>
+          <TabsContent value='products'>
+            <Suspense
+              fallback={
+                <DataTableSkeleton
+                  columnCount={5}
+                  rowCount={8}
+                  filterCount={0}
+                />
+              }
+            >
+              <FloorProductListingPage />
+            </Suspense>
+          </TabsContent>
+        </Tabs>
       </div>
     </PageContainer>
   );
 };
 
-export default page;
+export default Page;

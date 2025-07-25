@@ -18,13 +18,14 @@ export function CatalogTable({ data, columns, perPage }: CatalogTableProps) {
     columns,
     pageCount: Math.ceil(data.length / perPage)
   });
-  console.log('🚀 ~ CatalogTable ~ table:', table);
 
   return (
-    <DataTable table={table}>
-      <div className='flex items-end justify-between'>
-        <DataTableToolbar table={table} />
-      </div>
-    </DataTable>
+    <div className='h-[calc(100vh-10rem)] overflow-auto'>
+      <DataTable table={table}>
+        <div className='flex items-end justify-between'>
+          <DataTableToolbar table={table} />
+        </div>
+      </DataTable>
+    </div>
   );
 }

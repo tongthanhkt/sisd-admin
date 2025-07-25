@@ -52,25 +52,27 @@ export function FloorProductTable({
   }, [data]);
 
   return (
-    <DataTable table={table}>
-      <div className='flex items-end justify-between'>
-        <div className='space-y-1'>
-          <Label>Filter Catalog</Label>
-          <Select onValueChange={onCatalogChange} value={selectedCatalog}>
-            <SelectTrigger className='w-xs'>
-              <SelectValue placeholder='Select categories' />
-            </SelectTrigger>
-            <SelectContent>
-              {catalogOptions.map((catalog) => (
-                <SelectItem key={catalog.id} value={catalog.id}>
-                  {catalog.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className='h-[calc(100vh-10rem)] overflow-auto'>
+      <DataTable table={table}>
+        <div className='flex items-end justify-between'>
+          <div className='space-y-1'>
+            <Label>Filter Catalog</Label>
+            <Select onValueChange={onCatalogChange} value={selectedCatalog}>
+              <SelectTrigger className='w-xs'>
+                <SelectValue placeholder='Select categories' />
+              </SelectTrigger>
+              <SelectContent>
+                {catalogOptions.map((catalog) => (
+                  <SelectItem key={catalog.id} value={catalog.id}>
+                    {catalog.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DataTableToolbar table={table} />
         </div>
-        <DataTableToolbar table={table} />
-      </div>
-    </DataTable>
+      </DataTable>
+    </div>
   );
 }
