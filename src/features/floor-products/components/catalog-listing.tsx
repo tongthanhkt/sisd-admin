@@ -4,10 +4,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGetStoneCatalogsQuery } from '@/lib/api/catalog';
 import { AlertCircle } from 'lucide-react';
-import { FloorProductTable } from './floor-product-tables';
-import { columns } from './floor-product-tables/columns';
+import { CatalogTable } from './catalog-tables';
+import { columns } from './catalog-tables/columns';
 
-export default function FloorProductListingPage() {
+export default function CatalogListingPage() {
   // Use RTK Query hook with pagination and filter params
   const { data: catalogs, isLoading, error } = useGetStoneCatalogsQuery();
 
@@ -31,11 +31,5 @@ export default function FloorProductListingPage() {
     );
   }
 
-  return (
-    <FloorProductTable
-      data={catalogs || []}
-      columns={columns(catalogs || [])}
-      perPage={10}
-    />
-  );
+  return <CatalogTable data={catalogs || []} columns={columns} perPage={10} />;
 }

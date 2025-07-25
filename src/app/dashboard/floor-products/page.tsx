@@ -3,6 +3,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
+import CatalogListingPage from '@/features/floor-products/components/catalog-listing';
 import FloorProductListingPage from '@/features/floor-products/components/floor-product-listing';
 import { cn } from '@/lib/utils';
 import { IconPlus } from '@tabler/icons-react';
@@ -33,6 +34,7 @@ const page = () => {
             <DataTableSkeleton columnCount={5} rowCount={8} filterCount={0} />
           }
         >
+          <CatalogListingPage />
           <FloorProductListingPage />
         </Suspense>
       </div>

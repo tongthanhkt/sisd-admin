@@ -53,6 +53,24 @@ const catalogsApi = api.injectEndpoints({
         body: catalog
       }),
       invalidatesTags: ['Catalog']
+    }),
+    updateStoneCatalog: builder.mutation<
+      ICatalog,
+      { id: string; catalog: { code: string } }
+    >({
+      query: ({ id, catalog }) => ({
+        url: `stone-catalogs/${id}`,
+        method: 'PUT',
+        body: catalog
+      }),
+      invalidatesTags: ['Catalog']
+    }),
+    deleteStoneCatalog: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `stone-catalogs/${id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: ['Catalog']
     })
   })
 });
@@ -63,5 +81,7 @@ export const {
   useDeleteStoneProductMutation,
   useGetStoneProductQuery,
   useUpdateStoneProductMutation,
-  useCreateStoneCatalogMutation
+  useCreateStoneCatalogMutation,
+  useUpdateStoneCatalogMutation,
+  useDeleteStoneCatalogMutation
 } = catalogsApi;
