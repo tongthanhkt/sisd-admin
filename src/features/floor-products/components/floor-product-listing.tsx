@@ -1,0 +1,41 @@
+'use client';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useGetStoneCatalogsQuery } from '@/lib/api/catalog';
+import { AlertCircle } from 'lucide-react';
+import { FloorProductTable } from './floor-product-tables';
+import { columns } from './floor-product-tables/columns';
+
+export default function FloorProductListingPage() {
+  // Use RTK Query hook with pagination and filter params
+  const { data: catalogs, isLoading, error } = useGetStoneCatalogsQuery();
+
+  if (isLoading) {
+    return (
+      <div className='space-y-4'>
+        <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-64 w-full' />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant='destructive'>
+        <AlertCircle className='h-4 w-4' />
+        <AlertDescription>
+          Failed to load documents. Please try again later.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <FloorProductTable
+      data={catalogs || []}
+      columns={columns(catalogs || [])}
+      perPage={10}
+    />
+  );
+}

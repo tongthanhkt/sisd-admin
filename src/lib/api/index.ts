@@ -27,3 +27,5 @@ export {
   useUpdateDocumentMutation,
   useDeleteDocumentMutation
 } from './documents';
+
+export * from './catalog';
