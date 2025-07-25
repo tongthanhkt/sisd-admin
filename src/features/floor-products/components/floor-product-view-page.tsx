@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { DocumentForm } from './document-form';
+import { DocumentForm } from './floor-product-form';
 
 type DocumentViewPageProps = {
   documentId: string;

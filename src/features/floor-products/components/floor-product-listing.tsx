@@ -35,10 +35,8 @@ export default function FloorProductListingPage() {
 
   return (
     <FloorProductTable
-      data={catalogs?.[0]?.products || []}
-      totalItems={totalItems}
+      data={catalogs || []}
       columns={columns(catalogs || [])}
-      page={1}
       perPage={10}
     />
   );

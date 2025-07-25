@@ -18,13 +18,15 @@ export const columns: (catalogs: ICatalog[]) => ColumnDef<ICatalogProduct>[] = (
         <DataTableColumnHeader column={column} title='Color name' />
       ),
       cell: ({ cell }) => (
-        <div className='w-full'>{cell.getValue<string>()}</div>
+        <div className='ml-5 w-full'>{cell.getValue<string>()}</div>
       )
     },
     {
       id: 'image_url',
       accessorKey: 'image_url',
-      header: 'image_url',
+      header: ({ column }: { column: Column<ICatalogProduct, unknown> }) => (
+        <DataTableColumnHeader column={column} title='Image' />
+      ),
       cell: ({ row }) => {
         return (
           <div className='m-auto h-full'>
@@ -42,7 +44,9 @@ export const columns: (catalogs: ICatalog[]) => ColumnDef<ICatalogProduct>[] = (
     {
       id: 'color_image_url',
       accessorKey: 'color_image_url',
-      header: 'color_image_url',
+      header: ({ column }: { column: Column<ICatalogProduct, unknown> }) => (
+        <DataTableColumnHeader column={column} title='Color image' />
+      ),
       cell: ({ row }) => {
         return (
           <div className='m-auto h-full'>
