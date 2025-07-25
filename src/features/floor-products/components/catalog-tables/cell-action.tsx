@@ -9,37 +9,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import {
-  useDeleteStoneCatalogMutation,
-  useDeleteStoneProductMutation
-} from '@/lib/api/catalog';
+import { useDeleteStoneCatalogMutation } from '@/lib/api/catalog';
 import { ICatalog } from '@/types';
-import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
-import { useRouter } from 'next/navigation';
+import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { CatalogModal } from '../CatalogModal';
 
 interface CellActionProps {
   data: ICatalog;
 }
 
-export function CellAction({ data }: CellActionProps) {
-  const router = useRouter();
+export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [deleteCatalog] = useDeleteStoneCatalogMutation();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [deleteStoneCatalog, { isLoading: isDeleting }] =
+    useDeleteStoneCatalogMutation();
 
-  const onDelete = async () => {
+  const onConfirm = async () => {
     try {
-      setLoading(true);
-      await deleteCatalog(data.id);
-      toast.success('Catalog deleted successfully');
-      router.refresh();
-    } catch (error) {
-      console.error('Error deleting catalog:', error);
-    } finally {
-      setLoading(false);
+      await deleteStoneCatalog(data.id).unwrap();
+      toast.success('Catalog deleted.');
       setOpen(false);
+    } catch (error) {
+      toast.error('Failed to delete catalog.');
     }
   };
 
@@ -48,23 +42,24 @@ export function CellAction({ data }: CellActionProps) {
       <AlertModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        onConfirm={onDelete}
-        loading={loading}
+        onConfirm={onConfirm}
+        loading={isDeleting}
+      />
+      <CatalogModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        catalog={data}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' className='h-8 w-8 p-0'>
-            <span className='sr-only'>Mở menu</span>
-            <IconDotsVertical className='h-4 w-4' />
+            <span className='sr-only'>Open menu</span>
+            <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
-          <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() =>
-              router.push(`/dashboard/floor-products/${data.id}/edit`)
-            }
-          >
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
             <IconEdit className='mr-2 h-4 w-4' />
             Chỉnh sửa
           </DropdownMenuItem>
@@ -76,4 +71,4 @@ export function CellAction({ data }: CellActionProps) {
       </DropdownMenu>
     </>
   );
-}
+};
