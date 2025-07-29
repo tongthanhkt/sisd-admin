@@ -63,7 +63,7 @@ export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
                     maxFiles={1}
                     maxSize={10 * 1024 * 1024}
                     required
-                    label='Image'
+                    label='Image (792x424)'
                   />
                 )}
               />{' '}
@@ -82,7 +82,7 @@ export function FloorProductForm({ pageTitle, productId }: BlogFormProps) {
                     maxFiles={1}
                     maxSize={10 * 1024 * 1024}
                     required
-                    label='Color Image'
+                    label='Color Image (104x80)'
                   />
                 )}
               />
