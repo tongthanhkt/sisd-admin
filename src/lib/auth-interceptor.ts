@@ -42,7 +42,6 @@ export const refreshAccessToken = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'description': 'OPS_REFRESH_TOKEN'
       },
       body: JSON.stringify({
         userId: currentUserId,

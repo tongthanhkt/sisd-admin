@@ -29,8 +29,7 @@ export const createProduct = async (
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'description': 'OPS_PRODUCTS'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(product)
       }

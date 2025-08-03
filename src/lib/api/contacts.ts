@@ -21,7 +21,6 @@ const getContactsExternal = async ({ page = 1, perPage = 10, search = '', sortBy
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-      'description': 'OPS_CONTACTS'
     },
     credentials: 'omit'
   });
