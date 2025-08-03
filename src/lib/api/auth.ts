@@ -24,7 +24,7 @@ const authService = api.injectEndpoints({
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'description': 'OPS_LOGIN'
+
             },
             body: JSON.stringify(credentials)
           });
