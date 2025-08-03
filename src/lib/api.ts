@@ -13,6 +13,7 @@ export const api = createApi({
     credentials: 'include', // Include cookies in requests
     prepareHeaders: async (headers, { getState, endpoint }) => {
       headers.set('content-type', 'application/json');
+      headers.set('description', 'SIS_OPS');
       // Don't include credentials for external API calls
       if (endpoint === 'login' || endpoint === 'refreshToken') {
         headers.delete('cookie');
