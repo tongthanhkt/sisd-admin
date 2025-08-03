@@ -55,6 +55,7 @@ export const ProductImages = ({
             maxFiles={1}
             maxSize={2 * 1024 * 1024}
             required
+            label='Thumbnail (177x196)'
           />
         )}
       />
@@ -67,6 +68,7 @@ export const ProductImages = ({
         error={!!errors.images}
         helperText={errors.images?.message as string}
         required
+        label='Other images (564x440)'
       />
     </div>
   );
