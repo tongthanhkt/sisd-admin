@@ -6,7 +6,10 @@ export async function uploadFile(
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/upload`, {
     method: 'POST',
-    body: formData
+    body: formData,
+    headers: {
+      'description': 'OPS_UPLOAD'
+    }
   });
 
   if (!response.ok) {

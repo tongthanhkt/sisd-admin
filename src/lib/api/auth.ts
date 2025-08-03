@@ -24,6 +24,7 @@ const authService = api.injectEndpoints({
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'description': 'OPS_LOGIN'
             },
             body: JSON.stringify(credentials)
           });
@@ -50,6 +51,7 @@ const authService = api.injectEndpoints({
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'description': 'OPS_REFRESH_TOKEN'
             },
             body: JSON.stringify(credentials)
           });
@@ -74,6 +76,7 @@ const authService = api.injectEndpoints({
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'description': 'OPS_LOGOUT'
             }
           });
 

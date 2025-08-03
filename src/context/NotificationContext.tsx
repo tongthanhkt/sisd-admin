@@ -91,7 +91,7 @@ function getCookie(name: string) {
 async function fetchNotifications(page = 1, limit = 10) {
     const accessToken = getCookie('accessToken');
     const res = await fetch(`${API_URL}?page=${page}&limit=${limit}`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
+        headers: { Authorization: `Bearer ${accessToken}`, 'description': 'OPS_NOTIFICATION' }
     });
     if (!res.ok) throw new Error('Failed to fetch notifications');
     return res.json();
@@ -101,7 +101,7 @@ async function markNotificationAsRead(id: number) {
     const accessToken = getCookie('accessToken');
     const res = await fetch(`${API_URL}/${id}/read`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` }
+        headers: { Authorization: `Bearer ${accessToken}`, 'description': 'OPS_NOTIFICATION' }
     });
     if (!res.ok) throw new Error('Failed to mark as read');
     return res.json();
