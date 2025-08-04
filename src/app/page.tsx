@@ -1,15 +1,12 @@
-
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { useSocketUserLoggedIn } from '@/hooks/useSocketUserLoggedIn';
-import { toast } from 'sonner';
 
-export default function HomePage() {
+export default async function Page() {
+  const { userId } = await auth();
 
-  useSocketUserLoggedIn((data) => {
-    console.log("New user loggin");
-    toast.success(`User đã login! ID: ${data.id}, Email: ${data.email}`);
-  });
-
-  // ...phần UI khác hoặc redirect nếu cần
-  return null;
+  if (!userId) {
+    return redirect('/auth/sign-in');
+  } else {
+    redirect('/dashboard/overview');
+  }
 }
