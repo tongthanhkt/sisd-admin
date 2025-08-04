@@ -10,6 +10,8 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
 import './theme.css';
 import ClientProvidersWrapper from '@/components/layout/ClientProvidersWrapper';
+import { SocketProvider } from '@/components/SocketProvider';
+
 
 const META_THEME_COLORS = {
   light: '#ffffff',
@@ -68,8 +70,10 @@ export default async function RootLayout({
             enableColorScheme
           >
             <ClientProvidersWrapper activeThemeValue={activeThemeValue as string}>
-              <Toaster />
-              {children}
+              <SocketProvider>
+                <Toaster />
+                {children}
+              </SocketProvider>
             </ClientProvidersWrapper>
           </ThemeProvider>
         </NuqsAdapter>
