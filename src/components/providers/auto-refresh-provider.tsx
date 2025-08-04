@@ -8,7 +8,7 @@ export default function AutoRefreshProvider({
     children: React.ReactNode;
 }) {
     // Initialize auto refresh hook
-    useAutoRefresh();
+    // useAutoRefresh();
 
     return <>{children}</>;
 } 
