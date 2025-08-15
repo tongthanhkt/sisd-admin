@@ -1,5 +1,5 @@
+import { AppEditor } from '@/components';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { useFormContext } from 'react-hook-form';
 import { Description } from './Description';
 
@@ -15,9 +15,7 @@ export const BlogDescriptions = () => {
         render={({ field, fieldState: { error } }) => (
           <FormItem>
             <FormControl>
-              <Textarea
-                placeholder='Enter short description'
-                className='resize-none'
+              <AppEditor
                 {...field}
                 label='Short Description'
                 required

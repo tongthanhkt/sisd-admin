@@ -1,5 +1,6 @@
-import React from 'react';
 import { Editor, IAllProps } from '@tinymce/tinymce-react';
+import { FormLabel, FormMessage } from '../ui/form';
+import { useState } from 'react';
 
 export type TEditorOptions = {
   type: string;
@@ -16,18 +17,41 @@ type AppEditorProps = IAllProps & {
   customToolbarOptions?: TEditorOptions[];
   onChange?: (content: string) => void;
   onFocusOut?: (content: string) => void;
+  label?: string;
+  required?: boolean;
+  error?: boolean;
+  helperText?: string;
 };
-export const AppEditor = ({ ...props }: AppEditorProps) => {
+export const AppEditor = ({
+  label,
+  required,
+  error,
+  helperText,
+  onChange,
+  ...props
+}: AppEditorProps) => {
   return (
-    <Editor
-      apiKey={process.env.NEXT_PUBLIC_TINY_MCE_API_KEY}
-      init={{
-        plugins:
-          'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-        toolbar:
-          'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat'
-      }}
-      {...props}
-    />
+    <div className='space-y-2'>
+      {label && (
+        <FormLabel>
+          {label} {required && <span className='text-destructive'>*</span>}
+        </FormLabel>
+      )}
+      <Editor
+        key={1}
+        apiKey={process.env.NEXT_PUBLIC_TINYMCE_KEY}
+        init={{
+          plugins:
+            'anchor autolink charmap codesample emoticons link lists searchreplace table visualblocks wordcount',
+          toolbar:
+            'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat'
+        }}
+        onEditorChange={onChange}
+        {...props}
+      />
+      {error && (
+        <FormMessage className='text-destructive'>{helperText}</FormMessage>
+      )}
+    </div>
   );
 };
