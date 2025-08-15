@@ -51,12 +51,6 @@ export function RelatedSectionModal<T>({
   search,
   onSearchChange
 }: RelatedSectionModalProps<T>) {
-  console.log(
-    '🚀 ~  currentPage, itemsPerPage, totalItems:',
-    currentPage,
-    itemsPerPage,
-    totalItems
-  );
   const [selected, setSelected] = useState<string[]>(selectedIds);
 
   // Filter items by search (parent should paginate, not here)
