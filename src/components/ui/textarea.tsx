@@ -7,6 +7,7 @@ type TextareaProps = React.ComponentProps<'textarea'> & {
   error?: boolean;
   helperText?: string;
   label?: string;
+  wrapperClassName?: string;
 };
 function Textarea({
   className,
@@ -14,10 +15,11 @@ function Textarea({
   helperText,
   label,
   required,
+  wrapperClassName,
   ...props
 }: TextareaProps) {
   return (
-    <div className='space-y-2'>
+    <div className={cn('space-y-2', wrapperClassName)}>
       {label && (
         <FormLabel>
           {label} {required && <span className='text-destructive'>*</span>}
