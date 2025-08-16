@@ -57,7 +57,8 @@ export const api = createApi({
     'Document',
     'Contact',
     'ActivityLog',
-    'Catalog'
+    'Catalog',
+    'faq'
   ],
   endpoints: () => ({})
 });
