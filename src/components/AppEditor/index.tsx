@@ -41,6 +41,8 @@ export const AppEditor = ({
         key={1}
         apiKey={process.env.NEXT_PUBLIC_TINYMCE_KEY}
         init={{
+          height: 200,
+          menubar: false,
           plugins:
             'anchor autolink charmap codesample emoticons link lists searchreplace table visualblocks wordcount',
           toolbar:
