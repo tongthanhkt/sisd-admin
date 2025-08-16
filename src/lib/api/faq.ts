@@ -12,12 +12,12 @@ const faqApi = api.injectEndpoints({
     }),
     updateFaq: builder.mutation<
       IFaqRequest,
-      { id: string; body: Omit<IFaqRequest, 'id'> }
+      { id: string; data: Omit<IFaqRequest, 'id'> }
     >({
-      query: ({ id, body }) => ({
+      query: ({ id, data }) => ({
         url: `faqs/${id}`,
         method: 'PUT',
-        body
+        body: data
       })
     })
   })
