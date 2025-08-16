@@ -4,8 +4,14 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
-import { useSortableList } from '@/hooks/use-sortable-list';
-import { closestCenter, DndContext } from '@dnd-kit/core';
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy
@@ -22,29 +28,60 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useMemo } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { FAQFormValues } from '../utils/form-schema';
 import { FAQContent } from './FAQContent';
 
 export const FAQItem = () => {
-  const methods = useFormContext();
-  const { control, watch, setValue } = methods;
-  const { fields, append, remove } = useFieldArray({
+  const methods = useFormContext<FAQFormValues>();
+  const { control } = methods;
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'body'
   });
-  const { sensors, handleDragEnd, removeItem } = useSortableList({
-    items: fields.map((f, i) => ({ ...f, ...watch('body')[i] })),
-    onItemsChange: (newItems) => {
-      setValue('body', newItems);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = fields.findIndex((field) => field.id === active.id);
+      const newIndex = fields.findIndex((field) => field.id === over?.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        move(oldIndex, newIndex);
+      }
     }
+  };
+
+  const removeItem = (index: number) => {
+    remove(index);
+  };
+
+  const body = fields;
+
+  // Watch form values to get realtime updates
+  const watchedBody = useWatch({
+    control,
+    name: 'body'
   });
 
-  const body = (watch('body') || []).filter((s: any) => !!s && !!s.id);
+  const previewQuestion = useMemo(() => {
+    const currentBody = watchedBody || body;
+    return currentBody.map((section, index: number) => {
+      const question = section?.question;
+      if (!question || question.trim() === '') {
+        return `Question ${index + 1}`;
+      }
+      return question.length > 50 ? `${question.slice(0, 50)}...` : question;
+    });
+  }, [watchedBody, body]);
+
   return (
     <FormField
       control={control}
       name='body'
-      render={({ field }) => {
+      render={() => {
         return (
           <FormItem>
             <FormLabel>
@@ -57,22 +94,19 @@ export const FAQItem = () => {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={body.map((section: any) => section.id as string)}
+                items={body.map((section) => section.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <Accordion type='multiple' className='mb-4'>
                   {body?.length > 0 ? (
-                    body.map((section: any, index: number) => (
-                      <SortableSpecItem
-                        key={section.id as string}
-                        id={section.id as string}
-                      >
+                    body.map((section, index: number) => (
+                      <SortableSpecItem key={section.id} id={section.id}>
                         {(listeners) => (
-                          <AccordionItem value={`item-${section.id as string}`}>
+                          <AccordionItem value={`item-${section.id}`}>
                             <div className='flex items-center gap-2 px-2 py-1'>
                               <AccordionTrigger className='flex min-w-0 flex-1 flex-row-reverse items-center px-0'>
                                 <div className='w-full truncate text-left'>
-                                  {section?.headline || `Question ${index + 1}`}
+                                  {previewQuestion[index]}
                                 </div>
                               </AccordionTrigger>
                               <div className='flex flex-shrink-0 items-center'>
@@ -105,11 +139,16 @@ export const FAQItem = () => {
                                 <FormField
                                   control={control}
                                   name={`body.${index}.question`}
-                                  render={({ field }) => (
+                                  render={({
+                                    field,
+                                    fieldState: { error }
+                                  }) => (
                                     <Input
                                       label='Question'
                                       placeholder='Enter question'
                                       {...field}
+                                      error={!!error}
+                                      helperText={error?.message}
                                     />
                                   )}
                                 />
@@ -130,15 +169,9 @@ export const FAQItem = () => {
             <Button
               onClick={() =>
                 append({
-                  id:
-                    typeof crypto !== 'undefined' && crypto.randomUUID
-                      ? crypto.randomUUID()
-                      : `${Date.now()}-${Math.random()}`,
-                  headline: '',
-                  headline2: '',
+                  id: Math.random().toString(),
                   contents: [],
-                  images: [],
-                  subHeadline: []
+                  question: ''
                 })
               }
               type='button'

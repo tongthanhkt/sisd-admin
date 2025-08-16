@@ -2,20 +2,16 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormField } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 
-import { UploadImage } from '@/components';
-import { Textarea } from '@/components/ui/textarea';
-import { Controller, useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import { Controller } from 'react-hook-form';
+import { useFAQ } from '../hooks/useFAQ';
 import { FAQItem } from './FAQItem';
-export function FAQForm({ faqId }: { faqId?: string }) {
-  const methods = useForm();
-  const { control, handleSubmit } = methods;
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
-  });
+export function FAQForm({ faqId }: { faqId?: string }) {
+  const { methods, onSubmit } = useFAQ();
+  const { control } = methods;
 
   return (
     <Card className='mx-auto w-full'>
