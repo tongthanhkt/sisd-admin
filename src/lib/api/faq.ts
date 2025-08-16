@@ -8,7 +8,8 @@ const faqApi = api.injectEndpoints({
         url: 'faqs',
         method: 'POST',
         body: faq
-      })
+      }),
+      invalidatesTags: ['faq']
     }),
     updateFaq: builder.mutation<
       IFaqRequest,
@@ -18,9 +19,15 @@ const faqApi = api.injectEndpoints({
         url: `faqs/${id}`,
         method: 'PUT',
         body: data
-      })
+      }),
+      invalidatesTags: ['faq']
+    }),
+    getFaq: builder.query<IFaqRequest, string>({
+      query: (id) => `faqs/${id}`,
+      providesTags: ['faq']
     })
   })
 });
 
-export const { useCreateFaqMutation, useUpdateFaqMutation } = faqApi;
+export const { useCreateFaqMutation, useUpdateFaqMutation, useGetFaqQuery } =
+  faqApi;

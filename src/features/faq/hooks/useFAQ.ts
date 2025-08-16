@@ -1,14 +1,23 @@
-import { useCreateFaqMutation, useUpdateFaqMutation } from '@/lib/api/faq';
+import {
+  useCreateFaqMutation,
+  useGetFaqQuery,
+  useUpdateFaqMutation
+} from '@/lib/api/faq';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { faqFormSchema, FAQFormValues } from '../utils/form-schema';
 
 export const useFAQ = ({ faqId }: { faqId?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
+
   const [createFaq] = useCreateFaqMutation();
   const [updateFaq] = useUpdateFaqMutation();
+  const { data: faqData } = useGetFaqQuery(faqId || '', {
+    skip: !faqId || faqId === 'new'
+  });
+
   const methods = useForm<FAQFormValues>({
     resolver: zodResolver(faqFormSchema),
     defaultValues: {
@@ -78,6 +87,22 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
       setIsLoading(false);
     }
   });
+
+  useEffect(() => {
+    if (faqData) {
+      reset({
+        id: faqData.id,
+        body: faqData.body.map((item) => ({
+          id: Math.random().toString(),
+          question: item.question,
+          contents: item.contents.map((content) => ({
+            id: Math.random().toString(),
+            value: content
+          }))
+        }))
+      });
+    }
+  }, [faqData, reset]);
 
   return { methods, onSubmit, isLoading };
 };
