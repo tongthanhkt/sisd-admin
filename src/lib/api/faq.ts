@@ -25,9 +25,25 @@ const faqApi = api.injectEndpoints({
     getFaq: builder.query<IFaqRequest, string>({
       query: (id) => `faqs/${id}`,
       providesTags: ['faq']
+    }),
+    getFaqList: builder.query<IFaqRequest[], void>({
+      query: () => 'faqs',
+      providesTags: ['faq']
+    }),
+    deleteFaq: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `faqs/${id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: ['faq']
     })
   })
 });
 
-export const { useCreateFaqMutation, useUpdateFaqMutation, useGetFaqQuery } =
-  faqApi;
+export const {
+  useCreateFaqMutation,
+  useUpdateFaqMutation,
+  useGetFaqQuery,
+  useGetFaqListQuery,
+  useDeleteFaqMutation
+} = faqApi;

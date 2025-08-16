@@ -2,6 +2,7 @@
 
 import {
   type ColumnFiltersState,
+  type ColumnSizingState,
   type PaginationState,
   type RowSelectionState,
   type SortingState,
@@ -113,6 +114,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(initialState?.columnVisibility ?? {});
+  const [columnSizing, setColumnSizing] = React.useState<ColumnSizingState>({});
 
   const [page, setPage] = useQueryState(
     PAGE_KEY,
@@ -250,6 +252,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       pagination: pagination || defaultPagination,
       rowSelection,
       columnVisibility,
+      columnSizing,
       sorting,
       columnFilters
     },
@@ -260,6 +263,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     onPaginationChange,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: setColumnSizing,
     onSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),

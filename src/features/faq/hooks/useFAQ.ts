@@ -4,6 +4,7 @@ import {
   useUpdateFaqMutation
 } from '@/lib/api/faq';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -38,6 +39,7 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
   });
 
   const { handleSubmit, reset } = methods;
+  const router = useRouter();
 
   const prepareDataSubmit = (data: FAQFormValues) => {
     return {
@@ -81,6 +83,7 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
           : 'FAQ created successfully'
       );
       reset();
+      router.push('/dashboard/faqs');
     } catch (error) {
       toast.error('An error occurred while saving the faq');
     } finally {

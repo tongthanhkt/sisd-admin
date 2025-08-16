@@ -4,6 +4,7 @@ import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
 import ContactListing from '@/features/contacts/components/contact-listing';
+import FAQListing from '@/features/faq/components/faq-listing';
 import { searchParamsCache } from '@/lib/searchparams';
 import { cn } from '@/lib/utils';
 import { IconPlus } from '@tabler/icons-react';
@@ -40,7 +41,7 @@ export default async function ContactPage(props: pageProps) {
             <DataTableSkeleton columnCount={5} rowCount={8} filterCount={0} />
           }
         >
-          <ContactListing />
+          <FAQListing />
         </Suspense>
       </div>
     </PageContainer>
