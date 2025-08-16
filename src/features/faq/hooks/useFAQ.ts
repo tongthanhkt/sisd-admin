@@ -1,8 +1,14 @@
-import { useForm } from 'react-hook-form';
-import { faqFormSchema, FAQFormValues } from '../utils/form-schema';
+import { useCreateFaqMutation, useUpdateFaqMutation } from '@/lib/api/faq';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { faqFormSchema, FAQFormValues } from '../utils/form-schema';
 
-export const useFAQ = () => {
+export const useFAQ = ({ faqId }: { faqId?: string }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [createFaq] = useCreateFaqMutation();
+  const [updateFaq] = useUpdateFaqMutation();
   const methods = useForm<FAQFormValues>({
     resolver: zodResolver(faqFormSchema),
     defaultValues: {
@@ -22,11 +28,56 @@ export const useFAQ = () => {
     }
   });
 
-  const { handleSubmit } = methods;
+  const { handleSubmit, reset } = methods;
+
+  const prepareDataSubmit = (data: FAQFormValues) => {
+    return {
+      id: data.id,
+      body: data.body.map((item) => ({
+        question: item.question,
+        contents: item.contents.map((content) => content.value)
+      }))
+    };
+  };
+
   const onSubmit = handleSubmit(async (data) => {
-    // TODO: Implement FAQ submission logic
-    console.log(data); // eslint-disable-line no-console
+    try {
+      setIsLoading(true);
+      const formattedData = prepareDataSubmit(data);
+      let response;
+      if (faqId && faqId !== 'new') {
+        // Update existing faq
+        response = await updateFaq({
+          id: faqId,
+          data: { body: formattedData.body }
+        });
+      } else {
+        // Create new faq
+        response = await createFaq(formattedData);
+      }
+      if ('error' in response && response.error) {
+        const errorMessage =
+          'data' in response.error && response.error.data
+            ? (response.error.data as any)?.message
+            : 'error' in response.error
+              ? response.error.error
+              : 'Something went wrong';
+        toast.error(errorMessage);
+        return;
+      }
+
+      toast.success(
+        faqId && faqId !== 'new'
+          ? 'FAQ updated successfully'
+          : 'FAQ created successfully'
+      );
+      reset();
+    } catch (error) {
+      toast.error('An error occurred while saving the faq');
+    } finally {
+      setIsLoading(false);
+    }
   });
 
-  return { methods, onSubmit };
+  return { methods, onSubmit, isLoading };
 };

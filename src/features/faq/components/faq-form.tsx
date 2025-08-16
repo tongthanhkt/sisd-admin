@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 
 import { Input } from '@/components/ui/input';
+import { SpinnerOverlay } from '@/components/ui/spinner';
 import { Controller } from 'react-hook-form';
 import { useFAQ } from '../hooks/useFAQ';
 import { FAQItem } from './FAQItem';
 
 export function FAQForm({ faqId }: { faqId?: string }) {
-  const { methods, onSubmit } = useFAQ();
+  const { methods, onSubmit, isLoading } = useFAQ({ faqId });
   const { control } = methods;
 
   return (
@@ -42,7 +43,7 @@ export function FAQForm({ faqId }: { faqId?: string }) {
           </form>
         </Form>
       </CardContent>
-      {/* {isLoading && <SpinnerOverlay />} */}
+      {isLoading && <SpinnerOverlay />}
     </Card>
   );
 }
