@@ -3,17 +3,16 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
+import { SpinnerOverlay } from '@/components/ui/spinner';
 import { useBlogForm } from '../hooks/useBlogForm';
 import { type BlogFormValues } from '../utils/form-schema';
+import { ArticleSection } from './ArticleSection';
 import { BlogAdditionalInfo } from './BlogAdditionalInfo';
 import { BlogDescriptions } from './BlogDescriptions';
 import { BlogImages } from './BlogImages';
 import { BlogSummary } from './BlogSummary';
 import { RelatedBlogs } from './RelatedBlogs';
-import { RelatedProducts } from './RelatedProducts';
 import { TitleBlog } from './TitleBlog';
-import { ArticleSection } from './ArticleSection';
-import Spinner, { SpinnerOverlay } from '@/components/ui/spinner';
 
 interface BlogFormProps {
   blogId?: string;
@@ -40,10 +39,10 @@ export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
             <BlogAdditionalInfo />
             <ArticleSection />
             <RelatedBlogs fieldName='relatedPosts' label='Related Blogs' />
-            <RelatedBlogs
+            {/* <RelatedBlogs
               fieldName='relatedProducts'
               label='Related Products'
-            />
+            /> */}
             <BlogSummary />
             <Button type='submit'>{blogId ? 'Update' : 'Create'}</Button>
           </form>

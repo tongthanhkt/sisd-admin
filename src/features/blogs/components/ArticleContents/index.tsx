@@ -1,3 +1,4 @@
+import { AppEditor } from '@/components';
 import NoData from '@/components/NoData';
 import {
   Accordion,
@@ -7,7 +8,6 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { FormField, FormLabel } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { UploadMultipleIImage } from '@/components/UploadMultipleIImage';
 import { BlogFormValues } from '@/features/blogs/utils/form-schema';
 import { cn } from '@/lib/utils';
@@ -142,7 +142,11 @@ function SortableItem({
     if (!content || content.trim() === '') {
       return `Content ${index + 1}`;
     }
-    return content.length > 50 ? `${content.slice(0, 50)}...` : content;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const plainText = doc.body.textContent || '';
+
+    return plainText.length > 50 ? `${plainText.slice(0, 50)}...` : plainText;
   }, [content, index]);
 
   if (!isAccordion) {
@@ -157,7 +161,7 @@ function SortableItem({
             key={id}
             control={undefined as any}
             name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
-            render={({ field }) => <Textarea {...field} />}
+            render={({ field }) => <AppEditor {...field} />}
           />
           <UploadMultipleIImage
             value={imagesValue || []}
@@ -237,7 +241,7 @@ function SortableItem({
             key={id}
             control={undefined as any}
             name={`${name}.${index}.content` as FieldPath<BlogFormValues>}
-            render={({ field }) => <Textarea {...field} />}
+            render={({ field }) => <AppEditor {...field} />}
           />
           <UploadMultipleIImage
             value={imagesValue || []}

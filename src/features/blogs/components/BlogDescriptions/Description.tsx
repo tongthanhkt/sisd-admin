@@ -1,4 +1,4 @@
-import { SortableSpecItem } from '@/components';
+import { AppEditor, SortableSpecItem } from '@/components';
 import NoData from '@/components/NoData';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +18,6 @@ import {
 import { GripVerticalIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { Path, useFormContext } from 'react-hook-form';
 import { BlogFormValues } from '../../utils/form-schema';
-import { Textarea } from '@/components/ui/textarea';
 
 // Define a type for list item with id
 interface ListItem {
@@ -48,20 +47,20 @@ export const Description = ({
     return (arr || []).map((item) =>
       typeof item === 'string'
         ? {
-          id:
-            typeof crypto !== 'undefined' && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `${Date.now()}-${Math.random()}`,
-          value: item
-        }
+            id:
+              typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random()}`,
+            value: item
+          }
         : {
-          ...item,
-          id:
-            item.id ||
-            (typeof crypto !== 'undefined' && crypto.randomUUID
-              ? crypto.randomUUID()
-              : `${Date.now()}-${Math.random()}`)
-        }
+            ...item,
+            id:
+              item.id ||
+              (typeof crypto !== 'undefined' && crypto.randomUUID
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random()}`)
+          }
     );
   }
 
@@ -120,13 +119,12 @@ export const Description = ({
                                 render={({ field, fieldState: { error } }) => (
                                   <FormItem className='!w-full'>
                                     <FormControl>
-                                      <Textarea
+                                      <AppEditor
                                         {...field}
-                                        placeholder={`${placeholder} ${index + 1}`}
-                                        value={item.value}
-                                        onChange={(e) => {
+                                        value={item?.value || ''}
+                                        onChange={(value) => {
                                           updateItem(index, {
-                                            value: e.target.value
+                                            value
                                           });
                                         }}
                                         error={!!error}

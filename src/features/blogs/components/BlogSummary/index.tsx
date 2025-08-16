@@ -1,10 +1,11 @@
+import { AppEditor } from '@/components';
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { useFormContext } from 'react-hook-form';
 
 export const BlogSummary = () => {
   const methods = useFormContext();
   const { control } = methods;
+
   return (
     <div className='grid grid-cols-1 gap-6'>
       <FormField
@@ -13,10 +14,8 @@ export const BlogSummary = () => {
         render={({ field, fieldState: { error } }) => (
           <FormItem>
             <FormControl>
-              <Textarea
+              <AppEditor
                 label='Summary'
-                placeholder='Enter summary'
-                className='resize-none'
                 {...field}
                 error={!!error}
                 helperText={error?.message}
@@ -31,9 +30,7 @@ export const BlogSummary = () => {
         render={({ field, fieldState: { error } }) => (
           <FormItem>
             <FormControl>
-              <Textarea
-                placeholder='Enter contact'
-                className='resize-none'
+              <AppEditor
                 {...field}
                 label='Contact'
                 error={!!error}
