@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 import {
@@ -29,7 +29,6 @@ import { skipToken } from '@reduxjs/toolkit/query';
 
 export default function TrackingDashboardPage() {
   const { data: dashboardData } = useDashboardQuery();
-  console.log('🚀 ~ TrackingDashboardPage ~ dashboardData:', dashboardData);
 
   const topPages = useMemo(() => {
     const pages = (dashboardData || [])
@@ -83,7 +82,10 @@ export default function TrackingDashboardPage() {
   // Filters for history
   const pageOptions = useMemo(
     () =>
-      (dashboardData || []).map((p) => ({ label: p.page, value: p.page })) as {
+      (dashboardData || []).map((p) => ({
+        label: PAGE_NAME[p.page],
+        value: p.page
+      })) as {
         label: string;
         value: string;
       }[],
@@ -92,13 +94,33 @@ export default function TrackingDashboardPage() {
 
   const [selectedPage, setSelectedPage] = useState<string>(ViewPage.HOMEPAGE);
   const [selectedDetailId, setSelectedDetailId] = useState<string | null>(null);
-
   const [selectedBlogDetailId, setSelectedBlogDetailId] = useState<
     string | null
   >(null);
-
   const [selectedDocumentationDetailId, setSelectedDocumentationDetailId] =
     useState<string | null>(null);
+
+  // Default selections: pick first item when options > 0 (runs after state declared)
+  useEffect(() => {
+    if (!selectedDetailId && productDetailOptions.length > 0) {
+      setSelectedDetailId(productDetailOptions[0].value);
+    }
+  }, [productDetailOptions, selectedDetailId]);
+
+  useEffect(() => {
+    if (!selectedBlogDetailId && blogDetailOptions.length > 0) {
+      setSelectedBlogDetailId(blogDetailOptions[0].value);
+    }
+  }, [blogDetailOptions, selectedBlogDetailId]);
+
+  useEffect(() => {
+    if (
+      !selectedDocumentationDetailId &&
+      documentationDetailOptions.length > 0
+    ) {
+      setSelectedDocumentationDetailId(documentationDetailOptions[0].value);
+    }
+  }, [documentationDetailOptions, selectedDocumentationDetailId]);
 
   const { data: pageHistory } = usePageHistoryQuery({
     page: selectedPage as ViewPage
@@ -124,12 +146,17 @@ export default function TrackingDashboardPage() {
       header: 'STT',
       cell: ({ row }) => <div className='text-center'>{row.index + 1}</div>
     },
-    { id: 'page', accessorKey: 'page', header: 'Page' },
     { id: 'ip', accessorKey: 'ip', header: 'IP' },
     { id: 'city', accessorKey: 'city', header: 'City' },
     { id: 'region', accessorKey: 'region', header: 'Region' },
     { id: 'country', accessorKey: 'country', header: 'Country' },
-    { id: 'createdAt', accessorKey: 'createdAt', header: 'Time' }
+    {
+      id: 'createdAt',
+      accessorKey: 'createdAt',
+      header: 'Time',
+      cell: ({ cell }) =>
+        format(new Date(cell.getValue<string>()), 'HH:mm:ss  dd/MM/yyyy')
+    }
   ];
 
   return (
@@ -226,41 +253,44 @@ export default function TrackingDashboardPage() {
       {/* History section with tabs */}
       <Card>
         <CardHeader>
-          <CardTitle>Lịch sử truy cập</CardTitle>
+          <CardTitle>Lịch sử truy cập trang</CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-            <div>
-              <div className='mb-2 text-sm font-medium'>Trang</div>
-              <Select
-                value={selectedPage}
-                onValueChange={(v) => {
-                  setSelectedPage(v);
-                  setSelectedDetailId(null);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Chọn trang' />
-                </SelectTrigger>
-                <SelectContent>
-                  {pageOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
           <TrackingHistoryTable
             data={pageHistory || []}
             columns={historyColumns}
-          />
+          >
+            <Select
+              value={selectedPage}
+              onValueChange={(v) => {
+                setSelectedPage(v);
+                setSelectedDetailId(null);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='Chọn trang' />
+              </SelectTrigger>
+              <SelectContent>
+                {pageOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </TrackingHistoryTable>
         </CardContent>
       </Card>
       <Card className='p-6'>
-        <div>
-          <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+        <CardHeader className='px-0'>
+          <CardTitle>Lịch sử truy cập chi tiết sản phẩm</CardTitle>
+        </CardHeader>
+
+        <TrackingHistoryTable
+          data={pageDetailHistory || []}
+          columns={historyColumns}
+        >
+          {' '}
           <Select
             value={selectedDetailId || ''}
             onValueChange={(v) => setSelectedDetailId(v)}
@@ -276,15 +306,18 @@ export default function TrackingDashboardPage() {
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <TrackingHistoryTable
-          data={pageDetailHistory || []}
-          columns={historyColumns}
-        />
+        </TrackingHistoryTable>
       </Card>
       <Card className='p-6'>
-        <div>
-          <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+        <CardHeader className='px-0'>
+          <CardTitle>Lịch sử truy cập chi tiết blog</CardTitle>
+        </CardHeader>
+
+        <TrackingHistoryTable
+          data={blogDetailHistory || []}
+          columns={historyColumns}
+        >
+          {' '}
           <Select
             value={selectedBlogDetailId || ''}
             onValueChange={(v) => setSelectedBlogDetailId(v)}
@@ -299,16 +332,18 @@ export default function TrackingDashboardPage() {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
-        </div>
-        <TrackingHistoryTable
-          data={blogDetailHistory || []}
-          columns={historyColumns}
-        />
-      </Card>{' '}
+          </Select>{' '}
+        </TrackingHistoryTable>
+      </Card>
       <Card className='p-6'>
-        <div>
-          <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+        <CardHeader className='px-0'>
+          <CardTitle>Lịch sử truy cập chi tiết tài liệu</CardTitle>
+        </CardHeader>
+
+        <TrackingHistoryTable
+          data={documentationDetailHistory || []}
+          columns={historyColumns}
+        >
           <Select
             value={selectedDocumentationDetailId || ''}
             onValueChange={(v) => setSelectedDocumentationDetailId(v)}
@@ -324,11 +359,7 @@ export default function TrackingDashboardPage() {
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <TrackingHistoryTable
-          data={documentationDetailHistory || []}
-          columns={historyColumns}
-        />
+        </TrackingHistoryTable>
       </Card>
     </div>
   );
@@ -336,18 +367,24 @@ export default function TrackingDashboardPage() {
 
 // Lightweight wrapper to reuse existing table infra without routing pagination for now
 import { useDataTable } from '@/hooks/use-data-table';
+import { format } from 'date-fns';
 function TrackingHistoryTable({
   data,
-  columns
+  columns,
+  children
 }: {
   data: PageHistory;
   columns: ColumnDef<PageHistory[number]>[];
+  children?: React.ReactNode;
 }) {
   const { table } = useDataTable({ data, columns, pageCount: 1 });
   return (
     <div className='h-[520px]'>
       <DataTable table={table}>
-        <DataTableToolbar table={table} />
+        <div className='flex'>
+          {children}
+          <DataTableToolbar table={table} />
+        </div>
       </DataTable>
     </div>
   );
