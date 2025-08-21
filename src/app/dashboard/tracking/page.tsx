@@ -1,26 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  XAxis,
-  YAxis
-} from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent
 } from '@/components/ui/chart';
-import {
-  useDashboardQuery,
-  usePageDetailHistoryQuery,
-  usePageHistoryQuery
-} from '@/lib/api/tracking';
-import { PAGE_NAME, ViewPage } from '@/constants/tracking';
 import {
   Select,
   SelectContent,
@@ -30,11 +15,26 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
+import { PAGE_NAME, ViewPage } from '@/constants/tracking';
+import {
+  useDashboardQuery,
+  usePageDetailHistoryQuery,
+  usePageHistoryQuery
+} from '@/lib/api/tracking';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  XAxis,
+  YAxis
+} from 'recharts';
 // import { Progress } from '@/components/ui/progress';
 // import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ColumnDef } from '@tanstack/react-table';
 import { PageHistory } from '@/types';
 import { skipToken } from '@reduxjs/toolkit/query';
+import { ColumnDef } from '@tanstack/react-table';
 
 export default function TrackingDashboardPage() {
   const { data: dashboardData } = useDashboardQuery();
@@ -78,7 +78,11 @@ export default function TrackingDashboardPage() {
     const pages = (dashboardData || [])
       .slice()
       .sort((a, b) => b.total - a.total);
-    return pages.map((p) => ({ name: getPageLabel(p.page), total: p.total }));
+    return pages.map((p) => ({
+      name: getPageLabel(p.page),
+      total: p.total,
+      page: p.page
+    }));
   }, [dashboardData]);
   // console.debug('topPages', topPages);
 
@@ -207,7 +211,7 @@ export default function TrackingDashboardPage() {
   return (
     <div className='h-[calc(100vh-48px)] space-y-6 overflow-y-auto p-4'>
       {/* Overall views summary */}
-      <Card ref={pageHistoryRef}>
+      <Card>
         <CardHeader>
           <CardTitle>Lượt truy cập</CardTitle>
         </CardHeader>
@@ -364,7 +368,7 @@ export default function TrackingDashboardPage() {
         })}
       </div>
       {/* History section with tabs */}
-      <Card>
+      <Card ref={pageHistoryRef}>
         <CardHeader>
           <CardTitle>Lịch sử truy cập trang</CardTitle>
         </CardHeader>
