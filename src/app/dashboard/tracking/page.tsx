@@ -24,17 +24,32 @@ import {
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
 import { ColumnDef } from '@tanstack/react-table';
-import { DashboardTracking, PageHistory } from '@/types';
+import { PageHistory } from '@/types';
 import { skipToken } from '@reduxjs/toolkit/query';
 
 export default function TrackingDashboardPage() {
   const { data: dashboardData } = useDashboardQuery();
+  console.log('🚀 ~ TrackingDashboardPage ~ dashboardData:', dashboardData);
 
   const topPages = useMemo(() => {
     const pages = (dashboardData || [])
       .slice()
       .sort((a, b) => b.total - a.total);
     return pages.map((p) => ({ name: PAGE_NAME[p.page], total: p.total }));
+  }, [dashboardData]);
+
+  const productDetailOptions = useMemo(() => {
+    const productDetail = (dashboardData || []).find(
+      (p) => p.page === ViewPage.PRODUCT_DETAIL
+    );
+    return (
+      productDetail?.details
+        ?.map((d) => ({
+          label: d.pageName || d.pageDetailId || '',
+          value: d.pageDetailId || ''
+        }))
+        ?.filter((opt) => opt.value) || []
+    );
   }, [dashboardData]);
 
   // Filters for history
@@ -53,21 +68,10 @@ export default function TrackingDashboardPage() {
   const { data: pageHistory } = usePageHistoryQuery({
     page: selectedPage as ViewPage
   });
+
   const { data: pageDetailHistory } = usePageDetailHistoryQuery(
     selectedDetailId ? { pageDetailId: selectedDetailId } : skipToken
   );
-
-  // Build detail options from dashboard data
-  const detailOptions = useMemo(() => {
-    const section = (dashboardData || []).find((p) => p.page === selectedPage);
-    const details = section?.details || [];
-    return details
-      .filter((d) => d.pageDetailId)
-      .map((d) => ({
-        label: d.pageName || d.pageDetailId!,
-        value: d.pageDetailId!
-      }));
-  }, [dashboardData, selectedPage]);
 
   const historyColumns: ColumnDef<PageHistory[number]>[] = [
     {
@@ -76,7 +80,6 @@ export default function TrackingDashboardPage() {
       cell: ({ row }) => <div className='text-center'>{row.index + 1}</div>
     },
     { id: 'page', accessorKey: 'page', header: 'Page' },
-    { id: 'pageName', accessorKey: 'pageName', header: 'Page name' },
     { id: 'ip', accessorKey: 'ip', header: 'IP' },
     { id: 'city', accessorKey: 'city', header: 'City' },
     { id: 'region', accessorKey: 'region', header: 'Region' },
@@ -85,7 +88,8 @@ export default function TrackingDashboardPage() {
   ];
 
   return (
-    <div className='space-y-6 p-4'>
+    <div className='h-[calc(100vh-48px)] space-y-6 overflow-y-auto p-4'>
+      {/* Overall views summary */}
       <Card>
         <CardHeader>
           <CardTitle>Lượt truy cập</CardTitle>
@@ -116,6 +120,124 @@ export default function TrackingDashboardPage() {
           </ChartContainer>
         </CardContent>
       </Card>
+
+      {/* Details sections */}
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+        {[
+          ViewPage.PRODUCT_DETAIL,
+          ViewPage.BLOGS_DETAIL,
+          ViewPage.DOCUMENTATION_DETAIL
+        ].map((section) => {
+          const items =
+            (dashboardData || [])
+              .find((p) => p.page === section)
+              ?.details?.slice()
+              .sort((a, b) => b.total - a.total) || [];
+          const chartData = items.map((d) => ({
+            name: d.pageName || d.pageDetailId || 'Unknown',
+            total: d.total
+          }));
+          return (
+            <Card key={section}>
+              <CardHeader>
+                <CardTitle>
+                  {section === ViewPage.PRODUCT_DETAIL &&
+                    'Product Detail Views'}
+                  {section === ViewPage.BLOGS_DETAIL && 'Blog Detail Views'}
+                  {section === ViewPage.DOCUMENTATION_DETAIL &&
+                    'Document Detail Views'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer
+                  config={{
+                    total: { label: 'Views', color: 'var(--primary)' }
+                  }}
+                  className='h-[280px] w-full'
+                >
+                  <BarChart data={chartData} margin={{ left: 12, right: 12 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey='name'
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                    />
+                    <ChartTooltip
+                      cursor={{ fill: 'var(--primary)', opacity: 0.1 }}
+                      content={<ChartTooltipContent />}
+                    />
+                    <Bar
+                      dataKey='total'
+                      fill='var(--primary)'
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* History section with tabs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Lịch sử truy cập</CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            <div>
+              <div className='mb-2 text-sm font-medium'>Trang</div>
+              <Select
+                value={selectedPage}
+                onValueChange={(v) => {
+                  setSelectedPage(v);
+                  setSelectedDetailId(null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='Chọn trang' />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <TrackingHistoryTable
+            data={pageHistory || []}
+            columns={historyColumns}
+          />
+
+          <div>
+            <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+            <Select
+              value={selectedDetailId || ''}
+              onValueChange={(v) => setSelectedDetailId(v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='Chọn trang chi tiết (tuỳ chọn)' />
+              </SelectTrigger>
+              <SelectContent>
+                {productDetailOptions.map((opt, index) => (
+                  <SelectItem key={index} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <TrackingHistoryTable
+            data={pageDetailHistory || []}
+            columns={historyColumns}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -131,7 +253,7 @@ function TrackingHistoryTable({
 }) {
   const { table } = useDataTable({ data, columns, pageCount: 1 });
   return (
-    <div className='min-h-[520px]'>
+    <div className='h-[520px]'>
       <DataTable table={table}>
         <DataTableToolbar table={table} />
       </DataTable>
