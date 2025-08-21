@@ -7,7 +7,7 @@ interface PageDetail {
 }
 
 interface PageTracking {
-  page: string;
+  page: ViewPage;
   total: number;
   details?: PageDetail[];
 }

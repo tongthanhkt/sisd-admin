@@ -93,6 +93,14 @@ export const navItems: NavItem[] = [
     shortcut: ['f', 'f'],
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Tracking',
+    url: '/dashboard/tracking',
+    icon: 'dashboard',
+    shortcut: ['t', 't'],
+    isActive: false,
+    items: []
   }
   // {
   //   title: 'Account',
