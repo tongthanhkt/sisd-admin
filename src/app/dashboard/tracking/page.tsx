@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
+import { Progress } from '@/components/ui/progress';
 import { PAGE_NAME, ViewPage } from '@/constants/tracking';
 import {
   useDashboardQuery,
@@ -30,8 +31,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
-// import { Progress } from '@/components/ui/progress';
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { PageHistory } from '@/types';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { ColumnDef } from '@tanstack/react-table';
@@ -46,6 +46,23 @@ export default function TrackingDashboardPage() {
   const getPageLabel = (pageKey: string): string =>
     (PAGE_NAME as Record<string, string>)[pageKey] || pageKey;
 
+  const totalViews = useMemo(
+    () => (dashboardData || []).reduce((s, p) => s + (p.total || 0), 0),
+    [dashboardData]
+  );
+  const sortedPages = useMemo(
+    () => (dashboardData || []).slice().sort((a, b) => b.total - a.total),
+    [dashboardData]
+  );
+  const topKpi = sortedPages[0];
+  const pagesCount = sortedPages.length;
+  const topShare = useMemo(
+    () =>
+      totalViews > 0 && topKpi
+        ? Math.round((topKpi.total * 100) / totalViews)
+        : 0,
+    [topKpi, totalViews]
+  );
   // Wrap long X-axis labels into at most 2 lines for the main bar chart
   const TwoLineXAxisTick = ({ x, y, payload, maxChars = 16 }: any) => {
     const value: string = payload?.value ?? '';
@@ -210,6 +227,88 @@ export default function TrackingDashboardPage() {
 
   return (
     <div className='h-[calc(100vh-48px)] space-y-6 overflow-y-auto p-4'>
+      {/* KPIs: Total views and Top 5 pages */}
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+        {/* Total views */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tổng số lượt xem</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='flex items-end gap-4'>
+              <div className='text-4xl font-bold md:text-5xl'>
+                {totalViews.toLocaleString()}
+              </div>
+              <div className='text-muted-foreground mb-1'>toàn hệ thống</div>
+            </div>
+            <div className='mt-6 space-y-3'>
+              <div className='text-muted-foreground text-sm'>
+                Số trang theo dõi:{' '}
+                <span className='text-foreground font-medium'>
+                  {pagesCount}
+                </span>
+              </div>
+              {topKpi && (
+                <div className='space-y-1'>
+                  <div className='flex items-center justify-between text-sm'>
+                    <div className='min-w-0'>
+                      Trang top:{' '}
+                      <span className='font-medium'>
+                        {getPageLabel(topKpi.page)}
+                      </span>
+                    </div>
+                    <span className='tabular-nums'>
+                      {topKpi.total.toLocaleString()}
+                    </span>
+                  </div>
+                  <Progress value={topShare} />
+                  <div className='text-muted-foreground text-xs'>
+                    Chiếm {topShare}% tổng
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Top 5 pages */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Top 5 trang được xem nhiều nhất</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-3'>
+            {(dashboardData || [])
+              .slice()
+              .sort((a, b) => b.total - a.total)
+              .slice(0, 5)
+              .map((p, idx, arr) => {
+                const max = Math.max(1, ...arr.map((it) => it.total));
+                const name = getPageLabel(p.page);
+                return (
+                  <div key={p.page} className='space-y-1'>
+                    <div className='flex items-center justify-between gap-3'>
+                      <div className='flex min-w-0 items-center gap-2'>
+                        <span className='bg-muted text-foreground/80 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium'>
+                          {idx + 1}
+                        </span>
+                        <span className='line-clamp-1 text-sm'>{name}</span>
+                      </div>
+                      <span className='text-muted-foreground text-xs tabular-nums'>
+                        {p.total}
+                      </span>
+                    </div>
+                    <Progress value={(p.total / max) * 100} />
+                  </div>
+                );
+              })}
+            {(!dashboardData || dashboardData.length === 0) && (
+              <div className='text-muted-foreground text-sm'>
+                Không có dữ liệu
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
       {/* Overall views summary */}
       <Card>
         <CardHeader>
