@@ -1,11 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent
-} from '@/components/ui/chart';
+// charts moved to shared components
 import {
   Select,
   SelectContent,
@@ -15,8 +11,7 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
-import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
+// Progress and Skeleton are used inside shared KPI components
 import { PAGE_NAME, ViewPage } from '@/constants/tracking';
 import {
   useDashboardQuery,
@@ -24,18 +19,18 @@ import {
   usePageHistoryQuery
 } from '@/lib/api/tracking';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  XAxis,
-  YAxis
-} from 'recharts';
+// recharts primitives are used inside shared chart components
 
 import { PageHistory } from '@/types';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { ColumnDef } from '@tanstack/react-table';
+import {
+  TotalViewsKpi,
+  Top5PagesKpi
+} from '@/features/tracking/components/Kpis';
+import { DetailBarChart } from '@/features/tracking/components/DetailBarChart';
+import { MainBarChart } from '@/features/tracking/components/MainBarChart';
+// import { TwoLineXAxisTick } from '@/features/tracking/components/utils';
 
 export default function TrackingDashboardPage() {
   const { data: dashboardData, isLoading: isDashboardLoading } =
@@ -66,32 +61,7 @@ export default function TrackingDashboardPage() {
     [topKpi, totalViews]
   );
   // Wrap long X-axis labels into at most 2 lines for the main bar chart
-  const TwoLineXAxisTick = ({ x, y, payload, maxChars = 16 }: any) => {
-    const value: string = payload?.value ?? '';
-    if (!value) return null;
-    let first = value;
-    let second = '';
-    if (value.length > maxChars) {
-      const cutAt = value.lastIndexOf(' ', maxChars);
-      const idx = cutAt > 3 ? cutAt : maxChars;
-      first = value.slice(0, idx).trim();
-      second = value.slice(idx).trim();
-    }
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text textAnchor='middle' fill='currentColor' className='text-[12px]'>
-          <tspan x={0} dy={0}>
-            {first}
-          </tspan>
-          {second ? (
-            <tspan x={0} dy={12}>
-              {second}
-            </tspan>
-          ) : null}
-        </text>
-      </g>
-    );
-  };
+  // legacy local axis tick removed; using shared utils in MainBarChart
 
   const topPages = useMemo(() => {
     const pages = (dashboardData || [])
@@ -231,169 +201,48 @@ export default function TrackingDashboardPage() {
     <div className='h-[calc(100vh-48px)] space-y-6 overflow-y-auto p-4'>
       {/* KPIs: Total views and Top 5 pages */}
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-        {/* Total views */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tổng số lượt xem</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isDashboardLoading ? (
-              <div className='space-y-4'>
-                <div className='flex items-end gap-4'>
-                  <Skeleton className='h-10 w-40' />
-                  <Skeleton className='mb-1 h-4 w-24' />
-                </div>
-                <div className='space-y-2'>
-                  <Skeleton className='h-4 w-48' />
-                  <Skeleton className='h-2 w-full' />
-                  <Skeleton className='h-2 w-2/3' />
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className='flex items-end gap-4'>
-                  <div className='text-4xl font-bold md:text-5xl'>
-                    {totalViews.toLocaleString()}
-                  </div>
-                  <div className='text-muted-foreground mb-1'>
-                    toàn hệ thống
-                  </div>
-                </div>
-                <div className='mt-6 space-y-3'>
-                  <div className='text-muted-foreground text-sm'>
-                    Số trang theo dõi:{' '}
-                    <span className='text-foreground font-medium'>
-                      {pagesCount}
-                    </span>
-                  </div>
-                  {topKpi && (
-                    <div className='space-y-1'>
-                      <div className='flex items-center justify-between text-sm'>
-                        <div className='min-w-0'>
-                          Trang top:{' '}
-                          <span className='font-medium'>
-                            {getPageLabel(topKpi.page)}
-                          </span>
-                        </div>
-                        <span className='tabular-nums'>
-                          {topKpi.total.toLocaleString()}
-                        </span>
-                      </div>
-                      <Progress value={topShare} />
-                      <div className='text-muted-foreground text-xs'>
-                        Chiếm {topShare}% tổng
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Top 5 pages */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Top 5 trang được xem nhiều nhất</CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            {isDashboardLoading ? (
-              Array.from({ length: 5 }).map((_, idx) => (
-                <div key={idx} className='space-y-1'>
-                  <div className='flex items-center justify-between gap-3'>
-                    <div className='flex min-w-0 items-center gap-2'>
-                      <Skeleton className='h-6 w-6 rounded-full' />
-                      <Skeleton className='h-4 w-40' />
-                    </div>
-                    <Skeleton className='h-3 w-10' />
-                  </div>
-                  <Skeleton className='h-2 w-full' />
-                </div>
-              ))
-            ) : (
-              <>
-                {(dashboardData || [])
-                  .slice()
-                  .sort((a, b) => b.total - a.total)
-                  .slice(0, 5)
-                  .map((p, idx, arr) => {
-                    const max = Math.max(1, ...arr.map((it) => it.total));
-                    const name = getPageLabel(p.page);
-                    return (
-                      <div key={p.page} className='space-y-1'>
-                        <div className='flex items-center justify-between gap-3'>
-                          <div className='flex min-w-0 items-center gap-2'>
-                            <span className='bg-muted text-foreground/80 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium'>
-                              {idx + 1}
-                            </span>
-                            <span className='line-clamp-1 text-sm'>{name}</span>
-                          </div>
-                          <span className='text-muted-foreground text-xs tabular-nums'>
-                            {p.total}
-                          </span>
-                        </div>
-                        <Progress value={(p.total / max) * 100} />
-                      </div>
-                    );
-                  })}
-                {(!dashboardData || dashboardData.length === 0) && (
-                  <div className='text-muted-foreground text-sm'>
-                    Không có dữ liệu
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <TotalViewsKpi
+          isLoading={isDashboardLoading}
+          totalViews={totalViews}
+          pagesCount={pagesCount}
+          topPage={
+            topKpi
+              ? {
+                  page: topKpi.page,
+                  total: topKpi.total,
+                  label: getPageLabel(topKpi.page)
+                }
+              : undefined
+          }
+          topShare={topShare}
+        />
+        <Top5PagesKpi
+          isLoading={isDashboardLoading}
+          items={(dashboardData || [])
+            .slice()
+            .sort((a, b) => b.total - a.total)
+            .slice(0, 5)
+            .map((p) => ({
+              page: p.page,
+              total: p.total,
+              label: getPageLabel(p.page)
+            }))}
+        />
       </div>
       {/* Overall views summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lượt truy cập</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            config={{ total: { label: 'Views', color: 'var(--primary)' } }}
-            className='h-[300px] w-full'
-          >
-            <BarChart
-              data={topPages}
-              margin={{ left: 12, right: 12, bottom: 32 }}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey='name'
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                interval={0}
-                tick={<TwoLineXAxisTick />}
-              />
-              <ChartTooltip
-                cursor={{ fill: 'var(--primary)', opacity: 0.1 }}
-                content={<ChartTooltipContent />}
-              />
-              <Bar
-                dataKey='total'
-                fill='var(--primary)'
-                radius={[4, 4, 0, 0]}
-                cursor='pointer'
-                onClick={(_, index) => {
-                  const item = (topPages as any[])[index];
-                  if (item?.page) {
-                    setSelectedPage(item.page);
-                    setSelectedDetailId(null);
-                    pageHistoryRef.current?.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'start'
-                    });
-                  }
-                }}
-              />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <MainBarChart
+        data={topPages}
+        onClick={(item) => {
+          if (item?.page) {
+            setSelectedPage(item.page);
+            setSelectedDetailId(null);
+            pageHistoryRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }}
+      />
       {/* Details sections - vertical bar charts with full labels */}
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3'>
         {[
@@ -416,90 +265,34 @@ export default function TrackingDashboardPage() {
             total: d.total,
             id: d.pageDetailId || ''
           }));
-          const chartHeight = Math.min(40 + chartData.length * 28, 360);
+          // height handled in DetailBarChart
           return (
-            <Card key={key}>
-              <CardHeader>
-                <CardTitle>{title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    total: { label: 'Views', color: 'var(--primary)' }
-                  }}
-                  className='w-full'
-                  style={{ height: chartHeight }}
-                >
-                  <BarChart
-                    data={chartData}
-                    layout='vertical'
-                    margin={{ left: 12, right: 12 }}
-                  >
-                    <CartesianGrid vertical={false} />
-                    <YAxis
-                      type='category'
-                      dataKey='name'
-                      width={180}
-                      tickLine={false}
-                      axisLine={false}
-                      interval={0}
-                      tickFormatter={(value: string) =>
-                        value.length > 28 ? value.slice(0, 28) + '…' : value
-                      }
-                    />
-                    {/* Keep X axis for grid calculation but hide ticks/axis */}
-                    <XAxis
-                      type='number'
-                      hide
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <ChartTooltip
-                      cursor={{ fill: 'var(--primary)', opacity: 0.08 }}
-                      content={<ChartTooltipContent />}
-                    />
-                    <Bar
-                      dataKey='total'
-                      fill='var(--primary)'
-                      radius={[0, 4, 4, 0]}
-                      cursor='pointer'
-                      onClick={(_, index) => {
-                        const item = (chartData as any[])[index];
-                        if (!item) return;
-                        if (key === ViewPage.PRODUCT_DETAIL && item.id) {
-                          setSelectedDetailId(item.id);
-                          pageDetailRef.current?.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                          });
-                        } else if (key === ViewPage.BLOGS_DETAIL && item.id) {
-                          setSelectedBlogDetailId(item.id);
-                          blogDetailRef.current?.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                          });
-                        } else if (
-                          key === ViewPage.DOCUMENTATION_DETAIL &&
-                          item.id
-                        ) {
-                          setSelectedDocumentationDetailId(item.id);
-                          documentationDetailRef.current?.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                          });
-                        }
-                      }}
-                    >
-                      <LabelList
-                        dataKey='total'
-                        position='right'
-                        className='text-xs'
-                      />
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
+            <DetailBarChart
+              key={key}
+              title={title}
+              data={chartData}
+              onClick={(item) => {
+                if (key === ViewPage.PRODUCT_DETAIL && item.id) {
+                  setSelectedDetailId(item.id);
+                  pageDetailRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                } else if (key === ViewPage.BLOGS_DETAIL && item.id) {
+                  setSelectedBlogDetailId(item.id);
+                  blogDetailRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                } else if (key === ViewPage.DOCUMENTATION_DETAIL && item.id) {
+                  setSelectedDocumentationDetailId(item.id);
+                  documentationDetailRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }}
+            />
           );
         })}
       </div>
