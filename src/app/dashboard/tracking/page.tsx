@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  XAxis,
+  YAxis
+} from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
@@ -23,6 +30,8 @@ import {
 } from '@/components/ui/select';
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
+// import { Progress } from '@/components/ui/progress';
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ColumnDef } from '@tanstack/react-table';
 import { PageHistory } from '@/types';
 import { skipToken } from '@reduxjs/toolkit/query';
@@ -30,12 +39,44 @@ import { skipToken } from '@reduxjs/toolkit/query';
 export default function TrackingDashboardPage() {
   const { data: dashboardData } = useDashboardQuery();
 
+  const getPageLabel = (pageKey: string): string =>
+    (PAGE_NAME as Record<string, string>)[pageKey] || pageKey;
+
+  // Wrap long X-axis labels into at most 2 lines for the main bar chart
+  const TwoLineXAxisTick = ({ x, y, payload, maxChars = 16 }: any) => {
+    const value: string = payload?.value ?? '';
+    if (!value) return null;
+    let first = value;
+    let second = '';
+    if (value.length > maxChars) {
+      const cutAt = value.lastIndexOf(' ', maxChars);
+      const idx = cutAt > 3 ? cutAt : maxChars;
+      first = value.slice(0, idx).trim();
+      second = value.slice(idx).trim();
+    }
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text textAnchor='middle' fill='currentColor' className='text-[12px]'>
+          <tspan x={0} dy={0}>
+            {first}
+          </tspan>
+          {second ? (
+            <tspan x={0} dy={12}>
+              {second}
+            </tspan>
+          ) : null}
+        </text>
+      </g>
+    );
+  };
+
   const topPages = useMemo(() => {
     const pages = (dashboardData || [])
       .slice()
       .sort((a, b) => b.total - a.total);
-    return pages.map((p) => ({ name: PAGE_NAME[p.page], total: p.total }));
+    return pages.map((p) => ({ name: getPageLabel(p.page), total: p.total }));
   }, [dashboardData]);
+  // console.debug('topPages', topPages);
 
   const productDetailOptions = useMemo(() => {
     const productDetail = (dashboardData || []).find(
@@ -83,7 +124,7 @@ export default function TrackingDashboardPage() {
   const pageOptions = useMemo(
     () =>
       (dashboardData || []).map((p) => ({
-        label: PAGE_NAME[p.page],
+        label: getPageLabel(p.page),
         value: p.page
       })) as {
         label: string;
@@ -171,13 +212,18 @@ export default function TrackingDashboardPage() {
             config={{ total: { label: 'Views', color: 'var(--primary)' } }}
             className='h-[300px] w-full'
           >
-            <BarChart data={topPages} margin={{ left: 12, right: 12 }}>
+            <BarChart
+              data={topPages}
+              margin={{ left: 12, right: 12, bottom: 32 }}
+            >
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey='name'
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                interval={0}
+                tick={<TwoLineXAxisTick />}
               />
               <ChartTooltip
                 cursor={{ fill: 'var(--primary)', opacity: 0.1 }}
@@ -192,57 +238,80 @@ export default function TrackingDashboardPage() {
           </ChartContainer>
         </CardContent>
       </Card>
-      {/* Details sections */}
-      <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+      {/* Details sections - vertical bar charts with full labels */}
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3'>
         {[
-          ViewPage.PRODUCT_DETAIL,
-          ViewPage.BLOGS_DETAIL,
-          ViewPage.DOCUMENTATION_DETAIL
-        ].map((section) => {
+          { key: ViewPage.PRODUCT_DETAIL, title: 'Lượt xem chi tiết sản phẩm' },
+          { key: ViewPage.BLOGS_DETAIL, title: 'Lượt xem chi tiết blog' },
+          {
+            key: ViewPage.DOCUMENTATION_DETAIL,
+            title: 'Lượt xem chi tiết tài liệu'
+          }
+        ].map(({ key, title }) => {
           const items =
             (dashboardData || [])
-              .find((p) => p.page === section)
-              ?.details?.slice()
-              .sort((a, b) => b.total - a.total) || [];
+              .find((p) => p.page === key)
+              ?.details?.filter((p) => p.total > 0)
+              ?.slice()
+              .sort((a, b) => b.total - a.total)
+              .slice(0, 10) || [];
           const chartData = items.map((d) => ({
             name: d.pageName || d.pageDetailId || 'Unknown',
             total: d.total
           }));
+          const chartHeight = Math.min(40 + chartData.length * 28, 360);
           return (
-            <Card key={section}>
+            <Card key={key}>
               <CardHeader>
-                <CardTitle>
-                  {section === ViewPage.PRODUCT_DETAIL &&
-                    'Product Detail Views'}
-                  {section === ViewPage.BLOGS_DETAIL && 'Blog Detail Views'}
-                  {section === ViewPage.DOCUMENTATION_DETAIL &&
-                    'Document Detail Views'}
-                </CardTitle>
+                <CardTitle>{title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={{
                     total: { label: 'Views', color: 'var(--primary)' }
                   }}
-                  className='h-[280px] w-full'
+                  className='w-full'
+                  style={{ height: chartHeight }}
                 >
-                  <BarChart data={chartData} margin={{ left: 12, right: 12 }}>
+                  <BarChart
+                    data={chartData}
+                    layout='vertical'
+                    margin={{ left: 12, right: 12 }}
+                  >
                     <CartesianGrid vertical={false} />
-                    <XAxis
+                    <YAxis
+                      type='category'
                       dataKey='name'
+                      width={180}
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
+                      interval={0}
+                      tickFormatter={(value: string) =>
+                        value.length > 28 ? value.slice(0, 28) + '…' : value
+                      }
+                    />
+                    {/* Keep X axis for grid calculation but hide ticks/axis */}
+                    <XAxis
+                      type='number'
+                      hide
+                      tickLine={false}
+                      axisLine={false}
                     />
                     <ChartTooltip
-                      cursor={{ fill: 'var(--primary)', opacity: 0.1 }}
+                      cursor={{ fill: 'var(--primary)', opacity: 0.08 }}
                       content={<ChartTooltipContent />}
                     />
                     <Bar
                       dataKey='total'
                       fill='var(--primary)'
-                      radius={[4, 4, 0, 0]}
-                    />
+                      radius={[0, 4, 4, 0]}
+                    >
+                      <LabelList
+                        dataKey='total'
+                        position='right'
+                        className='text-xs'
+                      />
+                    </Bar>
                   </BarChart>
                 </ChartContainer>
               </CardContent>
