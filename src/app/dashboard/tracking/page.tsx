@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Bar,
@@ -38,6 +38,10 @@ import { skipToken } from '@reduxjs/toolkit/query';
 
 export default function TrackingDashboardPage() {
   const { data: dashboardData } = useDashboardQuery();
+  const pageHistoryRef = useRef<HTMLDivElement | null>(null);
+  const pageDetailRef = useRef<HTMLDivElement | null>(null);
+  const blogDetailRef = useRef<HTMLDivElement | null>(null);
+  const documentationDetailRef = useRef<HTMLDivElement | null>(null);
 
   const getPageLabel = (pageKey: string): string =>
     (PAGE_NAME as Record<string, string>)[pageKey] || pageKey;
@@ -203,7 +207,7 @@ export default function TrackingDashboardPage() {
   return (
     <div className='h-[calc(100vh-48px)] space-y-6 overflow-y-auto p-4'>
       {/* Overall views summary */}
-      <Card>
+      <Card ref={pageHistoryRef}>
         <CardHeader>
           <CardTitle>Lượt truy cập</CardTitle>
         </CardHeader>
@@ -233,6 +237,18 @@ export default function TrackingDashboardPage() {
                 dataKey='total'
                 fill='var(--primary)'
                 radius={[4, 4, 0, 0]}
+                cursor='pointer'
+                onClick={(_, index) => {
+                  const item = (topPages as any[])[index];
+                  if (item?.page) {
+                    setSelectedPage(item.page);
+                    setSelectedDetailId(null);
+                    pageHistoryRef.current?.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'start'
+                    });
+                  }
+                }}
               />
             </BarChart>
           </ChartContainer>
@@ -257,7 +273,8 @@ export default function TrackingDashboardPage() {
               .slice(0, 10) || [];
           const chartData = items.map((d) => ({
             name: d.pageName || d.pageDetailId || 'Unknown',
-            total: d.total
+            total: d.total,
+            id: d.pageDetailId || ''
           }));
           const chartHeight = Math.min(40 + chartData.length * 28, 360);
           return (
@@ -305,6 +322,33 @@ export default function TrackingDashboardPage() {
                       dataKey='total'
                       fill='var(--primary)'
                       radius={[0, 4, 4, 0]}
+                      cursor='pointer'
+                      onClick={(_, index) => {
+                        const item = (chartData as any[])[index];
+                        if (!item) return;
+                        if (key === ViewPage.PRODUCT_DETAIL && item.id) {
+                          setSelectedDetailId(item.id);
+                          pageDetailRef.current?.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                          });
+                        } else if (key === ViewPage.BLOGS_DETAIL && item.id) {
+                          setSelectedBlogDetailId(item.id);
+                          blogDetailRef.current?.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                          });
+                        } else if (
+                          key === ViewPage.DOCUMENTATION_DETAIL &&
+                          item.id
+                        ) {
+                          setSelectedDocumentationDetailId(item.id);
+                          documentationDetailRef.current?.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                          });
+                        }
+                      }}
                     >
                       <LabelList
                         dataKey='total'
@@ -350,7 +394,7 @@ export default function TrackingDashboardPage() {
           </TrackingHistoryTable>
         </CardContent>
       </Card>
-      <Card className='p-6'>
+      <Card className='p-6' ref={pageDetailRef}>
         <CardHeader className='px-0'>
           <CardTitle>Lịch sử truy cập chi tiết sản phẩm</CardTitle>
         </CardHeader>
@@ -377,7 +421,7 @@ export default function TrackingDashboardPage() {
           </Select>
         </TrackingHistoryTable>
       </Card>
-      <Card className='p-6'>
+      <Card className='p-6' ref={blogDetailRef}>
         <CardHeader className='px-0'>
           <CardTitle>Lịch sử truy cập chi tiết blog</CardTitle>
         </CardHeader>
@@ -404,7 +448,7 @@ export default function TrackingDashboardPage() {
           </Select>{' '}
         </TrackingHistoryTable>
       </Card>
-      <Card className='p-6'>
+      <Card className='p-6' ref={documentationDetailRef}>
         <CardHeader className='px-0'>
           <CardTitle>Lịch sử truy cập chi tiết tài liệu</CardTitle>
         </CardHeader>
