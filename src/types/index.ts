@@ -41,3 +41,4 @@ export * from './file';
 export * from './document';
 export * from './stone-catalog';
 export * from './faq';
+export * from './tracking';

@@ -11,22 +11,28 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { getCommonPinningStyles } from '@/lib/data-table';
+import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface DataTableProps<TData> extends React.ComponentProps<'div'> {
   table: TanstackTable<TData>;
   actionBar?: React.ReactNode;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData>({
   table,
   actionBar,
-  children
+  children,
+  isLoading
 }: DataTableProps<TData>) {
   return (
     <div className='flex h-full flex-1 flex-col space-y-4'>
       {children}
       <div className='relative flex flex-1'>
+        {isLoading ? (
+          <DataTableSkeleton columnCount={table.getAllColumns().length} />
+        ) : null}
         <div className='absolute inset-0 flex overflow-hidden rounded-lg border'>
           <ScrollArea className='h-full w-full'>
             <Table>

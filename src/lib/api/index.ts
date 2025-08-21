@@ -30,3 +30,4 @@ export {
 
 export * from './catalog';
 export * from './faq';
+export * from './tracking';
