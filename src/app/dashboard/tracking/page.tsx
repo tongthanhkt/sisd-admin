@@ -16,6 +16,7 @@ import {
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PAGE_NAME, ViewPage } from '@/constants/tracking';
 import {
   useDashboardQuery,
@@ -37,7 +38,8 @@ import { skipToken } from '@reduxjs/toolkit/query';
 import { ColumnDef } from '@tanstack/react-table';
 
 export default function TrackingDashboardPage() {
-  const { data: dashboardData } = useDashboardQuery();
+  const { data: dashboardData, isLoading: isDashboardLoading } =
+    useDashboardQuery();
   const pageHistoryRef = useRef<HTMLDivElement | null>(null);
   const pageDetailRef = useRef<HTMLDivElement | null>(null);
   const blogDetailRef = useRef<HTMLDivElement | null>(null);
@@ -235,39 +237,57 @@ export default function TrackingDashboardPage() {
             <CardTitle>Tổng số lượt xem</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='flex items-end gap-4'>
-              <div className='text-4xl font-bold md:text-5xl'>
-                {totalViews.toLocaleString()}
+            {isDashboardLoading ? (
+              <div className='space-y-4'>
+                <div className='flex items-end gap-4'>
+                  <Skeleton className='h-10 w-40' />
+                  <Skeleton className='mb-1 h-4 w-24' />
+                </div>
+                <div className='space-y-2'>
+                  <Skeleton className='h-4 w-48' />
+                  <Skeleton className='h-2 w-full' />
+                  <Skeleton className='h-2 w-2/3' />
+                </div>
               </div>
-              <div className='text-muted-foreground mb-1'>toàn hệ thống</div>
-            </div>
-            <div className='mt-6 space-y-3'>
-              <div className='text-muted-foreground text-sm'>
-                Số trang theo dõi:{' '}
-                <span className='text-foreground font-medium'>
-                  {pagesCount}
-                </span>
-              </div>
-              {topKpi && (
-                <div className='space-y-1'>
-                  <div className='flex items-center justify-between text-sm'>
-                    <div className='min-w-0'>
-                      Trang top:{' '}
-                      <span className='font-medium'>
-                        {getPageLabel(topKpi.page)}
-                      </span>
-                    </div>
-                    <span className='tabular-nums'>
-                      {topKpi.total.toLocaleString()}
-                    </span>
+            ) : (
+              <>
+                <div className='flex items-end gap-4'>
+                  <div className='text-4xl font-bold md:text-5xl'>
+                    {totalViews.toLocaleString()}
                   </div>
-                  <Progress value={topShare} />
-                  <div className='text-muted-foreground text-xs'>
-                    Chiếm {topShare}% tổng
+                  <div className='text-muted-foreground mb-1'>
+                    toàn hệ thống
                   </div>
                 </div>
-              )}
-            </div>
+                <div className='mt-6 space-y-3'>
+                  <div className='text-muted-foreground text-sm'>
+                    Số trang theo dõi:{' '}
+                    <span className='text-foreground font-medium'>
+                      {pagesCount}
+                    </span>
+                  </div>
+                  {topKpi && (
+                    <div className='space-y-1'>
+                      <div className='flex items-center justify-between text-sm'>
+                        <div className='min-w-0'>
+                          Trang top:{' '}
+                          <span className='font-medium'>
+                            {getPageLabel(topKpi.page)}
+                          </span>
+                        </div>
+                        <span className='tabular-nums'>
+                          {topKpi.total.toLocaleString()}
+                        </span>
+                      </div>
+                      <Progress value={topShare} />
+                      <div className='text-muted-foreground text-xs'>
+                        Chiếm {topShare}% tổng
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -277,34 +297,51 @@ export default function TrackingDashboardPage() {
             <CardTitle>Top 5 trang được xem nhiều nhất</CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            {(dashboardData || [])
-              .slice()
-              .sort((a, b) => b.total - a.total)
-              .slice(0, 5)
-              .map((p, idx, arr) => {
-                const max = Math.max(1, ...arr.map((it) => it.total));
-                const name = getPageLabel(p.page);
-                return (
-                  <div key={p.page} className='space-y-1'>
-                    <div className='flex items-center justify-between gap-3'>
-                      <div className='flex min-w-0 items-center gap-2'>
-                        <span className='bg-muted text-foreground/80 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium'>
-                          {idx + 1}
-                        </span>
-                        <span className='line-clamp-1 text-sm'>{name}</span>
-                      </div>
-                      <span className='text-muted-foreground text-xs tabular-nums'>
-                        {p.total}
-                      </span>
+            {isDashboardLoading ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <div key={idx} className='space-y-1'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <div className='flex min-w-0 items-center gap-2'>
+                      <Skeleton className='h-6 w-6 rounded-full' />
+                      <Skeleton className='h-4 w-40' />
                     </div>
-                    <Progress value={(p.total / max) * 100} />
+                    <Skeleton className='h-3 w-10' />
                   </div>
-                );
-              })}
-            {(!dashboardData || dashboardData.length === 0) && (
-              <div className='text-muted-foreground text-sm'>
-                Không có dữ liệu
-              </div>
+                  <Skeleton className='h-2 w-full' />
+                </div>
+              ))
+            ) : (
+              <>
+                {(dashboardData || [])
+                  .slice()
+                  .sort((a, b) => b.total - a.total)
+                  .slice(0, 5)
+                  .map((p, idx, arr) => {
+                    const max = Math.max(1, ...arr.map((it) => it.total));
+                    const name = getPageLabel(p.page);
+                    return (
+                      <div key={p.page} className='space-y-1'>
+                        <div className='flex items-center justify-between gap-3'>
+                          <div className='flex min-w-0 items-center gap-2'>
+                            <span className='bg-muted text-foreground/80 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium'>
+                              {idx + 1}
+                            </span>
+                            <span className='line-clamp-1 text-sm'>{name}</span>
+                          </div>
+                          <span className='text-muted-foreground text-xs tabular-nums'>
+                            {p.total}
+                          </span>
+                        </div>
+                        <Progress value={(p.total / max) * 100} />
+                      </div>
+                    );
+                  })}
+                {(!dashboardData || dashboardData.length === 0) && (
+                  <div className='text-muted-foreground text-sm'>
+                    Không có dữ liệu
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -475,6 +512,7 @@ export default function TrackingDashboardPage() {
           <TrackingHistoryTable
             data={pageHistory || []}
             columns={historyColumns}
+            isLoading={!pageHistory}
           >
             <Select
               value={selectedPage}
@@ -505,6 +543,7 @@ export default function TrackingDashboardPage() {
         <TrackingHistoryTable
           data={pageDetailHistory || []}
           columns={historyColumns}
+          isLoading={!pageDetailHistory}
         >
           {' '}
           <Select
@@ -532,6 +571,7 @@ export default function TrackingDashboardPage() {
         <TrackingHistoryTable
           data={blogDetailHistory || []}
           columns={historyColumns}
+          isLoading={!blogDetailHistory}
         >
           {' '}
           <Select
@@ -559,6 +599,7 @@ export default function TrackingDashboardPage() {
         <TrackingHistoryTable
           data={documentationDetailHistory || []}
           columns={historyColumns}
+          isLoading={!documentationDetailHistory}
         >
           <Select
             value={selectedDocumentationDetailId || ''}
@@ -587,16 +628,18 @@ import { format } from 'date-fns';
 function TrackingHistoryTable({
   data,
   columns,
-  children
+  children,
+  isLoading
 }: {
   data: PageHistory;
   columns: ColumnDef<PageHistory[number]>[];
   children?: React.ReactNode;
+  isLoading?: boolean;
 }) {
   const { table } = useDataTable({ data, columns, pageCount: 1 });
   return (
     <div className='h-[520px]'>
-      <DataTable table={table}>
+      <DataTable table={table} isLoading={isLoading}>
         <div className='flex'>
           {children}
           <DataTableToolbar table={table} />
