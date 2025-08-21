@@ -52,6 +52,34 @@ export default function TrackingDashboardPage() {
     );
   }, [dashboardData]);
 
+  const blogDetailOptions = useMemo(() => {
+    const blogDetail = (dashboardData || []).find(
+      (p) => p.page === ViewPage.BLOGS_DETAIL
+    );
+    return (
+      blogDetail?.details
+        ?.map((d) => ({
+          label: d.pageName || d.pageDetailId || '',
+          value: d.pageDetailId || ''
+        }))
+        ?.filter((opt) => opt.value) || []
+    );
+  }, [dashboardData]);
+
+  const documentationDetailOptions = useMemo(() => {
+    const documentationDetail = (dashboardData || []).find(
+      (p) => p.page === ViewPage.DOCUMENTATION_DETAIL
+    );
+    return (
+      documentationDetail?.details
+        ?.map((d) => ({
+          label: d.pageName || d.pageDetailId || '',
+          value: d.pageDetailId || ''
+        }))
+        ?.filter((opt) => opt.value) || []
+    );
+  }, [dashboardData]);
+
   // Filters for history
   const pageOptions = useMemo(
     () =>
@@ -62,8 +90,15 @@ export default function TrackingDashboardPage() {
     [dashboardData]
   );
 
-  const [selectedPage, setSelectedPage] = useState<string>(ViewPage.PRODUCTS);
+  const [selectedPage, setSelectedPage] = useState<string>(ViewPage.HOMEPAGE);
   const [selectedDetailId, setSelectedDetailId] = useState<string | null>(null);
+
+  const [selectedBlogDetailId, setSelectedBlogDetailId] = useState<
+    string | null
+  >(null);
+
+  const [selectedDocumentationDetailId, setSelectedDocumentationDetailId] =
+    useState<string | null>(null);
 
   const { data: pageHistory } = usePageHistoryQuery({
     page: selectedPage as ViewPage
@@ -71,6 +106,16 @@ export default function TrackingDashboardPage() {
 
   const { data: pageDetailHistory } = usePageDetailHistoryQuery(
     selectedDetailId ? { pageDetailId: selectedDetailId } : skipToken
+  );
+
+  const { data: blogDetailHistory } = usePageDetailHistoryQuery(
+    selectedBlogDetailId ? { pageDetailId: selectedBlogDetailId } : skipToken
+  );
+
+  const { data: documentationDetailHistory } = usePageDetailHistoryQuery(
+    selectedDocumentationDetailId
+      ? { pageDetailId: selectedDocumentationDetailId }
+      : skipToken
   );
 
   const historyColumns: ColumnDef<PageHistory[number]>[] = [
@@ -120,7 +165,6 @@ export default function TrackingDashboardPage() {
           </ChartContainer>
         </CardContent>
       </Card>
-
       {/* Details sections */}
       <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
         {[
@@ -179,7 +223,6 @@ export default function TrackingDashboardPage() {
           );
         })}
       </div>
-
       {/* History section with tabs */}
       <Card>
         <CardHeader>
@@ -213,30 +256,79 @@ export default function TrackingDashboardPage() {
             data={pageHistory || []}
             columns={historyColumns}
           />
-
-          <div>
-            <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
-            <Select
-              value={selectedDetailId || ''}
-              onValueChange={(v) => setSelectedDetailId(v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='Chọn trang chi tiết (tuỳ chọn)' />
-              </SelectTrigger>
-              <SelectContent>
-                {productDetailOptions.map((opt, index) => (
-                  <SelectItem key={index} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <TrackingHistoryTable
-            data={pageDetailHistory || []}
-            columns={historyColumns}
-          />
         </CardContent>
+      </Card>
+      <Card className='p-6'>
+        <div>
+          <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+          <Select
+            value={selectedDetailId || ''}
+            onValueChange={(v) => setSelectedDetailId(v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='Chọn trang chi tiết (tuỳ chọn)' />
+            </SelectTrigger>
+            <SelectContent>
+              {productDetailOptions.map((opt, index) => (
+                <SelectItem key={index} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <TrackingHistoryTable
+          data={pageDetailHistory || []}
+          columns={historyColumns}
+        />
+      </Card>
+      <Card className='p-6'>
+        <div>
+          <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+          <Select
+            value={selectedBlogDetailId || ''}
+            onValueChange={(v) => setSelectedBlogDetailId(v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='Chọn trang chi tiết (tuỳ chọn)' />
+            </SelectTrigger>
+            <SelectContent>
+              {blogDetailOptions.map((opt, index) => (
+                <SelectItem key={index} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <TrackingHistoryTable
+          data={blogDetailHistory || []}
+          columns={historyColumns}
+        />
+      </Card>{' '}
+      <Card className='p-6'>
+        <div>
+          <div className='mb-2 text-sm font-medium'>Chi tiết trang</div>
+          <Select
+            value={selectedDocumentationDetailId || ''}
+            onValueChange={(v) => setSelectedDocumentationDetailId(v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='Chọn trang chi tiết (tuỳ chọn)' />
+            </SelectTrigger>
+            <SelectContent>
+              {documentationDetailOptions.map((opt, index) => (
+                <SelectItem key={index} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <TrackingHistoryTable
+          data={documentationDetailHistory || []}
+          columns={historyColumns}
+        />
       </Card>
     </div>
   );
