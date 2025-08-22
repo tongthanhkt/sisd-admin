@@ -22,7 +22,7 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
   const methods = useForm<FAQFormValues>({
     resolver: zodResolver(faqFormSchema),
     defaultValues: {
-      id: '',
+      name: '',
       body: [
         {
           id: Math.random().toString(),
@@ -43,7 +43,7 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
 
   const prepareDataSubmit = (data: FAQFormValues) => {
     return {
-      id: data.id,
+      name: data.name,
       body: data.body.map((item) => ({
         question: item.question,
         contents: item.contents.map((content) => content.value)
@@ -60,7 +60,7 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
         // Update existing faq
         response = await updateFaq({
           id: faqId,
-          data: { body: formattedData.body }
+          data: { body: formattedData.body, name: formattedData.name }
         });
       } else {
         // Create new faq
@@ -94,7 +94,7 @@ export const useFAQ = ({ faqId }: { faqId?: string }) => {
   useEffect(() => {
     if (faqData) {
       reset({
-        id: faqData.id,
+        name: faqData.name,
         body: faqData.body.map((item) => ({
           id: Math.random().toString(),
           question: item.question,

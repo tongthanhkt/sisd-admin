@@ -1,7 +1,7 @@
 import * as z from 'zod';
 
 export const faqFormSchema = z.object({
-  id: z.string().min(1, 'id is required'),
+  name: z.string().min(1, 'Name is required'),
   body: z
     .array(
       z.object({

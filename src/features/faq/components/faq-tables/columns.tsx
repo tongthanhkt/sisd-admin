@@ -18,10 +18,10 @@ export const columns: ColumnDef<IFaqRequest>[] = [
     enableResizing: false
   },
   {
-    id: 'id',
-    accessorKey: 'id',
+    id: 'name',
+    accessorKey: 'name',
     header: ({ column }: { column: Column<IFaqRequest, unknown> }) => (
-      <DataTableColumnHeader column={column} title='ID' />
+      <DataTableColumnHeader column={column} title='Name' />
     ),
     cell: ({ cell }) => <div>{cell.getValue<string>()}</div>,
     enableColumnFilter: true,

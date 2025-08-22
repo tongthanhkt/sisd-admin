@@ -26,11 +26,11 @@ export function FAQForm({ faqId }: { faqId?: string }) {
           <form onSubmit={onSubmit} className='space-y-8'>
             <Controller
               control={control}
-              name='id'
+              name='name'
               render={({ field, fieldState: { error } }) => (
                 <Input
                   {...field}
-                  label='ID'
+                  label='Name'
                   className='w-1/3'
                   required
                   error={!!error}
