@@ -208,7 +208,8 @@ export const useBlogForm = (blogId?: string) => {
       banner: bannerUrl,
       isOustanding: data.isOustanding,
       summary: data.summary || '',
-      contact: data.contact || ''
+      contact: data.contact || '',
+      faqId: data.faqId || ''
     };
   };
 
@@ -270,7 +271,8 @@ export const useBlogForm = (blogId?: string) => {
             thumbnail: thumbnailFiles,
             shortDescription: blogData.shortDescription || '',
             summary: blogData.summary || '',
-            contact: blogData.contact || ''
+            contact: blogData.contact || '',
+            faqId: blogData.faqId || ''
           });
         } catch (error) {
           console.error('Error loading blog data:', error);

@@ -49,7 +49,7 @@ export const BlogAdditionalInfo = ({
       <FormField
         control={control}
         name='faqId'
-        render={({ field, fieldState: { error } }) => (
+        render={({ field }) => (
           <AppSelect
             {...field}
             onChange={field.onChange}
@@ -58,7 +58,6 @@ export const BlogAdditionalInfo = ({
             options={faqOptions}
             placeholder='Select FAQ'
             required
-            error={!!error}
           />
         )}
       />
