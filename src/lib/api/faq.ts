@@ -3,7 +3,7 @@ import { api } from '../api';
 
 const faqApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    createFaq: builder.mutation<IFaqRequest, IFaqRequest>({
+    createFaq: builder.mutation<IFaqRequest, Omit<IFaqRequest, 'id'>>({
       query: (faq) => ({
         url: 'faqs',
         method: 'POST',
