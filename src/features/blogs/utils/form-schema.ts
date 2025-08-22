@@ -104,8 +104,8 @@ export const blogFormSchema = z.object({
   relatedPosts: z
     .array(z.string())
     .min(1, { message: 'At least one blog is required' }),
-  relatedProducts: z.array(z.string())
-  // .min(1, { message: 'At least one product is required' })
+  relatedProducts: z.array(z.string()),
+  faqId: z.string().min(1, 'FAQ is required')
 });
 
 export type BlogFormValues = z.infer<typeof blogFormSchema>;

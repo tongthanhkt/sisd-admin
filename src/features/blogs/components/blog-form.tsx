@@ -21,7 +21,7 @@ interface BlogFormProps {
 }
 
 export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
-  const { form, onSubmit, isLoading } = useBlogForm(blogId);
+  const { form, onSubmit, isLoading, faqOptions } = useBlogForm(blogId);
 
   return (
     <Card className='mx-auto w-full'>
@@ -36,7 +36,7 @@ export function BlogForm({ pageTitle, blogId }: BlogFormProps) {
             <TitleBlog />
             <BlogImages />
             <BlogDescriptions />
-            <BlogAdditionalInfo />
+            <BlogAdditionalInfo faqOptions={faqOptions} />
             <ArticleSection />
             <RelatedBlogs fieldName='relatedPosts' label='Related Blogs' />
             {/* <RelatedBlogs
