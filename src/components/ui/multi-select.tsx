@@ -23,7 +23,6 @@ interface MultiSelectProps {
   className?: string;
   required?: boolean;
   error?: boolean;
-  helperText?: string;
 }
 
 export function MultiSelect({
@@ -34,7 +33,8 @@ export function MultiSelect({
   label,
   disabled,
   className,
-  required
+  required,
+  error
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -78,7 +78,8 @@ export function MultiSelect({
             variant='outline'
             className={cn(
               'flex min-h-9 w-full flex-wrap items-center justify-between gap-2 px-3 py-1',
-              disabled && 'pointer-events-none opacity-60'
+              disabled && 'pointer-events-none opacity-60',
+              error && 'border-destructive'
             )}
             aria-label={label}
             type='button'

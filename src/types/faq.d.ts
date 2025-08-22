@@ -1,5 +1,5 @@
 export interface IFaqRequest {
-  id?: string;
+  id: string;
   name: string;
   body: {
     question: string;

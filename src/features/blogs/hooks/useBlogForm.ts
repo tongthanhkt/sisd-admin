@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { blogFormSchema, BlogFormValues } from '../utils/form-schema';
+import { useGetFaqListQuery } from '@/lib/api/faq';
 
 export const useBlogForm = (blogId?: string) => {
   const router = useRouter();
@@ -21,6 +22,7 @@ export const useBlogForm = (blogId?: string) => {
   const { data: blogData } = useGetBlogQuery(blogId || '', {
     skip: !blogId || blogId === 'new'
   });
+  const { data: faqData } = useGetFaqListQuery();
 
   const [createBlog] = useCreateBlogMutation();
   const [updateBlog] = useUpdateBlogMutation();
@@ -46,6 +48,12 @@ export const useBlogForm = (blogId?: string) => {
       contact: ''
     }
   });
+
+  const faqOptions =
+    faqData?.map((faq) => ({
+      label: faq.name,
+      value: faq.id
+    })) || [];
 
   const prepareDataSubmit = async (
     data: BlogFormValues
@@ -313,5 +321,5 @@ export const useBlogForm = (blogId?: string) => {
     }
   };
 
-  return { form, onSubmit, isLoading };
+  return { form, onSubmit, isLoading, faqOptions };
 };
