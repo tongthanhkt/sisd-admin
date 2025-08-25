@@ -6,8 +6,7 @@ import { Form, FormField } from '@/components/ui/form';
 
 import { UploadVideo } from '@/components';
 import { Input } from '@/components/ui/input';
-import { SpinnerOverlay } from '@/components/ui/spinner';
-import { useForm } from 'react-hook-form';
+import { useHomeVideo } from '../../hooks/useHomeVideo';
 
 interface HomeVideoFormProps {
   videoId?: string;
@@ -15,10 +14,8 @@ interface HomeVideoFormProps {
 }
 
 export function HomeVideoForm({ pageTitle, videoId }: HomeVideoFormProps) {
-  //   const { methods, onSubmit, isLoading } = useFloorProduct({ videoId });
-  const methods = useForm();
-  const { control, setValue, handleSubmit } = methods;
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const { methods, onSubmit } = useHomeVideo({ videoId });
+  const { control } = methods;
 
   return (
     <Card className='mx-auto w-full'>
@@ -33,11 +30,19 @@ export function HomeVideoForm({ pageTitle, videoId }: HomeVideoFormProps) {
             <FormField
               control={control}
               name='name'
-              render={({ field }) => <Input {...field} label='Name' />}
+              render={({ field, fieldState: { error } }) => (
+                <Input
+                  {...field}
+                  label='Name'
+                  required
+                  error={!!error?.message}
+                  helperText={error?.message}
+                />
+              )}
             />
             <FormField
               control={control}
-              name='video'
+              name='video_url'
               render={({ field }) => (
                 <UploadVideo
                   {...field}
