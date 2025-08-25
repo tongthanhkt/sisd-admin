@@ -164,15 +164,20 @@ export default function TrackingDashboardPage() {
     page: selectedPage as ViewPage
   });
 
-  const { data: pageDetailHistory } = usePageDetailHistoryQuery(
-    selectedDetailId ? { pageDetailId: selectedDetailId } : skipToken
-  );
+  const { data: pageDetailHistory, isLoading: isPageDetailHistoryLoading } =
+    usePageDetailHistoryQuery(
+      selectedDetailId ? { pageDetailId: selectedDetailId } : skipToken
+    );
 
-  const { data: blogDetailHistory } = usePageDetailHistoryQuery(
-    selectedBlogDetailId ? { pageDetailId: selectedBlogDetailId } : skipToken
-  );
+  const { data: blogDetailHistory, isLoading: isBlogDetailHistoryLoading } =
+    usePageDetailHistoryQuery(
+      selectedBlogDetailId ? { pageDetailId: selectedBlogDetailId } : skipToken
+    );
 
-  const { data: documentationDetailHistory } = usePageDetailHistoryQuery(
+  const {
+    data: documentationDetailHistory,
+    isLoading: isDocumentationDetailHistoryLoading
+  } = usePageDetailHistoryQuery(
     selectedDocumentationDetailId
       ? { pageDetailId: selectedDocumentationDetailId }
       : skipToken
@@ -336,7 +341,7 @@ export default function TrackingDashboardPage() {
         <TrackingHistoryTable
           data={pageDetailHistory || []}
           columns={historyColumns}
-          isLoading={!pageDetailHistory}
+          isLoading={isPageDetailHistoryLoading}
         >
           {' '}
           <Select
@@ -364,7 +369,7 @@ export default function TrackingDashboardPage() {
         <TrackingHistoryTable
           data={blogDetailHistory || []}
           columns={historyColumns}
-          isLoading={!blogDetailHistory}
+          isLoading={isBlogDetailHistoryLoading}
         >
           {' '}
           <Select
@@ -392,7 +397,7 @@ export default function TrackingDashboardPage() {
         <TrackingHistoryTable
           data={documentationDetailHistory || []}
           columns={historyColumns}
-          isLoading={!documentationDetailHistory}
+          isLoading={isDocumentationDetailHistoryLoading}
         >
           <Select
             value={selectedDocumentationDetailId || ''}
