@@ -35,7 +35,7 @@ export function UploadVideo(props: FileUploaderProps) {
     label = 'Video',
     required = false,
     disabled,
-    deletable = true
+    deletable
   } = props;
 
   const [files, setFiles] = useControllableState({
