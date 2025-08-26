@@ -52,6 +52,7 @@ export function HomeVideoForm({ pageTitle, videoId }: HomeVideoFormProps) {
                   maxSize={100 * 1024 * 1024}
                   required
                   label='Video'
+                  disabled={!!videoId}
                 />
               )}
             />

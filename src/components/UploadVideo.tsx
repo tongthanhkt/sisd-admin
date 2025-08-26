@@ -19,6 +19,7 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   maxFiles?: DropzoneProps['maxFiles'];
   label?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 export function UploadVideo(props: FileUploaderProps) {
@@ -31,7 +32,8 @@ export function UploadVideo(props: FileUploaderProps) {
     maxFiles = 1,
     className,
     label = 'Video',
-    required = false
+    required = false,
+    disabled
   } = props;
 
   const [files, setFiles] = useControllableState({
@@ -95,7 +97,7 @@ export function UploadVideo(props: FileUploaderProps) {
       </FormLabel>
       <div className='relative flex flex-col gap-6 overflow-hidden'>
         <Dropzone
-          onDrop={onDrop}
+          onDrop={!disabled ? onDrop : undefined}
           accept={accept}
           maxSize={maxSize}
           maxFiles={maxFiles}
@@ -130,15 +132,20 @@ export function UploadVideo(props: FileUploaderProps) {
                     playsInline
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <button
-                    type='button'
-                    onClick={handleEditClick}
-                    className='absolute top-2 right-2 z-50 flex cursor-pointer items-center justify-center rounded-full bg-slate-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-800'
-                    tabIndex={-1}
-                  >
-                    <Pencil className='size-4' />
-                    <span className='sr-only'>Change video</span>
-                  </button>
+                  {!disabled && (
+                    <button
+                      type='button'
+                      onClick={handleEditClick}
+                      className={cn(
+                        'absolute top-2 right-2 z-50 flex cursor-pointer items-center justify-center rounded-full bg-slate-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-800'
+                      )}
+                      tabIndex={-1}
+                      disabled={disabled}
+                    >
+                      <Pencil className='size-4' />
+                      <span className='sr-only'>Change video</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div
