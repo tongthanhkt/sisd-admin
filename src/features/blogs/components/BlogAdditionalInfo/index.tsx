@@ -57,7 +57,7 @@ export const BlogAdditionalInfo = ({
             label='FAQ'
             options={faqOptions}
             placeholder='Select FAQ'
-            required
+            clearable
           />
         )}
       />

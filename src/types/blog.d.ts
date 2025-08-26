@@ -54,5 +54,5 @@ export interface IMutateBlog {
   isOustanding: boolean;
   summary: string;
   contact: string;
-  faqId: string;
+  faqId?: string;
 }

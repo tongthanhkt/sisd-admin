@@ -209,7 +209,7 @@ export const useBlogForm = (blogId?: string) => {
       isOustanding: data.isOustanding,
       summary: data.summary || '',
       contact: data.contact || '',
-      faqId: data.faqId || ''
+      faqId: data.faqId || undefined
     };
   };
 
@@ -240,7 +240,7 @@ export const useBlogForm = (blogId?: string) => {
       }))
     }));
   };
-
+  console.log('form', form.watch());
   useEffect(() => {
     const loadBlogData = async () => {
       if (blogData) {
@@ -252,6 +252,7 @@ export const useBlogForm = (blogId?: string) => {
           const bannerFiles = blogData.banner ? [blogData.banner] : [];
           const thumbnailFiles = blogData.thumbnail ? [blogData.thumbnail] : [];
 
+          console.log('blogData.faqId', blogData.faqId);
           form.reset({
             title: blogData.title || '',
             descriptions:
