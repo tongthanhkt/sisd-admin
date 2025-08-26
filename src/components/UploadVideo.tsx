@@ -167,10 +167,7 @@ export function UploadVideo(props: FileUploaderProps) {
                   </div>
                 </div>
               ) : (
-                <div
-                  className='flex h-[400px] flex-col items-center justify-center gap-4 sm:px-5'
-                  onClick={openFileDialog}
-                >
+                <div className='flex h-[400px] flex-col items-center justify-center gap-4 sm:px-5'>
                   <div className='rounded-full border border-dashed p-3'>
                     <IconUpload
                       className='text-muted-foreground size-7'
