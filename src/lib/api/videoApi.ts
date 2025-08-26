@@ -39,8 +39,14 @@ interface UpdateHomeVideoRequest {
 
 export const videoApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getHomeVideos: builder.query<HomeVideoListResponse, void>({
-      query: () => '/homepage-video',
+    getHomeVideos: builder.query<
+      HomeVideoListResponse,
+      {
+        page: number;
+        limit: number;
+      }
+    >({
+      query: ({ page, limit }) => `/homepage-video?page=${page}&limit=${limit}`,
       providesTags: ['HomeVideo']
     }),
     getHomeVideoById: builder.query<HomeVideo, string>({

@@ -1,21 +1,65 @@
 'use client';
 
 import { DataTable } from '@/components/ui/table/data-table';
-import { useGetHomeVideosQuery } from '@/lib/api/videoApi';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
-import { columns } from './columns';
+import { DataTableToolbar } from '@/components/ui/table/data-table-toolbar';
+import {
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_DEFAULT_PER_PAGE
+} from '@/constants/pagination';
 import { useDataTable } from '@/hooks/use-data-table';
+import { useGetHomeVideosQuery } from '@/lib/api/videoApi';
+import { PaginationState, Updater } from '@tanstack/react-table';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
+import { columns } from './columns';
 
 export default function HomeVideoTable() {
-  const { data, isLoading, error } = useGetHomeVideosQuery();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get pagination params from URL
+  const page = Number(searchParams.get('page')) || PAGINATION_DEFAULT_PAGE;
+  const limit =
+    Number(searchParams.get('limit')) || PAGINATION_DEFAULT_PER_PAGE;
+
+  const { data, isLoading, error } = useGetHomeVideosQuery({
+    page,
+    limit
+  });
 
   const homeVideos = data?.data || [];
+  const totalItems = data?.pagination?.total || 0;
+
+  const pagination = useMemo<PaginationState>(
+    () => ({
+      pageIndex: page - 1,
+      pageSize: limit
+    }),
+    [page, limit]
+  );
+
+  const onPaginationChange = useCallback(
+    (updaterOrValue: Updater<PaginationState>) => {
+      const value =
+        typeof updaterOrValue === 'function'
+          ? updaterOrValue(pagination)
+          : updaterOrValue;
+      const params = new URLSearchParams(searchParams);
+      params.set('page', String(value.pageIndex + 1));
+      params.set('limit', String(value.pageSize));
+      router.push(`?${params.toString()}`);
+    },
+    [router, pagination, searchParams]
+  );
 
   const { table } = useDataTable({
     data: homeVideos,
     columns,
-    enableAdvancedFilter: false,
-    pageCount: 1
+    pageCount: Math.ceil(totalItems / limit),
+    pagination,
+    onPaginationChange,
+    enableColumnFilters: true
   });
 
   if (isLoading) {
@@ -30,5 +74,9 @@ export default function HomeVideoTable() {
     );
   }
 
-  return <DataTable table={table} />;
+  return (
+    <DataTable table={table}>
+      <DataTableToolbar table={table} />
+    </DataTable>
+  );
 }
