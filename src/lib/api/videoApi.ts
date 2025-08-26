@@ -1,13 +1,13 @@
 import { api } from '../api';
 
 interface HomeVideo {
-  _id: string;
+  id: string;
   name: string;
   videoId: string;
   createdAt: string;
   updatedAt: string;
   video: {
-    _id: string;
+    id: string;
     fileName: string;
     url: string;
     type: string;

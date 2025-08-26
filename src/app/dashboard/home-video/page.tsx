@@ -3,7 +3,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { DataTableSkeleton } from '@/components/ui/table/data-table-skeleton';
-import ProductListingPage from '@/features/products/components/product-listing';
+import HomeVideoListingPage from '@/features/home-video/components/home-video-listing';
 import { cn } from '@/lib/utils';
 import { IconPlus } from '@tabler/icons-react';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 export const metadata = {
-  title: 'Dashboard: Products'
+  title: 'Dashboard: Home Videos'
 };
 
 export default function Page() {
@@ -20,11 +20,11 @@ export default function Page() {
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='flex items-start justify-between'>
           <Heading
-            title='Products'
-            description='Manage products (Client side table functionalities.)'
+            title='Home Videos'
+            description='Manage home videos displayed on the homepage'
           />
           <Link
-            href='/dashboard/product/new'
+            href='/dashboard/home-video/new'
             className={cn(buttonVariants(), 'text-xs md:text-sm')}
           >
             <IconPlus className='mr-2 h-4 w-4' /> Add New
@@ -32,10 +32,10 @@ export default function Page() {
         </div>
         <Separator />
         <Suspense
-          fallback={<DataTableSkeleton columnCount={5} filterCount={2} />}
+          fallback={<DataTableSkeleton columnCount={3} filterCount={1} />}
         >
           <NuqsAdapter>
-            <ProductListingPage />
+            <HomeVideoListingPage />
           </NuqsAdapter>
         </Suspense>
       </div>
