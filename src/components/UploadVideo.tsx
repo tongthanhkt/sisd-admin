@@ -7,7 +7,7 @@ import Dropzone, { type DropzoneProps } from 'react-dropzone';
 import { useControllableState } from '@/hooks/use-controllable-state';
 import { useUploadFileMixed } from '@/hooks/use-upload-file';
 import { cn, formatBytes, isFile, isUrl } from '@/lib/utils';
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash } from 'lucide-react';
 import { FormLabel } from './ui/form';
 
 interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -20,6 +20,7 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
   required?: boolean;
   disabled?: boolean;
+  deletable?: boolean;
 }
 
 export function UploadVideo(props: FileUploaderProps) {
@@ -33,7 +34,8 @@ export function UploadVideo(props: FileUploaderProps) {
     className,
     label = 'Video',
     required = false,
-    disabled
+    disabled,
+    deletable = true
   } = props;
 
   const [files, setFiles] = useControllableState({
@@ -90,6 +92,11 @@ export function UploadVideo(props: FileUploaderProps) {
     openFileDialog();
   };
 
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFiles([]);
+  };
+
   return (
     <div className='flex flex-col gap-2'>
       <FormLabel>
@@ -132,20 +139,32 @@ export function UploadVideo(props: FileUploaderProps) {
                     playsInline
                     onClick={(e) => e.stopPropagation()}
                   />
-                  {!disabled && (
-                    <button
-                      type='button'
-                      onClick={handleEditClick}
-                      className={cn(
-                        'absolute top-2 right-2 z-50 flex cursor-pointer items-center justify-center rounded-full bg-slate-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-800'
-                      )}
-                      tabIndex={-1}
-                      disabled={disabled}
-                    >
-                      <Pencil className='size-4' />
-                      <span className='sr-only'>Change video</span>
-                    </button>
-                  )}
+                  <div className='absolute top-2 right-2 z-50 flex gap-2'>
+                    {deletable && (
+                      <button
+                        type='button'
+                        onClick={handleDeleteClick}
+                        className='flex cursor-pointer items-center justify-center rounded-full bg-slate-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-800'
+                      >
+                        <Trash className='size-4' />
+                        <span className='sr-only'>Delete video</span>
+                      </button>
+                    )}
+                    {!disabled && (
+                      <button
+                        type='button'
+                        onClick={handleEditClick}
+                        className={cn(
+                          'flex cursor-pointer items-center justify-center rounded-full bg-slate-700 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-800'
+                        )}
+                        tabIndex={-1}
+                        disabled={disabled}
+                      >
+                        <Pencil className='size-4' />
+                        <span className='sr-only'>Change video</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div

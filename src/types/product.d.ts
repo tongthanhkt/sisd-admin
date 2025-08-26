@@ -1,3 +1,5 @@
+import { Video } from './video';
+
 export interface IProductPagination {
   products: IProduct[];
   current_page: number;
@@ -18,6 +20,8 @@ export interface IMutateProduct {
   technicalSpecifications: ITechnicalSpecifications;
   transportationAndStorage: string[];
   safetyRegulations: SafetyRegulations;
+  videoId?: string;
+  video?: Video;
 }
 
 interface ITechnicalSpecifications {

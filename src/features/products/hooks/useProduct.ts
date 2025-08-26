@@ -3,7 +3,7 @@ import {
   useGetProductQuery,
   useUpdateProductMutation
 } from '@/lib/api/products';
-import { uploadFile } from '@/lib/upload';
+import { uploadFile, uploadVideo } from '@/lib/upload';
 import { isFile, isUrl } from '@/lib/utils';
 import { IMortalProduct } from '@/models/MortalProduct';
 import { IMutateProduct } from '@/types';
@@ -23,7 +23,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
     skip: !productId || productId === 'new'
   });
 
-  const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -55,15 +55,32 @@ export const useProduct = ({ productId }: { productId: string }) => {
   const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
 
-  const {
-    formState: { errors },
-    watch
-  } = form;
+  const prepareVideo = async (videos: (File | string)[]) => {
+    const videoFile = videos?.[0];
+
+    if (typeof videoFile === 'string') return productData?.video?.id || '';
+
+    try {
+      let videoId = '';
+
+      if (isFile(videoFile)) {
+        const uploadResult = await uploadVideo(videoFile);
+        videoId = uploadResult?.id || '';
+      } else if (isUrl(videoFile)) {
+        videoId = videoFile;
+      }
+
+      return videoId;
+    } catch (error) {
+      console.error('Error preparing data submit:', error);
+      throw error;
+    }
+  };
 
   const prepareDataSubmit = async (
     values: ProductFormValues
   ): Promise<IMutateProduct> => {
-    const { thumbnail, images } = values;
+    const { thumbnail, images, video } = values;
 
     // Handle thumbnail upload
     let thumbnailUrl = '';
@@ -102,6 +119,9 @@ export const useProduct = ({ productId }: { productId: string }) => {
       (transportation) => transportation.value
     );
 
+    // upload video
+    const videoId = await prepareVideo(video as (string | File)[]);
+
     return {
       code: values.code,
       name: values.name,
@@ -128,13 +148,14 @@ export const useProduct = ({ productId }: { productId: string }) => {
       safetyRegulations: {
         warning: values.safetyRegulations.warning,
         notes: values.safetyRegulations.notes
-      }
+      },
+      videoId: videoId || undefined
     };
   };
 
   // Convert API image URLs to displayable values (no fetch)
   const convertImagesFromAPI = async (productData: IMortalProduct) => {
-    setIsLoadingImages(true);
+    setIsLoading(true);
     try {
       const thumbnailFiles: string[] = [];
       const imageFiles: { file: string }[] = [];
@@ -153,7 +174,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
 
       return { thumbnailFiles, imageFiles };
     } finally {
-      setIsLoadingImages(false);
+      setIsLoading(false);
     }
   };
 
@@ -196,7 +217,8 @@ export const useProduct = ({ productId }: { productId: string }) => {
             safetyRegulations: {
               warning: productData.safetyRegulations?.warning || '',
               notes: productData.safetyRegulations?.notes || ''
-            }
+            },
+            video: productData.video ? [productData.video.url] : []
           });
         } catch (error) {
           console.error('Error loading product data:', error);
@@ -210,6 +232,7 @@ export const useProduct = ({ productId }: { productId: string }) => {
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
+      setIsLoading(true);
       const data = await prepareDataSubmit(values);
 
       let response;
@@ -240,14 +263,15 @@ export const useProduct = ({ productId }: { productId: string }) => {
       form.reset();
       router.push('/dashboard/product');
     } catch (error) {
-      console.error('🚀 ~ onSubmit error:', error);
       toast.error('An error occurred while saving the product');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     form,
     onSubmit,
-    isLoadingImages
+    isLoading
   };
 };

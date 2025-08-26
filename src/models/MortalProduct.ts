@@ -1,3 +1,4 @@
+import { Video } from '@/types';
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMortalProduct extends Document {
@@ -29,7 +30,8 @@ export interface IMortalProduct extends Document {
   createdAt?: Date;
   updatedAt?: Date;
   id: string;
-
+  videoId?: string;
+  video?: Video;
 }
 
 const MortalProductSchema: Schema = new Schema(

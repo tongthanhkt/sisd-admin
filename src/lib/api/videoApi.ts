@@ -1,41 +1,10 @@
+import {
+  CreateHomeVideoRequest,
+  HomeVideo,
+  HomeVideoListResponse,
+  UpdateHomeVideoRequest
+} from '@/types';
 import { api } from '../api';
-
-interface HomeVideo {
-  id: string;
-  name: string;
-  videoId: string;
-  createdAt: string;
-  updatedAt: string;
-  video: {
-    id: string;
-    fileName: string;
-    url: string;
-    type: string;
-    originalSize: number;
-    compressedSize: number;
-    createdAt: string;
-  };
-}
-
-interface HomeVideoListResponse {
-  data: HomeVideo[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-interface CreateHomeVideoRequest {
-  name: string;
-  videoId: string;
-}
-
-interface UpdateHomeVideoRequest {
-  name: string;
-  //   videoId?: string;
-}
 
 export const videoApi = api.injectEndpoints({
   endpoints: (builder) => ({

@@ -83,5 +83,19 @@ export const productFormSchema = z.object({
   safetyRegulations: z.object({
     warning: z.string().min(1, { message: 'Warning is required' }),
     notes: z.string().optional()
-  })
+  }),
+  video: z
+    .array(z.any())
+    .refine(
+      (arr) =>
+        typeof window === 'undefined' ||
+        arr.every(
+          (f) =>
+            f instanceof File ||
+            (typeof f === 'string' &&
+              (f.startsWith('http') || f.startsWith('/')))
+        ),
+      { message: 'All video must be files or valid URLs' }
+    )
+    .optional()
 });

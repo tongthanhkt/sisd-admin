@@ -5,12 +5,10 @@ import { useFormContext } from 'react-hook-form';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProductImagesProps {
-  isLoadingImages?: boolean;
+  isLoading?: boolean;
 }
 
-export const ProductImages = ({
-  isLoadingImages = false
-}: ProductImagesProps) => {
+export const ProductImages = ({ isLoading = false }: ProductImagesProps) => {
   const methods = useFormContext();
   const {
     control,
@@ -20,7 +18,7 @@ export const ProductImages = ({
   const { watch } = methods;
   const images = watch('images');
 
-  if (isLoadingImages) {
+  if (isLoading) {
     return (
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
