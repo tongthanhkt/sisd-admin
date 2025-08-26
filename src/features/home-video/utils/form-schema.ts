@@ -1,7 +1,7 @@
 import * as z from 'zod';
 
 export const homeVideoFormSchema = z.object({
-  video_url: z
+  video: z
     .array(z.any())
     .min(1, { message: 'Video is required' })
     .refine(

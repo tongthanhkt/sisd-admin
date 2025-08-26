@@ -6,6 +6,7 @@ import { Form, FormField } from '@/components/ui/form';
 
 import { UploadVideo } from '@/components';
 import { Input } from '@/components/ui/input';
+import { SpinnerOverlay } from '@/components/ui/spinner';
 import { useHomeVideo } from '../../hooks/useHomeVideo';
 
 interface HomeVideoFormProps {
@@ -14,7 +15,7 @@ interface HomeVideoFormProps {
 }
 
 export function HomeVideoForm({ pageTitle, videoId }: HomeVideoFormProps) {
-  const { methods, onSubmit } = useHomeVideo({ videoId });
+  const { methods, onSubmit, isLoading } = useHomeVideo({ videoId });
   const { control } = methods;
 
   return (
@@ -42,27 +43,23 @@ export function HomeVideoForm({ pageTitle, videoId }: HomeVideoFormProps) {
             />
             <FormField
               control={control}
-              name='video_url'
-              render={({ field }) => (
+              name='video'
+              render={({ field, fieldState: { error } }) => (
                 <UploadVideo
                   {...field}
-                  onValueChange={async (files) => {
-                    if (files) {
-                      field.onChange(files);
-                    }
-                  }}
+                  onValueChange={field.onChange}
                   maxFiles={1}
                   maxSize={100 * 1024 * 1024}
                   required
-                  label='Video '
+                  label='Video'
                 />
               )}
-            />{' '}
+            />
             <Button type='submit'>{videoId ? 'Update' : 'Create'}</Button>
           </form>
         </Form>
       </CardContent>
-      {/* {isLoading && <SpinnerOverlay />} */}
+      {isLoading && <SpinnerOverlay />}
     </Card>
   );
 }
