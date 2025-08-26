@@ -1,8 +1,8 @@
 'use client';
 
+import { UploadVideo } from '@/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { SpinnerOverlay } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { productCategories } from '@/constants/products';
 import { useProduct } from '../hooks/useProduct';
@@ -33,10 +34,11 @@ export default function ProductForm({
   pageTitle: string;
   productId: string;
 }) {
-  const { form, onSubmit, isLoadingImages } = useProduct({ productId });
+  const { form, onSubmit, isLoading } = useProduct({ productId });
 
   return (
     <Card className='mx-auto w-full'>
+      {isLoading && <SpinnerOverlay />}
       <CardHeader>
         <CardTitle className='text-left text-2xl font-bold'>
           {pageTitle}
@@ -84,7 +86,7 @@ export default function ProductForm({
               />
             </div>
 
-            <ProductImages isLoadingImages={isLoadingImages} />
+            <ProductImages isLoading={isLoading} />
 
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
@@ -226,6 +228,21 @@ export default function ProductForm({
                   </FormControl>
                   <FormMessage />
                 </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='video'
+              render={({ field, fieldState: { error } }) => (
+                <UploadVideo
+                  {...field}
+                  onValueChange={field.onChange}
+                  maxFiles={1}
+                  maxSize={100 * 1024 * 1024}
+                  label='Video'
+                  deletable
+                />
               )}
             />
 
