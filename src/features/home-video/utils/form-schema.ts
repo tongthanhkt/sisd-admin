@@ -15,7 +15,8 @@ export const homeVideoFormSchema = z.object({
         ),
       { message: 'All video must be files or valid URLs' }
     ),
-  name: z.string().min(1, 'Name is required')
+  name: z.string().min(1, 'Name is required'),
+  page: z.string().min(1, 'Page is required')
 });
 
 export type HomeVideoFormValues = z.infer<typeof homeVideoFormSchema>;

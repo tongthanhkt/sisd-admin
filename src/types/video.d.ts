@@ -10,6 +10,7 @@ interface Video {
 export interface HomeVideo {
   id: string;
   name: string;
+  page: 'SPC_PAGE' | 'HOMEPAGE';
   videoId: string;
   createdAt: string;
   updatedAt: string;
@@ -29,9 +30,10 @@ export interface HomeVideoListResponse {
 interface CreateHomeVideoRequest {
   name: string;
   videoId: string;
+  page: string;
 }
 
 export interface UpdateHomeVideoRequest {
   name: string;
-  //   videoId?: string;
+  page: string;
 }

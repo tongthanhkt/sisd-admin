@@ -24,7 +24,8 @@ export const useHomeVideo = ({ videoId }: { videoId?: string }) => {
     mode: 'onChange',
     defaultValues: {
       video: [],
-      name: ''
+      name: '',
+      page: 'HOMEPAGE'
     }
   });
 
@@ -45,8 +46,8 @@ export const useHomeVideo = ({ videoId }: { videoId?: string }) => {
 
   const prepareDataSubmit = async (
     values: HomeVideoFormValues
-  ): Promise<{ name: string; videoId: string }> => {
-    const { video, name } = values;
+  ): Promise<{ name: string; videoId: string; page: string }> => {
+    const { video, name, page } = values;
 
     try {
       let videoId = '';
@@ -63,7 +64,8 @@ export const useHomeVideo = ({ videoId }: { videoId?: string }) => {
 
       return {
         name,
-        videoId
+        videoId,
+        page
       };
     } catch (error) {
       console.error('Error preparing data submit:', error);
@@ -77,7 +79,8 @@ export const useHomeVideo = ({ videoId }: { videoId?: string }) => {
         try {
           reset({
             video: homeVideoData.video ? [homeVideoData.video.url] : [],
-            name: homeVideoData.name
+            name: homeVideoData.name,
+            page: homeVideoData.page
           });
         } catch (error) {
           console.error('Error loading home video data:', error);
@@ -97,7 +100,8 @@ export const useHomeVideo = ({ videoId }: { videoId?: string }) => {
       if (videoId && videoId !== 'new') {
         response = await updateHomeVideo({
           id: videoId,
-          name: values.name
+          name: values.name,
+          page: values.page
         });
       } else {
         const data = await prepareDataSubmit(values);

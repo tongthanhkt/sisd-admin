@@ -17,6 +17,7 @@ type AppSelectProps = {
   placeholder?: string;
   required?: boolean;
   clearable?: boolean;
+  className?: string;
 };
 export const AppSelect = ({
   onChange,
@@ -25,10 +26,11 @@ export const AppSelect = ({
   options,
   placeholder,
   required,
-  clearable = false
+  clearable = false,
+  className
 }: AppSelectProps) => {
   return (
-    <FormItem>
+    <FormItem className={className}>
       <FormLabel>
         {label}
         {required && <span className='text-destructive'>*</span>}

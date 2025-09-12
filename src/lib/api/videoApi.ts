@@ -15,7 +15,7 @@ export const videoApi = api.injectEndpoints({
         limit: number;
       }
     >({
-      query: ({ page, limit }) => `/homepage-video?page=${page}&limit=${limit}`,
+      query: ({ page, limit }) => `/homepage-video`,
       providesTags: ['HomeVideo']
     }),
     getHomeVideoById: builder.query<HomeVideo, string>({
@@ -28,7 +28,8 @@ export const videoApi = api.injectEndpoints({
         method: 'POST',
         body: {
           name: data.name,
-          videoId: data.videoId
+          videoId: data.videoId,
+          page: data.page
         }
       }),
       invalidatesTags: ['HomeVideo']
@@ -41,7 +42,8 @@ export const videoApi = api.injectEndpoints({
         url: `/homepage-video/${id}`,
         method: 'PATCH',
         body: {
-          ...(data.name && { name: data.name })
+          ...(data.name && { name: data.name }),
+          ...(data.page && { page: data.page })
         }
       }),
       invalidatesTags: (result, error, { id }) => [

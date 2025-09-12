@@ -2,6 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
+import { VIDEO_PAGE_LABEL } from '@/constants/video';
 
 export type HomeVideo = {
   id: string;
@@ -39,6 +40,22 @@ export const columns: ColumnDef<HomeVideo>[] = [
       );
     }
   },
+  {
+    accessorKey: 'page',
+    header: 'Trang',
+    cell: ({ row }) => {
+      return (
+        <div className='max-w-[300px] truncate font-medium'>
+          {
+            VIDEO_PAGE_LABEL[
+              row.getValue('page') as keyof typeof VIDEO_PAGE_LABEL
+            ]
+          }
+        </div>
+      );
+    }
+  },
+
   {
     id: 'actions',
     header: 'Action',
