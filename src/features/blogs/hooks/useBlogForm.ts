@@ -44,6 +44,7 @@ export const useBlogForm = (blogId?: string) => {
       banner: [],
       thumbnail: [],
       shortDescription: '',
+      slug: '',
       summary: '',
       contact: ''
     }
@@ -197,6 +198,7 @@ export const useBlogForm = (blogId?: string) => {
       title: data.title,
       descriptions: formatDescriptions,
       shortDescription: data.shortDescription,
+      slug: data.slug || '',
       categories: data.categories,
       date: data.date.toISOString(),
       articleSections: processedArticleSections,
@@ -255,6 +257,7 @@ export const useBlogForm = (blogId?: string) => {
           console.log('blogData.faqId', blogData.faqId);
           form.reset({
             title: blogData.title || '',
+            slug: blogData.slug || '',
             descriptions:
               blogData.descriptions?.map((d: string) => ({
                 value: d,

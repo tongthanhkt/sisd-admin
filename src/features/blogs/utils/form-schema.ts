@@ -48,6 +48,7 @@ const articleSectionSchema = z.object({
 export const blogFormSchema = z.object({
   isOustanding: z.boolean().default(false),
   title: z.string().min(1, 'Title is required'),
+  slug: z.string().optional().default(''),
   descriptions: z
     .array(
       z.object({

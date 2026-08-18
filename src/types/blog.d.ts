@@ -42,6 +42,7 @@ export interface IMutateBlog {
   title: string;
   descriptions: string[];
   shortDescription: string;
+  slug?: string;
   categories: string[];
   date: string;
   articleSections: ArticleSection[];
